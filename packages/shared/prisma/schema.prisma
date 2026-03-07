@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String           @id @default(uuid())
+  email     String           @unique
+  createdAt DateTime         @default(now())
+  books     Book[]
+  puzzles   PuzzleRegistry[]
+}
+
+model SeedCounter {
+  difficulty String @id
+  nextSeed   BigInt @default(1)
+}
+
+model PuzzleRegistry {
+  id         String    @id @default(uuid())
+  seed       BigInt    @unique
+  hash       String    @unique @db.Char(64)
+  difficulty String
+  status     String    @default("available")
+  userId     String?
+  bookId     String?
+  reservedAt DateTime?
+  createdAt  DateTime  @default(now())
+  user       User?     @relation(fields: [userId], references: [id])
+  book       Book?     @relation(fields: [bookId], references: [id])
+}
+
+model Book {
+  id        String           @id @default(uuid())
+  userId    String
+  title     String?
+  status    String           @default("draft")
+  createdAt DateTime         @default(now())
+  expiresAt DateTime?
+  user      User             @relation(fields: [userId], references: [id])
+  puzzles   PuzzleRegistry[]
+}
