@@ -18,24 +18,6 @@ trim size), pay, and download a KDP-ready PDF with an answer key.
 
 ---
 
-## Monorepo Structure
-
-```
-kdp-platform/
-├── apps/
-│   ├── web/                  → Next.js 14 (App Router) — user-facing frontend
-│   ├── api/                  → NestJS — REST API
-│   └── workers/              → BullMQ workers — puzzle generation + PDF rendering
-├── packages/
-│   ├── shared/               → Shared types, enums, Prisma client, constants
-│   ├── puzzle-core/          → Sudoku generation logic (used by workers + api)
-│   └── pdf-templates/        → KDP PDF layout logic (used by workers)
-├── turbo.json
-├── pnpm-workspace.yaml
-├── package.json              → Root package.json with workspace scripts
-└── .env                      → Root env (DATABASE_URL for Prisma CLI only)
-```
-
 **Rule:** Never put business logic in `apps/`. Logic lives in `packages/`.
 Apps only wire things together — routes, controllers, UI components.
 
@@ -43,18 +25,18 @@ Apps only wire things together — routes, controllers, UI components.
 
 ## Tech Stack
 
-| Layer         | Technology                  | Version |
-| ------------- | --------------------------- | ------- |
-| Frontend      | Next.js (App Router)        | 14+     |
-| Backend       | NestJS                      | 10+     |
-| Workers       | BullMQ                      | 5+      |
-| Database ORM  | Prisma                      | 5+      |
-| Database      | PostgreSQL                  | 15+     |
-| Cache / Queue | Redis                       | 7+      |
-| Monorepo      | Turborepo + pnpm workspaces | latest  |
-| Payments      | LemonSqueezy                | —       |
-| PDF           | pdf-lib                     | latest  |
-| Language      | TypeScript everywhere       | 5+      |
+| Layer         | Technology                  |
+| ------------- | --------------------------- |
+| Frontend      | Next.js (App Router)        |
+| Backend       | NestJS                      |
+| Workers       | BullMQ                      |
+| Database ORM  | Prisma                      |
+| Database      | PostgreSQL                  |
+| Cache / Queue | Redis                       |
+| Monorepo      | Turborepo + pnpm workspaces |
+| Payments      | LemonSqueezy                |
+| PDF           | pdf-lib                     |
+| Language      | TypeScript everywhere       |
 
 ---
 
@@ -63,7 +45,7 @@ Apps only wire things together — routes, controllers, UI components.
 ### `packages/shared`
 
 **Purpose:** Single source of truth for types, enums, and the Prisma client.
-Both `apps/api` and `apps/workers` import from here.
+Both `apps/server` and `apps/workers` import from here.
 
 **Exports:**
 
@@ -76,7 +58,7 @@ Both `apps/api` and `apps/workers` import from here.
 Never create a second Prisma schema elsewhere.
 
 ```typescript
-// Example import in apps/api or apps/workers:
+// Example import in apps/server or apps/workers:
 import { PrismaClient, Difficulty, PuzzleStatus } from "@kdp/shared";
 import type { CreateBookDto } from "@kdp/shared";
 ```
@@ -230,7 +212,7 @@ Workers continuously pre-generate puzzles into the pool.
 
 ---
 
-## API Structure (NestJS — `apps/api`)
+## API Structure (NestJS — `apps/server`)
 
 ```
 src/
@@ -304,7 +286,7 @@ interface PdfGenerationJob {
 
 ---
 
-## Frontend Structure (Next.js — `apps/web`)
+## Frontend Structure (Next.js — `apps/client`)
 
 ```
 src/
@@ -330,10 +312,10 @@ src/
 
 ## Environment Variables
 
-### `apps/api/.env`
+### `apps/server/.env`
 
 ```
-DATABASE_URL=postgresql://user:pass@localhost:5432/kdp_platform
+DATABASE_URL=postgresql://postgres:admin@localhost:5432/kdp_platform
 REDIS_URL=redis://localhost:6379
 JWT_SECRET=
 JWT_REFRESH_SECRET=
@@ -342,10 +324,10 @@ GOOGLE_CLIENT_SECRET=
 LEMONSQUEEZY_API_KEY=
 LEMONSQUEEZY_WEBHOOK_SECRET=
 LEMONSQUEEZY_STORE_ID=
-PORT=3001
+PORT=5000
 ```
 
-### `apps/web/.env.local`
+### `apps/client/.env.local`
 
 ```
 NEXT_PUBLIC_API_URL=http://localhost:3001
@@ -358,9 +340,9 @@ GOOGLE_CLIENT_SECRET=
 ### `apps/workers/.env`
 
 ```
-DATABASE_URL=postgresql://user:pass@localhost:5432/kdp_platform
+DATABASE_URL=postgresql://postgres:admin@localhost:5432/kdp_platform
 REDIS_URL=redis://localhost:6379
-PDF_STORAGE_PATH=./storage/pdfs
+PDF_STORAGE_PATH=./storage/PDFs
 ```
 
 ---
@@ -457,7 +439,7 @@ export const CONSTANTS = {
 ### Testing
 
 - `packages/puzzle-core`: 100% unit test coverage required — it's pure functions
-- `apps/api`: integration tests for all endpoints using `supertest`
+- `apps/server`: integration tests for all endpoints using `supertest`
 - `apps/workers`: unit tests for job processors using mocked Prisma + Redis
 
 ---
@@ -492,7 +474,7 @@ pnpm dev
 
 # Individual apps
 pnpm --filter @kdp/web dev         # Next.js on :3000
-pnpm --filter @kdp/api dev         # NestJS on :3001
+pnpm --filter @kdp/api dev         # NestJS on :5000
 pnpm --filter @kdp/workers dev     # BullMQ workers
 
 # Run tests
@@ -500,20 +482,6 @@ pnpm --filter @kdp/puzzle-core test
 
 # Open Prisma Studio
 pnpm db:studio
-```
-
----
-
-## Current Build Status
-
-| Package / App            | Status        | Notes                                       |
-| ------------------------ | ------------- | ------------------------------------------- |
-| `packages/shared`        | Scaffold only | Types and enums defined, Prisma schema done |
-| `packages/puzzle-core`   | Not started   | Implement first                             |
-| `packages/pdf-templates` | Not started   | Implement after puzzle-core                 |
-| `apps/api`               | Scaffold only | NestJS project created, no modules yet      |
-| `apps/workers`           | Scaffold only | BullMQ setup pending                        |
-| `apps/web`               | Scaffold only | Next.js created, no pages yet               |
 
 ---
 
@@ -523,23 +491,14 @@ Follow this order strictly. Each step depends on the previous.
 
 1. `packages/shared` — finalize all types, enums, constants, Prisma client export
 2. `packages/puzzle-core` — Sudoku generator, hash normalization, tests
-3. `apps/api` — Auth module (JWT + Google OAuth)
-4. `apps/api` — Puzzle reservation service (with SKIP LOCKED)
+3. `apps/server` — Auth module (JWT + Google OAuth)
+4. `apps/server` — Puzzle reservation service (with SKIP LOCKED)
 5. `apps/workers` — BullMQ setup + puzzle pre-generation worker
 6. `apps/workers` — Cleanup worker (stale reservations)
 7. `packages/pdf-templates` — KDP PDF layout + answer key
 8. `apps/workers` — PDF generation worker
-9. `apps/api` — Books module + LemonSqueezy payment webhook
-10. `apps/web` — Auth pages (login, Google callback)
-11. `apps/web` — Dashboard (book history, download links)
-12. `apps/web` — Book builder (multi-step form + low-res preview)
-
----
-
-## Questions Claude Code Should Ask Before Starting Any Task
-
-1. Which package or app does this belong in?
-2. Does a type or enum for this already exist in `@kdp/shared`?
-3. Will this function need database access? (If yes, it does not belong in `packages/puzzle-core`)
-4. Is there an existing service or module this should be added to?
-5. What is the test strategy for this code?
+9. `apps/server` — Books module + LemonSqueezy payment webhook
+10. `apps/client` — Auth pages (login, Google callback)
+11. `apps/client` — Dashboard (book history, download links)
+12. `apps/client` — Book builder (multi-step form + low-res preview)
+```
