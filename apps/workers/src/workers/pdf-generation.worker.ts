@@ -4,6 +4,7 @@ import { join } from "path";
 import { generateBook } from "@kdp/pdf-templates";
 import type { BookOptions, PuzzleEntry } from "@kdp/pdf-templates";
 import { generatePuzzle, seedToMetadata } from "@kdp/puzzle-core";
+import { toUnsignedBigInt } from "./puzzle-generation.worker";
 import { prisma, BookStatus } from "@kdp/shared";
 import { getRedisOptions } from "../redis";
 import { QUEUE_PDF_GENERATION, type PdfGenerationJobData } from "../queues";
@@ -45,7 +46,8 @@ async function processPdfGenerationJob(
   await job.updateProgress(5);
 
   const puzzleEntries: PuzzleEntry[] = rows.map((row, idx) => {
-    const seed = BigInt(String(row.seed));
+    // Seeds for hard/expert are stored as signed negatives — convert back to unsigned
+    const seed = toUnsignedBigInt(BigInt(String(row.seed)));
     const { difficulty } = seedToMetadata(seed);
     const { puzzle, solution } = generatePuzzle(seed, difficulty);
     return { number: idx + 1, puzzle, solution };

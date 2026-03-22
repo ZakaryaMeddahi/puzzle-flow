@@ -14,7 +14,7 @@ async function registerRepeatableJobs(): Promise<void> {
     { ttlMinutes: CONSTANTS.RESERVATION_TTL_MINUTES },
     {
       repeat: { every: CLEANUP_REPEAT_MS },
-      jobId: "cleanup:stale-reservations",
+      jobId: "cleanup_stale_reservations",
     },
   );
   console.log("[workers] Repeatable cleanup job registered (every 5 min)");

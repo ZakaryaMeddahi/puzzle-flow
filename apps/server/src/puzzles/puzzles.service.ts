@@ -81,7 +81,7 @@ export class PuzzlesService {
       await tx.$executeRawUnsafe(
         `UPDATE puzzle_registry
          SET status = 'pending', user_id = $1, reserved_at = NOW()
-         WHERE id = ANY($2::uuid[])`,
+         WHERE id = ANY($2::text[])`,
         userId,
         ids,
       );

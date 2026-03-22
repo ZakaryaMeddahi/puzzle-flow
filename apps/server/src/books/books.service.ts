@@ -56,7 +56,7 @@ export class BooksService {
     // Link reserved puzzles to this book
     const puzzleIds = reserved.map((r) => r.id);
     await this.prisma.db.$executeRawUnsafe(
-      `UPDATE puzzle_registry SET book_id = $1 WHERE id = ANY($2::uuid[])`,
+      `UPDATE puzzle_registry SET book_id = $1 WHERE id = ANY($2::text[])`,
       book.id,
       puzzleIds,
     );

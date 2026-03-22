@@ -1,3 +1,4 @@
+import 'dotenv/config'; // must be first — Prisma singleton reads DATABASE_URL at import time
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';

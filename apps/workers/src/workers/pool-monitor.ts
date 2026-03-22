@@ -46,7 +46,7 @@ async function checkAndRefill(): Promise<void> {
       for (let i = 0; i < batches; i++) {
         // Use a deduplicated job ID per difficulty+batch so that rapid restarts
         // don't flood the queue with duplicates.
-        const jobId = `refill:${difficulty}:${Date.now()}:${i}`;
+        const jobId = `refill_${difficulty}_${Date.now()}_${i}`;
         await puzzleGenerationQueue.add(
           "generate",
           { difficulty, batchSize: CONSTANTS.PUZZLE_BATCH_SIZE },

@@ -12,6 +12,8 @@ import type { Request } from 'express';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { PuzzlesService } from '../puzzles/puzzles.service';
 import { QueuesService } from '../queues/queues.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { BookStatus } from '@kdp/shared';
 import { Public } from '../auth/decorators/public.decorator';
 
 interface LemonSqueezyEvent {
@@ -33,6 +35,7 @@ export class WebhooksController {
     private readonly config: ConfigService,
     private readonly puzzles: PuzzlesService,
     private readonly queues: QueuesService,
+    private readonly prisma: PrismaService,
   ) {}
 
   @Post('lemonsqueezy')
@@ -88,8 +91,12 @@ export class WebhooksController {
       return;
     }
 
-    // Confirm puzzle reservations for this book
+    // Confirm puzzle reservations and mark book as pending (generating)
     await this.puzzles.confirmPuzzles(bookId);
+    await this.prisma.db.book.update({
+      where: { id: bookId },
+      data: { status: BookStatus.PENDING },
+    });
 
     // Enqueue PDF generation job
     await this.queues.enqueuePdfGeneration(bookId);

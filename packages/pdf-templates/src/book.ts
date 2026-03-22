@@ -1,4 +1,7 @@
-import { PDFDocument, StandardFonts } from "pdf-lib";
+import { PDFDocument } from "pdf-lib";
+import fontkit from "@pdf-lib/fontkit";
+import { readFileSync } from "fs";
+import { join } from "path";
 import type { BookOptions } from "./types";
 import { PAGE_SIZE } from "./layout";
 import { drawTitlePage } from "./pages/title-page";
@@ -16,10 +19,13 @@ export async function generateBook(options: BookOptions): Promise<Uint8Array> {
   const { width, height } = PAGE_SIZE[trimSize];
 
   const doc = await PDFDocument.create();
+  doc.registerFontkit(fontkit);
 
-  // Embed standard fonts (no external font files required)
-  const titleFont = await doc.embedFont(StandardFonts.HelveticaBold);
-  const bodyFont  = await doc.embedFont(StandardFonts.Helvetica);
+  // Embed fonts — KDP requires fully embedded fonts (StandardFonts are not embedded)
+  const boldBytes    = readFileSync(join(__dirname, "../fonts/Roboto-Bold.ttf"));
+  const regularBytes = readFileSync(join(__dirname, "../fonts/Roboto-Regular.ttf"));
+  const titleFont = await doc.embedFont(boldBytes);
+  const bodyFont  = await doc.embedFont(regularBytes);
 
   // ── Title page ─────────────────────────────────────────────────────────────
   const titlePage = doc.addPage([width, height]);

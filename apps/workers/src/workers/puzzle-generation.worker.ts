@@ -7,6 +7,19 @@ import { QUEUE_PUZZLE_GENERATION, type PuzzleGenerationJobData } from "../queues
 
 const INSERT_CHUNK_SIZE = 500; // rows per DB round-trip
 
+// PostgreSQL BIGINT is signed (max 2^63-1). Seeds for hard/expert use bits 63-62
+// = 10/11, which exceed the signed range. Convert to two's complement for storage.
+const MAX_SIGNED_64  = (1n << 63n) - 1n;  // 9223372036854775807
+const TWO_64         = 1n << 64n;          // 18446744073709551616
+
+function toSignedBigInt(n: bigint): bigint {
+  return n > MAX_SIGNED_64 ? n - TWO_64 : n;
+}
+
+export function toUnsignedBigInt(n: bigint): bigint {
+  return n < 0n ? n + TWO_64 : n;
+}
+
 // ── Seed reservation ──────────────────────────────────────────────────────────
 
 /**
@@ -66,7 +79,7 @@ async function processPuzzleGenerationJob(
     const hash = hashPuzzle(normalized);
 
     rows.push({
-      seed,
+      seed: toSignedBigInt(seed), // store as signed for PostgreSQL BIGINT
       hash,
       difficulty,
       status: PuzzleStatus.AVAILABLE,
