@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -16,14 +10,19 @@ datasource db {
 model User {
   id        String           @id @default(uuid())
   email     String           @unique
-  createdAt DateTime         @default(now())
+  name      String?
+  createdAt DateTime         @default(now()) @map("created_at")
   books     Book[]
   puzzles   PuzzleRegistry[]
+
+  @@map("users")
 }
 
 model SeedCounter {
   difficulty String @id
-  nextSeed   BigInt @default(1)
+  nextSeed   BigInt @default(1) @map("next_seed")
+
+  @@map("seed_counters")
 }
 
 model PuzzleRegistry {
@@ -32,21 +31,29 @@ model PuzzleRegistry {
   hash       String    @unique @db.Char(64)
   difficulty String
   status     String    @default("available")
-  userId     String?
-  bookId     String?
-  reservedAt DateTime?
-  createdAt  DateTime  @default(now())
+  userId     String?   @map("user_id")
+  bookId     String?   @map("book_id")
+  reservedAt DateTime? @map("reserved_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
   user       User?     @relation(fields: [userId], references: [id])
   book       Book?     @relation(fields: [bookId], references: [id])
+
+  @@map("puzzle_registry")
 }
 
 model Book {
-  id        String           @id @default(uuid())
-  userId    String
-  title     String?
-  status    String           @default("draft")
-  createdAt DateTime         @default(now())
-  expiresAt DateTime?
-  user      User             @relation(fields: [userId], references: [id])
-  puzzles   PuzzleRegistry[]
+  id         String           @id @default(uuid())
+  userId     String           @map("user_id")
+  title      String?
+  trimSize   String           @map("trim_size")
+  difficulty String
+  pageCount  Int              @map("page_count")
+  status     String           @default("draft")
+  pdfPath    String?          @map("pdf_path")
+  expiresAt  DateTime?        @map("expires_at")
+  createdAt  DateTime         @default(now()) @map("created_at")
+  user       User             @relation(fields: [userId], references: [id])
+  puzzles    PuzzleRegistry[]
+
+  @@map("books")
 }
