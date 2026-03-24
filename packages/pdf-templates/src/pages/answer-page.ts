@@ -2,7 +2,7 @@ import type { PDFDocument, PDFFont } from "pdf-lib";
 import { rgb } from "pdf-lib";
 import type { PuzzleEntry } from "../types";
 import type { KdpTrimSize } from "../types";
-import { PAGE_SIZE, usableArea } from "../layout";
+import { PAGE_SIZE, usableArea, pageSide } from "../layout";
 import { drawGrid } from "../grid";
 
 const BLACK = rgb(0, 0, 0);
@@ -23,34 +23,40 @@ export function addAnswerPages(
   bodyFont: PDFFont,
   puzzles: PuzzleEntry[],
   trimSize: KdpTrimSize,
+  firstPageIndex: number,
 ): void {
   const { width, height } = PAGE_SIZE[trimSize];
-  const area = usableArea(trimSize);
 
-  // ── Header height ──────────────────────────────────────────────────────────
+  // ── Compute layout using a representative (recto) area for sizing ──────────
+  // We'll recompute area per-page for positioning, but use fixed sizes so
+  // grids don't shift in size between left and right pages.
   const sectionHeaderSize = 18;
   const sectionHeaderHeight = titleFont.heightAtSize(sectionHeaderSize) + 16;
 
-  const gridAreaHeight = area.height - sectionHeaderHeight;
-  const gridAreaWidth  = area.width;
+  // Use the narrower of inner/outer widths so sizing is consistent across sides
+  const rectoArea = usableArea(trimSize, "recto");
+  const versoArea = usableArea(trimSize, "verso");
+  const gridAreaWidth  = Math.min(rectoArea.width, versoArea.width);
+  const gridAreaHeight = rectoArea.height - sectionHeaderHeight;
 
-  // Padding between grids
   const padX = 16;
   const padY = 20;
 
   const cellW = (gridAreaWidth  - padX * (COLS - 1)) / COLS;
   const cellH = (gridAreaHeight - padY * (ROWS - 1)) / ROWS;
 
-  // Leave room for the puzzle-number label above each grid
   const labelSize = 9;
   const labelHeight = bodyFont.heightAtSize(labelSize) + 4;
   const gridSize = Math.min(cellW, cellH - labelHeight) * 0.95;
   const fontSize = Math.max(6, Math.floor(gridSize / 9 * 0.5));
 
   for (let pageIdx = 0; pageIdx * GRIDS_PER_PAGE < puzzles.length; pageIdx++) {
+    const absolutePageIndex = firstPageIndex + pageIdx;
+    const side = pageSide(absolutePageIndex);
+    const area = usableArea(trimSize, side);
+
     const page = doc.addPage([width, height]);
 
-    // Section header only on first answer page
     if (pageIdx === 0) {
       const headerText = "Answer Key";
       const hw = titleFont.widthOfTextAtSize(headerText, sectionHeaderSize);
@@ -73,14 +79,12 @@ export function addAnswerPages(
       const row = (idx / COLS) | 0;
 
       const cellLeft = area.x + col * (cellW + padX);
-      // y is measured from bottom; row 0 is the top row visually
       const cellBottom =
         area.y +
         gridAreaHeight -
         (row + 1) * (cellH + padY) +
         padY;
 
-      // Puzzle-number label
       const label = `#${entry.number}`;
       const lw = bodyFont.widthOfTextAtSize(label, labelSize);
       page.drawText(label, {
@@ -91,7 +95,6 @@ export function addAnswerPages(
         color: GREY,
       });
 
-      // Mini solution grid
       const gridLeft = cellLeft + (cellW - gridSize) / 2;
       drawGrid(page, bodyFont, entry.solution, gridLeft, cellBottom, gridSize, fontSize);
     });

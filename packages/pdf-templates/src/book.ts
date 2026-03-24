@@ -3,7 +3,7 @@ import fontkit from "@pdf-lib/fontkit";
 import { readFileSync } from "fs";
 import { join } from "path";
 import type { BookOptions } from "./types";
-import { PAGE_SIZE } from "./layout";
+import { PAGE_SIZE, pageSide } from "./layout";
 import { drawTitlePage } from "./pages/title-page";
 import { drawPuzzlePage } from "./pages/puzzle-page";
 import { addAnswerPages } from "./pages/answer-page";
@@ -27,18 +27,22 @@ export async function generateBook(options: BookOptions): Promise<Uint8Array> {
   const titleFont = await doc.embedFont(boldBytes);
   const bodyFont  = await doc.embedFont(regularBytes);
 
+  // Track the 0-based page index across the whole document for gutter margins.
+  // Page 0 = title (recto), page 1 = first puzzle (verso), etc.
+  let pageIndex = 0;
+
   // ── Title page ─────────────────────────────────────────────────────────────
   const titlePage = doc.addPage([width, height]);
-  drawTitlePage(titlePage, titleFont, bodyFont, options);
+  drawTitlePage(titlePage, titleFont, bodyFont, options, pageSide(pageIndex++));
 
   // ── Puzzle pages (one per puzzle) ──────────────────────────────────────────
   for (const entry of puzzles) {
     const page = doc.addPage([width, height]);
-    drawPuzzlePage(page, titleFont, bodyFont, entry, trimSize);
+    drawPuzzlePage(page, titleFont, bodyFont, entry, trimSize, pageSide(pageIndex++));
   }
 
   // ── Answer key (multiple mini grids per page) ──────────────────────────────
-  addAnswerPages(doc, titleFont, bodyFont, puzzles, trimSize);
+  addAnswerPages(doc, titleFont, bodyFont, puzzles, trimSize, pageIndex);
 
   return doc.save();
 }

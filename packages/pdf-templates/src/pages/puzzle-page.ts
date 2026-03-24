@@ -2,7 +2,7 @@ import type { PDFPage, PDFFont } from "pdf-lib";
 import { rgb } from "pdf-lib";
 import type { PuzzleEntry } from "../types";
 import type { KdpTrimSize } from "../types";
-import { usableArea } from "../layout";
+import { usableArea, type PageSide } from "../layout";
 import { drawGrid } from "../grid";
 
 const BLACK = rgb(0, 0, 0);
@@ -18,8 +18,9 @@ export function drawPuzzlePage(
   bodyFont: PDFFont,
   puzzle: PuzzleEntry,
   trimSize: KdpTrimSize,
+  side: PageSide,
 ): void {
-  const area = usableArea(trimSize);
+  const area = usableArea(trimSize, side);
 
   // ── Header ─────────────────────────────────────────────────────────────────
   const headerText = `Puzzle ${puzzle.number}`;

@@ -3,7 +3,11 @@
     "allow": [
       "Bash(pnpm install:*)",
       "Bash(npx prisma:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Read(//c/Users/LENOVO/puzzle-generator/apps/server/src/books/dto//**)",
+      "Read(//c/Users/LENOVO/puzzle-generator/packages/shared/src//**)",
+      "Read(//c/Users/LENOVO/puzzle-generator/packages/shared/prisma/migrations//**)",
+      "Read(//c/Users/LENOVO/puzzle-generator/packages/pdf-templates/**)"
     ]
   }
 }

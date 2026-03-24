@@ -26,6 +26,12 @@ async function getAvailableCounts(): Promise<Record<string, number>> {
   return counts;
 }
 
+// Total batch slots per difficulty needed to fill the pool from zero.
+// Stable slot IDs prevent the monitor from re-enqueueing already-queued batches.
+const TOTAL_SLOTS = Math.ceil(
+  CONSTANTS.PUZZLE_POOL_TARGET / CONSTANTS.PUZZLE_BATCH_SIZE,
+);
+
 // ── Refill logic ──────────────────────────────────────────────────────────────
 
 async function checkAndRefill(): Promise<void> {
@@ -35,18 +41,31 @@ async function checkAndRefill(): Promise<void> {
     const available = counts[difficulty] ?? 0;
 
     if (available < CONSTANTS.PUZZLE_POOL_REFILL_THRESHOLD) {
-      // How many batches do we need to reach the target?
-      const deficit = CONSTANTS.PUZZLE_POOL_TARGET - available;
-      const batches = Math.ceil(deficit / CONSTANTS.PUZZLE_BATCH_SIZE);
+      // Enqueue all slots with stable IDs. BullMQ silently ignores any slot
+      // whose ID already exists in waiting/active state, so this is safe to
+      // call every minute without compounding the queue.
+      const needed = Math.ceil(
+        (CONSTANTS.PUZZLE_POOL_TARGET - available) / CONSTANTS.PUZZLE_BATCH_SIZE,
+      );
+      const slots = Math.min(needed, TOTAL_SLOTS);
 
       console.log(
-        `[pool-monitor] ${difficulty}: available=${available} deficit=${deficit} enqueueing ${batches} batch(es)`,
+        `[pool-monitor] ${difficulty}: available=${available} enqueueing up to ${slots} slot(s)`,
       );
 
-      for (let i = 0; i < batches; i++) {
-        // Use a deduplicated job ID per difficulty+batch so that rapid restarts
-        // don't flood the queue with duplicates.
-        const jobId = `refill_${difficulty}_${Date.now()}_${i}`;
+      for (let slot = 0; slot < slots; slot++) {
+        const jobId = `refill_${difficulty}_slot_${slot}`;
+
+        // Skip if the job already exists in any non-terminal state.
+        // BullMQ deduplicates waiting jobs by ID but NOT active ones.
+        const existing = await puzzleGenerationQueue.getJob(jobId);
+        if (existing) {
+          const state = await existing.getState();
+          if (state === "waiting" || state === "active" || state === "delayed") {
+            continue;
+          }
+        }
+
         await puzzleGenerationQueue.add(
           "generate",
           { difficulty, batchSize: CONSTANTS.PUZZLE_BATCH_SIZE },
