@@ -52,6 +52,17 @@ export interface PdfGenerationJob {
   userId: string;
 }
 
+// ── Front Matter ─────────────────────────────────────────────────────────────
+
+export interface FrontMatterConfig {
+  titlePage: boolean;
+  copyrightPage: boolean;
+  howToPlay: boolean;
+  introduction: boolean;
+  introText?: string;
+  answerPages: boolean;
+}
+
 // ── Seed Metadata ────────────────────────────────────────────────────────────
 
 export interface SeedMetadata {

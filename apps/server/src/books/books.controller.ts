@@ -23,15 +23,16 @@ export class BooksController {
   async create(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateBookDto,
-  ) {
+  ): Promise<{ book: Record<string, unknown>; checkoutUrl: string }> {
     const { book, checkoutUrl } = await this.books.createBook(user.userId, dto);
-    return { book, checkoutUrl };
+    return { book: book as unknown as Record<string, unknown>, checkoutUrl };
   }
 
   /** GET /books — list all books belonging to the authenticated user. */
   @Get()
-  async findAll(@CurrentUser() user: AuthenticatedUser) {
-    return this.books.findAllForUser(user.userId);
+  async findAll(@CurrentUser() user: AuthenticatedUser): Promise<Record<string, unknown>[]> {
+    const books = await this.books.findAllForUser(user.userId);
+    return books as unknown as Record<string, unknown>[];
   }
 
   /** GET /books/:id — get a single book (must belong to the user). */
@@ -39,8 +40,9 @@ export class BooksController {
   async findOne(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
-  ) {
-    return this.books.findOneForUser(id, user.userId);
+  ): Promise<Record<string, unknown>> {
+    const book = await this.books.findOneForUser(id, user.userId);
+    return book as unknown as Record<string, unknown>;
   }
 
   /** GET /books/:id/download — stream the generated PDF. */

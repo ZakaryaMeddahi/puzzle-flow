@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geist.variable} font-sans antialiased`}>
+      <body className={`${geist.variable} font-sans antialiased`} suppressHydrationWarning>
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

@@ -218,6 +218,9 @@ importers:
       '@fontsource/roboto':
         specifier: ^5.2.10
         version: 5.2.10
+      '@kdp/shared':
+        specifier: workspace:^
+        version: link:../shared
       '@pdf-lib/fontkit':
         specifier: ^1.1.1
         version: 1.1.1

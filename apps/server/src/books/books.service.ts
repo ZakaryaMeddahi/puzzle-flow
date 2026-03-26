@@ -4,8 +4,8 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BookStatus, UniquenessLevel } from '@kdp/shared';
-import type { Book } from '@kdp/shared';
+import { BookStatus, Difficulty, UniquenessLevel } from '@kdp/shared';
+import type { Book, PuzzleReservation } from '@kdp/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { PuzzlesService } from '../puzzles/puzzles.service';
 import type { CreateBookDto } from './dto/create-book.dto';
@@ -13,6 +13,13 @@ import type { CreateBookDto } from './dto/create-book.dto';
 interface CheckoutResponse {
   data: { attributes: { url: string } };
 }
+
+const PROGRESSIVE_ORDER = [
+  Difficulty.EASY,
+  Difficulty.MEDIUM,
+  Difficulty.HARD,
+  Difficulty.EXPERT,
+] as const;
 
 @Injectable()
 export class BooksService {
@@ -24,31 +31,23 @@ export class BooksService {
 
   // ── Create ─────────────────────────────────────────────────────────────────
 
-  /**
-   * 1. Reserve puzzles from the pool.
-   * 2. Persist a draft book record.
-   * 3. Create a LemonSqueezy checkout and return its URL.
-   */
   async createBook(
     userId: string,
     dto: CreateBookDto,
   ): Promise<{ book: Book; checkoutUrl: string }> {
-    // Reserve puzzles (throws ServiceUnavailableException if pool too small)
-    const reserved = await this.puzzles.reservePuzzles(
-      dto.difficulty,
-      dto.pageCount,
-      dto.uniquenessLevel ?? UniquenessLevel.GLOBAL,
-      userId,
-    );
+    // Reserve puzzles — progressive splits across all 4 difficulties in order.
+    const reserved = await this.reservePuzzles(userId, dto);
 
     // Persist draft book
     const book = await this.prisma.db.book.create({
       data: {
         userId,
-        title: dto.title ?? null,
+        title: dto.title,
         trimSize: dto.trimSize,
         difficulty: dto.difficulty,
         pageCount: dto.pageCount,
+        layout: dto.layout,
+        frontMatter: JSON.parse(JSON.stringify(dto.frontMatter)),
         status: BookStatus.DRAFT,
       },
     });
@@ -62,8 +61,43 @@ export class BooksService {
     );
 
     const checkoutUrl = await this.createCheckout(book.id, userId);
-
     return { book, checkoutUrl };
+  }
+
+  // ── Puzzle reservation ─────────────────────────────────────────────────────
+
+  private async reservePuzzles(
+    userId: string,
+    dto: CreateBookDto,
+  ): Promise<PuzzleReservation[]> {
+    if (dto.difficulty !== Difficulty.PROGRESSIVE) {
+      return this.puzzles.reservePuzzles(
+        dto.difficulty,
+        dto.pageCount,
+        dto.uniquenessLevel ?? UniquenessLevel.GLOBAL,
+        userId,
+      );
+    }
+
+    // Progressive: divide puzzles evenly across 4 difficulties.
+    // Each difficulty gets floor(pageCount/4); any remainder goes to the last.
+    const base  = Math.floor(dto.pageCount / 4);
+    const extra = dto.pageCount - base * 4;
+    const results: PuzzleReservation[][] = [];
+
+    for (let i = 0; i < PROGRESSIVE_ORDER.length; i++) {
+      const count  = i === PROGRESSIVE_ORDER.length - 1 ? base + extra : base;
+      const result = await this.puzzles.reservePuzzles(
+        PROGRESSIVE_ORDER[i]!,
+        count,
+        dto.uniquenessLevel ?? UniquenessLevel.GLOBAL,
+        userId,
+      );
+      results.push(result);
+    }
+
+    // Return in difficulty order so puzzles appear easy → expert in the book.
+    return results.flat();
   }
 
   // ── LemonSqueezy checkout ──────────────────────────────────────────────────

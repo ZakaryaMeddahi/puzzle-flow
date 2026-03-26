@@ -2,47 +2,89 @@ import { PDFDocument } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import { readFileSync } from "fs";
 import { join } from "path";
+import type { FrontMatterConfig } from "@kdp/shared";
 import type { BookOptions } from "./types";
 import { PAGE_SIZE, pageSide } from "./layout";
-import { drawTitlePage } from "./pages/title-page";
-import { drawPuzzlePage } from "./pages/puzzle-page";
-import { addAnswerPages } from "./pages/answer-page";
+import { buildPagePlan } from "./page-plan";
+import { drawTitlePage }    from "./pages/title-page";
+import { drawCopyrightPage } from "./pages/copyright-page";
+import { drawHowToPlayPage } from "./pages/how-to-play-page";
+import { drawIntroPage }    from "./pages/intro-page";
+import { drawBlankPage }    from "./pages/blank-page";
+import { drawPuzzlePage }   from "./pages/puzzle-page";
+import { addAnswerPages }   from "./pages/answer-page";
 
 /**
  * Generate a complete KDP-ready Sudoku puzzle book as a PDF.
  *
- * @param options  Book configuration (title, difficulty, trim size, puzzles)
- * @returns        Raw PDF bytes (Uint8Array) ready to write to disk or S3
+ * @param options     Book configuration (title, difficulty, trim size, puzzles, layout)
+ * @param frontMatter Optional front matter config; defaults to all pages enabled.
+ * @returns           Raw PDF bytes ready to write to disk or upload.
  */
-export async function generateBook(options: BookOptions): Promise<Uint8Array> {
-  const { trimSize, puzzles } = options;
+export async function generateBook(
+  options: BookOptions,
+  frontMatter?: FrontMatterConfig | null,
+): Promise<Uint8Array> {
+  const { trimSize, puzzles, puzzlesPerPage } = options;
   const { width, height } = PAGE_SIZE[trimSize];
 
   const doc = await PDFDocument.create();
   doc.registerFontkit(fontkit);
 
-  // Embed fonts — KDP requires fully embedded fonts (StandardFonts are not embedded)
+  // Embed TTF fonts — KDP requires fully embedded fonts.
   const boldBytes    = readFileSync(join(__dirname, "../fonts/Roboto-Bold.ttf"));
   const regularBytes = readFileSync(join(__dirname, "../fonts/Roboto-Regular.ttf"));
   const titleFont = await doc.embedFont(boldBytes);
   const bodyFont  = await doc.embedFont(regularBytes);
 
-  // Track the 0-based page index across the whole document for gutter margins.
-  // Page 0 = title (recto), page 1 = first puzzle (verso), etc.
-  let pageIndex = 0;
+  // Pre-compute the full page sequence before rendering.
+  const plan = buildPagePlan(puzzles, puzzlesPerPage, frontMatter);
 
-  // ── Title page ─────────────────────────────────────────────────────────────
-  const titlePage = doc.addPage([width, height]);
-  drawTitlePage(titlePage, titleFont, bodyFont, options, pageSide(pageIndex++));
+  // Find the pageIndex of the first answer slot (for addAnswerPages).
+  const firstAnswerSlot = plan.slots.find((s) => s.kind === "answer");
+  const answerFirstPageIndex = firstAnswerSlot?.pageIndex ?? plan.slots.length;
 
-  // ── Puzzle pages (one per puzzle) ──────────────────────────────────────────
-  for (const entry of puzzles) {
+  for (const slot of plan.slots) {
+    if (slot.kind === "answer") continue; // handled below via addAnswerPages
+
+    const side = pageSide(slot.pageIndex);
     const page = doc.addPage([width, height]);
-    drawPuzzlePage(page, titleFont, bodyFont, entry, trimSize, pageSide(pageIndex++));
+
+    switch (slot.kind) {
+      case "title":
+        drawTitlePage(page, titleFont, bodyFont, options, side);
+        break;
+      case "copyright":
+        drawCopyrightPage(page, titleFont, bodyFont, trimSize, side);
+        break;
+      case "how-to-play":
+        drawHowToPlayPage(page, titleFont, bodyFont, trimSize, side);
+        break;
+      case "introduction":
+        drawIntroPage(page, titleFont, bodyFont, trimSize, side, frontMatter?.introText ?? "");
+        break;
+      case "blank":
+        drawBlankPage(page);
+        break;
+      case "puzzle":
+        drawPuzzlePage(
+          page,
+          titleFont,
+          bodyFont,
+          slot.puzzles!,
+          trimSize,
+          side,
+          puzzlesPerPage,
+        );
+        break;
+    }
   }
 
-  // ── Answer key (multiple mini grids per page) ──────────────────────────────
-  addAnswerPages(doc, titleFont, bodyFont, puzzles, trimSize, pageIndex);
+  // Answer pages (addAnswerPages handles its own addPage loop internally).
+  const fm = frontMatter ?? { answerPages: true } as FrontMatterConfig;
+  if (fm.answerPages !== false && puzzles.length > 0) {
+    addAnswerPages(doc, titleFont, bodyFont, puzzles, trimSize, answerFirstPageIndex);
+  }
 
   return doc.save();
 }

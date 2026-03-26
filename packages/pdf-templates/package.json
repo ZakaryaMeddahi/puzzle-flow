@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@fontsource/roboto": "^5.2.10",
+    "@kdp/shared": "workspace:^",
     "@pdf-lib/fontkit": "^1.1.1",
     "pdf-lib": "^1.17.1"
   },

@@ -2,10 +2,11 @@ import { Worker, type Job } from "bullmq";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { generateBook } from "@kdp/pdf-templates";
-import type { BookOptions, PuzzleEntry } from "@kdp/pdf-templates";
+import type { BookOptions, PuzzleEntry, PuzzlesPerPage } from "@kdp/pdf-templates";
 import { generatePuzzle, seedToMetadata } from "@kdp/puzzle-core";
 import { toUnsignedBigInt } from "./puzzle-generation.worker";
 import { prisma, BookStatus } from "@kdp/shared";
+import type { FrontMatterConfig } from "@kdp/shared";
 import { getRedisOptions } from "../redis";
 import { QUEUE_PDF_GENERATION, type PdfGenerationJobData } from "../queues";
 
@@ -24,16 +25,23 @@ async function processPdfGenerationJob(
   // 1. Load the book
   const book = await prisma.book.findUniqueOrThrow({ where: { id: bookId } });
 
-  // 2. Load confirmed puzzle seeds for this book, ordered by seed (= generation order)
-  const rows = await prisma.$queryRawUnsafe<
-    Array<{ seed: string | bigint }>
-  >(
+  // 2. Load confirmed puzzle seeds — order by difficulty category then seed so
+  //    progressive books appear easy → medium → hard → expert.
+  const rows = await prisma.$queryRawUnsafe<Array<{ seed: string | bigint }>>(
     `
     SELECT seed
     FROM puzzle_registry
     WHERE book_id = $1
       AND status  = 'confirmed'
-    ORDER BY seed ASC
+    ORDER BY
+      CASE difficulty
+        WHEN 'easy'   THEN 1
+        WHEN 'medium' THEN 2
+        WHEN 'hard'   THEN 3
+        WHEN 'expert' THEN 4
+        ELSE 5
+      END ASC,
+      id ASC
     `,
     bookId,
   );
@@ -54,16 +62,22 @@ async function processPdfGenerationJob(
   });
 
   // 4. Build BookOptions
+  const validLayouts: PuzzlesPerPage[] = [1, 2, 4];
+  const puzzlesPerPage: PuzzlesPerPage = validLayouts.includes(book.layout as PuzzlesPerPage)
+    ? (book.layout as PuzzlesPerPage)
+    : 1;
+
   const options: BookOptions = {
     title: book.title ?? "Sudoku Puzzle Book",
-    difficulty: book.difficulty as BookOptions["difficulty"],
+    difficulty: book.difficulty,
     trimSize: book.trimSize as BookOptions["trimSize"],
     puzzles: puzzleEntries,
+    puzzlesPerPage,
   };
 
   // 5. Generate PDF bytes
   await job.updateProgress(60);
-  const pdfBytes = await generateBook(options);
+  const pdfBytes = await generateBook(options, book.frontMatter as FrontMatterConfig | null);
   await job.updateProgress(85);
 
   // 6. Write to disk

@@ -7,10 +7,11 @@ const BLACK = rgb(0, 0, 0);
 const GREY  = rgb(0.45, 0.45, 0.45);
 
 const DIFFICULTY_LABEL: Record<string, string> = {
-  easy:   "Easy",
-  medium: "Medium",
-  hard:   "Hard",
-  expert: "Expert",
+  easy:        "Easy",
+  medium:      "Medium",
+  hard:        "Hard",
+  expert:      "Expert",
+  progressive: "Progressive",
 };
 
 /**

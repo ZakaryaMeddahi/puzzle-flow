@@ -3,6 +3,7 @@ export enum Difficulty {
   MEDIUM = "medium",
   HARD = "hard",
   EXPERT = "expert",
+  PROGRESSIVE = "progressive",
 }
 
 export enum PuzzleStatus {

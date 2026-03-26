@@ -10,9 +10,12 @@ export interface PuzzleEntry {
   solution: string;
 }
 
+export type PuzzlesPerPage = 1 | 2 | 4;
+
 export interface BookOptions {
   title: string;
-  difficulty: PuzzleDifficulty;
+  difficulty: string;
   trimSize: KdpTrimSize;
   puzzles: PuzzleEntry[];
+  puzzlesPerPage: PuzzlesPerPage;
 }
