@@ -38,3 +38,7 @@ yarn-error.log*
 
 # Claude
 .claude/
+
+# Files
+pdfs/
+uploads/

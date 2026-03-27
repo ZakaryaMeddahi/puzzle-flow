@@ -112,11 +112,16 @@ export class BooksService {
     const apiKey    = this.config.getOrThrow<string>('LEMONSQUEEZY_API_KEY');
     const storeId   = this.config.getOrThrow<string>('LEMONSQUEEZY_STORE_ID');
     const variantId = this.config.getOrThrow<string>('LEMONSQUEEZY_VARIANT_ID');
+    const clientUrl = this.config.get<string>('CLIENT_URL') ?? 'http://localhost:3000';
 
     const body = {
       data: {
         type: 'checkouts',
         attributes: {
+          product_options: {
+            // After payment, redirect the buyer back to the dashboard.
+            redirect_url: `${clientUrl}/dashboard?payment_success=1&book_id=${bookId}`,
+          },
           checkout_data: {
             custom: { bookId, userId },
           },

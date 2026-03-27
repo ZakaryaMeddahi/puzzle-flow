@@ -15,6 +15,8 @@ export interface TextElement {
   size: TextSize;
   weight: FontWeight;
   alignment: Alignment;
+  /** Default vertical placement within the zone. Defaults to "top" for multiline, "middle" for single-line. */
+  defaultVerticalAlignment?: VerticalAlignment;
   editable: boolean;
   multiline?: boolean;
   maxLength?: number;
@@ -65,7 +67,7 @@ export interface FrontMatterPageConfig {
    * Per-element style overrides keyed by element ID.
    * When absent for an element the schema default is used.
    */
-  styles?: Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }>;
+  styles?: Record<string, { alignment: Alignment }>;
 }
 
 export interface FrontMatterConfig {
@@ -139,12 +141,13 @@ export const COPYRIGHT_PAGE_DEFINITION: PageDefinition = {
       type: "text",
       id: "copyright",
       label: "Copyright Text",
-      zone: "center",
+      zone: "lower",
       defaultValue:
         `Copyright © ${new Date().getFullYear()} by the Author\n\nAll rights reserved. No part of this publication may be reproduced, distributed, or transmitted in any form or by any means without prior written permission.\n\nPublished independently.`,
       size: "sm",
       weight: "regular",
       alignment: "left",
+      defaultVerticalAlignment: "bottom",
       editable: true,
       multiline: true,
       maxLength: 1000,
@@ -235,9 +238,9 @@ export function getPageDefinition(pageType: PageType): PageDefinition {
  */
 export function resolveStyles(
   definition: PageDefinition,
-  styles?: Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }>,
-): Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }> {
-  const resolved: Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }> = {};
+  styles?: Record<string, { alignment: Alignment }>,
+): Record<string, { alignment: Alignment }> {
+  const resolved: Record<string, { alignment: Alignment }> = {};
   for (const el of definition.elements) {
     if (el.type === "text") {
       resolved[el.id] = styles?.[el.id] ?? { alignment: el.alignment };

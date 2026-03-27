@@ -6,7 +6,6 @@ import type {
   TextElement,
   ImageElement,
   Alignment,
-  VerticalAlignment,
   BookFont,
 } from "@kdp/shared/browser";
 import { PagePreview } from "../components/page-preview";
@@ -21,8 +20,8 @@ interface Props {
   onImageUploaded: (elementId: string, key: string, blobUrl: string) => void;
   trimSize: string;
   /** Per-element style overrides. */
-  styles: Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }>;
-  onStylesChange: (styles: Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }>) => void;
+  styles: Record<string, { alignment: Alignment }>;
+  onStylesChange: (styles: Record<string, { alignment: Alignment }>) => void;
   font: BookFont;
 }
 
@@ -38,17 +37,6 @@ const ALIGN_LABELS: Record<Alignment, string> = {
   right:  "Right",
 };
 
-const V_ALIGN_ICONS: Record<VerticalAlignment, string> = {
-  top:    "↑",
-  middle: "↕",
-  bottom: "↓",
-};
-
-const V_ALIGN_LABELS: Record<VerticalAlignment, string> = {
-  top:    "Top",
-  middle: "Middle",
-  bottom: "Bottom",
-};
 
 export function StepPageEditor({
   definition,
@@ -66,11 +54,7 @@ export function StepPageEditor({
   }
 
   function setAlignment(id: string, alignment: Alignment) {
-    onStylesChange({ ...styles, [id]: { ...styles[id], alignment } });
-  }
-
-  function setVerticalAlignment(id: string, verticalAlignment: VerticalAlignment) {
-    onStylesChange({ ...styles, [id]: { ...styles[id], verticalAlignment } });
+    onStylesChange({ ...styles, [id]: { alignment } });
   }
 
   return (
@@ -105,8 +89,6 @@ export function StepPageEditor({
             const textEl  = el as TextElement;
             const current = values[el.id] ?? textEl.defaultValue;
             const currentAlignment = styles[el.id]?.alignment ?? textEl.alignment;
-            const currentVAlign: VerticalAlignment =
-              styles[el.id]?.verticalAlignment ?? (textEl.multiline ? "top" : "middle");
 
             return (
               <div key={el.id}>
@@ -114,44 +96,23 @@ export function StepPageEditor({
                   <label className="text-sm font-medium text-zinc-700">
                     {textEl.label}
                   </label>
-                  {/* Alignment toggles */}
-                  <div className="flex items-center gap-1.5">
-                    {/* Horizontal */}
-                    <div className="flex rounded-md border border-zinc-200 overflow-hidden">
-                      {(["left", "center", "right"] as Alignment[]).map((align) => (
-                        <button
-                          key={align}
-                          type="button"
-                          title={ALIGN_LABELS[align]}
-                          onClick={() => setAlignment(el.id, align)}
-                          className={`px-2.5 py-1 text-xs transition-colors ${
-                            currentAlignment === align
-                              ? "bg-zinc-900 text-white"
-                              : "bg-white text-zinc-400 hover:text-zinc-700"
-                          }`}
-                        >
-                          {ALIGN_ICONS[align]}
-                        </button>
-                      ))}
-                    </div>
-                    {/* Vertical */}
-                    <div className="flex rounded-md border border-zinc-200 overflow-hidden">
-                      {(["top", "middle", "bottom"] as VerticalAlignment[]).map((va) => (
-                        <button
-                          key={va}
-                          type="button"
-                          title={V_ALIGN_LABELS[va]}
-                          onClick={() => setVerticalAlignment(el.id, va)}
-                          className={`px-2.5 py-1 text-xs transition-colors ${
-                            currentVAlign === va
-                              ? "bg-zinc-900 text-white"
-                              : "bg-white text-zinc-400 hover:text-zinc-700"
-                          }`}
-                        >
-                          {V_ALIGN_ICONS[va]}
-                        </button>
-                      ))}
-                    </div>
+                  {/* Horizontal alignment toggles */}
+                  <div className="flex rounded-md border border-zinc-200 overflow-hidden">
+                    {(["left", "center", "right"] as Alignment[]).map((align) => (
+                      <button
+                        key={align}
+                        type="button"
+                        title={ALIGN_LABELS[align]}
+                        onClick={() => setAlignment(el.id, align)}
+                        className={`px-2.5 py-1 text-xs transition-colors ${
+                          currentAlignment === align
+                            ? "bg-zinc-900 text-white"
+                            : "bg-white text-zinc-400 hover:text-zinc-700"
+                        }`}
+                      >
+                        {ALIGN_ICONS[align]}
+                      </button>
+                    ))}
                   </div>
                 </div>
                 {textEl.multiline ? (

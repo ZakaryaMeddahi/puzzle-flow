@@ -5,7 +5,6 @@ import type {
   PageValues,
   TextElement,
   Alignment,
-  VerticalAlignment,
   BookFont,
 } from "@kdp/shared/browser";
 import {
@@ -32,7 +31,7 @@ interface PagePreviewProps {
   imageUrls?: Record<string, string>;
   trimSize?: "6x9" | "8x10" | "8.5x11";
   /** Per-element style overrides. */
-  styles?: Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }>;
+  styles?: Record<string, { alignment: Alignment }>;
   font?: BookFont;
 }
 
@@ -72,9 +71,8 @@ export function PagePreview({
             const fontSize = TEXT_SIZE_PX[el.size];
             const fontWeight = el.weight === "bold" ? "700" : "400";
             const color    = el.weight === "bold" ? "#111" : "#555";
-            // Use alignment override if available, else schema default
             const alignment: Alignment = styles[el.id]?.alignment ?? el.alignment;
-            const verticalAlignment: VerticalAlignment = styles[el.id]?.verticalAlignment
+            const verticalAlignment = textEl.defaultVerticalAlignment
               ?? (textEl.multiline ? "top" : "middle");
             const textAlign = alignment as React.CSSProperties["textAlign"];
 

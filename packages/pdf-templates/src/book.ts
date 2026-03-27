@@ -2,7 +2,7 @@ import { PDFDocument } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import { readFileSync } from "fs";
 import { join } from "path";
-import type { FrontMatterConfig, PageType, Alignment, VerticalAlignment } from "@kdp/shared";
+import type { FrontMatterConfig, PageType, Alignment } from "@kdp/shared";
 import {
   getPageDefinition,
   resolveValues,
@@ -112,7 +112,7 @@ export async function generateBook(
       const def    = getPageDefinition(pageType);
       const stored = (frontMatter as unknown as Record<string, {
         values?: Record<string, string>;
-        styles?: Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }>;
+        styles?: Record<string, { alignment: Alignment }>;
       }>)?.[pageType];
       const values = resolveValues(def, stored?.values ?? {});
       const styleOverrides = stored?.styles ?? {};

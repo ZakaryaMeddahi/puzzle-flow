@@ -10,7 +10,6 @@ import type {
   PageValues,
   PageType,
   Alignment,
-  VerticalAlignment,
   BookFont,
   PuzzleLabelFormat,
   GridStyle,
@@ -125,9 +124,9 @@ export default function NewBookPage() {
 
   // Per-page per-element style overrides — initialised from schema defaults
   const [fmStyles, setFmStyles] = useState<
-    Record<string, Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }>>
+    Record<string, Record<string, { alignment: Alignment }>>
   >(() => {
-    const init: Record<string, Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }>> = {};
+    const init: Record<string, Record<string, { alignment: Alignment }>> = {};
     for (const key of FM_PAGE_KEYS) {
       const def = PAGE_DEFINITIONS[key as PageType];
       init[key] = {};
@@ -185,7 +184,7 @@ export default function NewBookPage() {
 
   function handleFmStylesChange(
     pageType: string,
-    styles: Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }>,
+    styles: Record<string, { alignment: Alignment }>,
   ) {
     setFmStyles((prev) => ({ ...prev, [pageType]: styles }));
   }

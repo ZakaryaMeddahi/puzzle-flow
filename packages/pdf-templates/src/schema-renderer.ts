@@ -6,7 +6,6 @@ import type {
   TextElement,
   ImageElement,
   Alignment,
-  VerticalAlignment,
 } from "@kdp/shared";
 import {
   ZONE_TOP_FRAC,
@@ -70,7 +69,7 @@ export function renderPageFromSchema(
   trimSize: KdpTrimSize,
   side: PageSide,
   images: Record<string, PDFImage> = {},
-  styleOverrides: Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }> = {},
+  styleOverrides: Record<string, { alignment: Alignment }> = {},
 ): void {
   const area = usableArea(trimSize, side);
 
@@ -110,7 +109,7 @@ function renderTextElement(
   zoneTopY: number,
   zoneHeight: number,
   zoneMidY: number,
-  styleOverrides: Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }>,
+  styleOverrides: Record<string, { alignment: Alignment }>,
 ): void {
   if (!value) return;
 
@@ -118,9 +117,8 @@ function renderTextElement(
   const font             = element.weight === "bold" ? titleFont : bodyFont;
   const color            = element.weight === "bold" ? BLACK : GREY;
   const alignment        = styleOverrides[element.id]?.alignment ?? element.alignment;
-  // Default vertical alignment: "top" for multiline (old behaviour preserved), "middle" for single-line.
   const isMultilineEl    = element.multiline || value.includes("\n");
-  const verticalAlignment = styleOverrides[element.id]?.verticalAlignment
+  const verticalAlignment = element.defaultVerticalAlignment
     ?? (isMultilineEl ? "top" : "middle");
   const zoneBottomY      = zoneTopY - zoneHeight;
 
@@ -133,10 +131,12 @@ function renderTextElement(
     let startY: number;
     switch (verticalAlignment) {
       case "bottom":
-        startY = Math.max(zoneBottomY + totalH, zoneTopY) - font.heightAtSize(size);
+        // Last line sits at zoneBottomY; first line is (N-1) line-heights above it.
+        startY = zoneBottomY + (lines.length - 1) * lineHeight;
         break;
       case "middle":
-        startY = zoneMidY + totalH / 2 - font.heightAtSize(size);
+        // Lines are symmetrically centred around zoneMidY.
+        startY = zoneMidY + (lines.length - 1) * lineHeight / 2;
         break;
       default: // "top"
         startY = zoneTopY - font.heightAtSize(size);
