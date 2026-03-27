@@ -49,8 +49,8 @@ model Book {
   difficulty String
   pageCount   Int              @map("page_count")
   layout      Int              @default(1)
-  frontMatter Json?            @map("front_matter")
-  status      String           @default("draft")
+  frontMatter Json?   @map("front_matter")
+  status      String  @default("draft")
   pdfPath    String?          @map("pdf_path")
   expiresAt  DateTime?        @map("expires_at")
   createdAt  DateTime         @default(now()) @map("created_at")

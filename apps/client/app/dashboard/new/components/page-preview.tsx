@@ -1,7 +1,19 @@
 "use client";
 
-import type { PageDefinition, PageValues, TextElement } from "@kdp/shared/browser";
-import { ZONE_TOP_FRAC, ZONE_HEIGHT_FRAC, TEXT_SIZE_PX } from "@kdp/shared/browser";
+import type {
+  PageDefinition,
+  PageValues,
+  TextElement,
+  Alignment,
+  VerticalAlignment,
+  BookFont,
+} from "@kdp/shared/browser";
+import {
+  ZONE_TOP_FRAC,
+  ZONE_HEIGHT_FRAC,
+  TEXT_SIZE_PX,
+  FONT_FAMILY_CSS,
+} from "@kdp/shared/browser";
 
 const ASPECT: Record<string, number> = {
   "6x9":    6 / 9,
@@ -19,6 +31,9 @@ interface PagePreviewProps {
   /** Blob URLs for images selected locally (before or after upload). */
   imageUrls?: Record<string, string>;
   trimSize?: "6x9" | "8x10" | "8.5x11";
+  /** Per-element style overrides. */
+  styles?: Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }>;
+  font?: BookFont;
 }
 
 export function PagePreview({
@@ -26,8 +41,11 @@ export function PagePreview({
   values,
   imageUrls = {},
   trimSize = "8.5x11",
+  styles = {},
+  font = "roboto",
 }: PagePreviewProps) {
-  const aspect = ASPECT[trimSize] ?? ASPECT["8.5x11"]!;
+  const aspect     = ASPECT[trimSize] ?? ASPECT["8.5x11"]!;
+  const fontFamily = FONT_FAMILY_CSS[font];
 
   return (
     <div
@@ -49,12 +67,26 @@ export function PagePreview({
           const heightPct = ZONE_HEIGHT_FRAC[el.zone] * 100;
 
           if (el.type === "text") {
-            const textEl  = el as TextElement;
-            const value   = values[el.id] ?? textEl.defaultValue ?? "";
-            const fontSize  = TEXT_SIZE_PX[el.size];
+            const textEl   = el as TextElement;
+            const value    = values[el.id] ?? textEl.defaultValue ?? "";
+            const fontSize = TEXT_SIZE_PX[el.size];
             const fontWeight = el.weight === "bold" ? "700" : "400";
             const color    = el.weight === "bold" ? "#111" : "#555";
-            const textAlign = el.alignment as React.CSSProperties["textAlign"];
+            // Use alignment override if available, else schema default
+            const alignment: Alignment = styles[el.id]?.alignment ?? el.alignment;
+            const verticalAlignment: VerticalAlignment = styles[el.id]?.verticalAlignment
+              ?? (textEl.multiline ? "top" : "middle");
+            const textAlign = alignment as React.CSSProperties["textAlign"];
+
+            // Multiline elements flow from zone top to page bottom (not clipped at zone boundary).
+            // Single-line elements are contained within their zone for vertical centering.
+            const containerHeight = textEl.multiline
+              ? `${100 - topPct}%`
+              : `${heightPct}%`;
+
+            const alignItems =
+              verticalAlignment === "top"    ? "flex-start" :
+              verticalAlignment === "bottom" ? "flex-end"   : "center";
 
             return (
               <div
@@ -62,13 +94,13 @@ export function PagePreview({
                 className="absolute overflow-hidden"
                 style={{
                   top:    `${topPct}%`,
-                  height: `${heightPct}%`,
+                  height: containerHeight,
                   left: 0, right: 0,
                   display: "flex",
-                  alignItems: textEl.multiline ? "flex-start" : "center",
+                  alignItems,
                   justifyContent:
-                    el.alignment === "center" ? "center"
-                    : el.alignment === "right"  ? "flex-end"
+                    alignment === "center" ? "center"
+                    : alignment === "right"  ? "flex-end"
                     : "flex-start",
                   padding: "2px 0",
                 }}
@@ -77,6 +109,7 @@ export function PagePreview({
                   style={{
                     fontSize,
                     fontWeight,
+                    fontFamily,
                     textAlign,
                     color,
                     whiteSpace: textEl.multiline ? "pre-wrap" : "nowrap",
@@ -87,7 +120,7 @@ export function PagePreview({
                   }}
                 >
                   {value || (
-                    <span style={{ color: "#ccc", fontStyle: "italic" }}>
+                    <span style={{ color: "#ccc", fontStyle: "italic", fontFamily: "inherit" }}>
                       {el.label}
                     </span>
                   )}

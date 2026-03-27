@@ -1,12 +1,22 @@
 "use client";
 
-import type { BookSetupState, FmEnabled } from "../page";
+import type { BookSetupState, BookStyleState, FmEnabled } from "../page";
+import {
+  BOOK_FONTS,
+  FONT_LABELS,
+  FONT_DESCRIPTIONS,
+  FONT_FAMILY_CSS,
+  LABEL_FORMAT_EXAMPLES,
+} from "@kdp/shared/browser";
+import type { BookFont, PuzzleLabelFormat, GridStyle } from "@kdp/shared/browser";
 
 interface Props {
   state: BookSetupState;
   onChange: <K extends keyof BookSetupState>(key: K, value: BookSetupState[K]) => void;
   fmEnabled: FmEnabled;
   onFmEnabledChange: (key: keyof FmEnabled, value: boolean) => void;
+  bookStyle: BookStyleState;
+  onBookStyleChange: <K extends keyof BookStyleState>(key: K, value: BookStyleState[K]) => void;
 }
 
 const TRIM_SIZES = [
@@ -43,7 +53,26 @@ const FM_TOGGLES: { key: keyof FmEnabled; label: string }[] = [
   { key: "answerPages",   label: "Answer pages" },
 ];
 
-export function StepBookSetup({ state, onChange, fmEnabled, onFmEnabledChange }: Props) {
+const LABEL_FORMATS: { value: PuzzleLabelFormat; label: string }[] = [
+  { value: "puzzle-n", label: "Puzzle 1" },
+  { value: "hash-n",   label: "#1" },
+  { value: "no-n",     label: "No. 1" },
+  { value: "n",        label: "1" },
+];
+
+const GRID_STYLES: { value: GridStyle; label: string; desc: string }[] = [
+  { value: "standard", label: "Standard", desc: "Solid black lines" },
+  { value: "minimal",  label: "Minimal",  desc: "Soft grey lines" },
+];
+
+export function StepBookSetup({
+  state,
+  onChange,
+  fmEnabled,
+  onFmEnabledChange,
+  bookStyle,
+  onBookStyleChange,
+}: Props) {
   const puzzlePages = Math.ceil(state.pageCount / state.layout);
   const answerPages = fmEnabled.answerPages ? Math.ceil(state.pageCount / 6) : 0;
   const fmPageCount = (["titlePage", "copyrightPage", "howToPlay", "introduction"] as const)
@@ -207,6 +236,157 @@ export function StepBookSetup({ state, onChange, fmEnabled, onFmEnabledChange }:
             ))}
           </div>
         </fieldset>
+      </section>
+
+      {/* ── Style ──────────────────────────────────────────────────────── */}
+      <section>
+        <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-zinc-400">
+          Style
+        </h3>
+        <div className="space-y-6">
+
+          {/* Font family */}
+          <fieldset>
+            <legend className="mb-2 text-sm font-medium text-zinc-700">Font</legend>
+            <div className="space-y-2">
+              {BOOK_FONTS.map((f) => (
+                <label
+                  key={f}
+                  className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-colors ${
+                    bookStyle.font === f
+                      ? "border-zinc-900 bg-zinc-50"
+                      : "border-zinc-200 hover:border-zinc-300"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="font"
+                    value={f}
+                    checked={bookStyle.font === f}
+                    onChange={() => onBookStyleChange("font", f as BookFont)}
+                    className="accent-zinc-900"
+                  />
+                  <div className="flex flex-1 items-baseline justify-between gap-3">
+                    <div>
+                      <span
+                        className="text-sm font-medium text-zinc-900"
+                        style={{ fontFamily: FONT_FAMILY_CSS[f] }}
+                      >
+                        {FONT_LABELS[f]}
+                      </span>
+                      <span className="ml-2 text-xs text-zinc-400">{FONT_DESCRIPTIONS[f]}</span>
+                    </div>
+                    <span
+                      className="shrink-0 text-sm text-zinc-500"
+                      style={{ fontFamily: FONT_FAMILY_CSS[f] }}
+                    >
+                      Aa Bb 123
+                    </span>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          {/* Grid line style */}
+          <fieldset>
+            <legend className="mb-2 text-sm font-medium text-zinc-700">Grid style</legend>
+            <div className="grid grid-cols-2 gap-2">
+              {GRID_STYLES.map((gs) => (
+                <label
+                  key={gs.value}
+                  className={`flex cursor-pointer flex-col gap-0.5 rounded-lg border px-4 py-3 transition-colors ${
+                    bookStyle.gridStyle === gs.value
+                      ? "border-zinc-900 bg-zinc-50"
+                      : "border-zinc-200 hover:border-zinc-300"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="gridStyle"
+                    value={gs.value}
+                    checked={bookStyle.gridStyle === gs.value}
+                    onChange={() => onBookStyleChange("gridStyle", gs.value as GridStyle)}
+                    className="sr-only"
+                  />
+                  <span className="text-sm font-medium text-zinc-900">{gs.label}</span>
+                  <span className="text-xs text-zinc-400">{gs.desc}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          {/* Puzzle label format */}
+          <fieldset>
+            <legend className="mb-2 text-sm font-medium text-zinc-700">Puzzle label</legend>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {LABEL_FORMATS.map((lf) => (
+                <label
+                  key={lf.value}
+                  className={`flex cursor-pointer items-center justify-center rounded-lg border px-3 py-2.5 text-sm transition-colors ${
+                    bookStyle.labelFormat === lf.value
+                      ? "border-zinc-900 bg-zinc-50 font-medium text-zinc-900"
+                      : "border-zinc-200 text-zinc-500 hover:border-zinc-300"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="labelFormat"
+                    value={lf.value}
+                    checked={bookStyle.labelFormat === lf.value}
+                    onChange={() => onBookStyleChange("labelFormat", lf.value as PuzzleLabelFormat)}
+                    className="sr-only"
+                  />
+                  {lf.label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          {/* Toggles */}
+          <div className="space-y-2 rounded-lg border border-zinc-200 px-4 py-3">
+            <label className="flex cursor-pointer items-center gap-3">
+              <input
+                type="checkbox"
+                checked={bookStyle.pageNumbers}
+                onChange={(e) => onBookStyleChange("pageNumbers", e.target.checked)}
+                className="h-4 w-4 rounded border-zinc-300 accent-zinc-900"
+              />
+              <div>
+                <span className="text-sm text-zinc-700">Page numbers</span>
+                <span className="ml-2 text-xs text-zinc-400">Bottom-right on right pages, bottom-left on left pages</span>
+              </div>
+            </label>
+            <label className="flex cursor-pointer items-center gap-3">
+              <input
+                type="checkbox"
+                checked={bookStyle.difficultyBadge}
+                onChange={(e) => onBookStyleChange("difficultyBadge", e.target.checked)}
+                className="h-4 w-4 rounded border-zinc-300 accent-zinc-900"
+              />
+              <div>
+                <span className="text-sm text-zinc-700">Difficulty stars</span>
+                <span className="ml-2 text-xs text-zinc-400">
+                  Star indicators next to puzzle labels (★ easy → ★★★★ expert)
+                </span>
+              </div>
+            </label>
+            <label className="flex cursor-pointer items-center gap-3">
+              <input
+                type="checkbox"
+                checked={bookStyle.clueBackground}
+                onChange={(e) => onBookStyleChange("clueBackground", e.target.checked)}
+                className="h-4 w-4 rounded border-zinc-300 accent-zinc-900"
+              />
+              <div>
+                <span className="text-sm text-zinc-700">Clue cell shading</span>
+                <span className="ml-2 text-xs text-zinc-400">
+                  Light grey background behind pre-filled numbers in the grid
+                </span>
+              </div>
+            </label>
+          </div>
+        </div>
       </section>
 
       {/* ── Options ────────────────────────────────────────────────────── */}

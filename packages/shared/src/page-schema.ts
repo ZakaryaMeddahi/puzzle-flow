@@ -1,8 +1,8 @@
 import type {
-  ElementZone, TextSize, FontWeight, Alignment,
+  ElementZone, TextSize, FontWeight, Alignment, VerticalAlignment,
 } from "./layout-constants";
 
-export type { ElementZone, TextSize, FontWeight, Alignment };
+export type { ElementZone, TextSize, FontWeight, Alignment, VerticalAlignment };
 
 // ── Element types ─────────────────────────────────────────────────────────────
 
@@ -61,6 +61,11 @@ export interface FrontMatterPageConfig {
   enabled: boolean;
   /** User-supplied values for this page's elements. */
   values: PageValues;
+  /**
+   * Per-element style overrides keyed by element ID.
+   * When absent for an element the schema default is used.
+   */
+  styles?: Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }>;
 }
 
 export interface FrontMatterConfig {
@@ -222,6 +227,23 @@ export const PAGE_DEFINITIONS: Record<PageType, PageDefinition> = {
 /** Get the static definition (template) for a given page type. */
 export function getPageDefinition(pageType: PageType): PageDefinition {
   return PAGE_DEFINITIONS[pageType];
+}
+
+/**
+ * Build a resolved styles map for a page definition.
+ * Falls back to the schema-defined alignment for any element not overridden.
+ */
+export function resolveStyles(
+  definition: PageDefinition,
+  styles?: Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }>,
+): Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }> {
+  const resolved: Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }> = {};
+  for (const el of definition.elements) {
+    if (el.type === "text") {
+      resolved[el.id] = styles?.[el.id] ?? { alignment: el.alignment };
+    }
+  }
+  return resolved;
 }
 
 /**

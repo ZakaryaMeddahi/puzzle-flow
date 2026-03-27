@@ -1,11 +1,12 @@
 "use client";
 
-import type { BookSetupState, FmEnabled } from "../page";
+import type { BookSetupState, BookStyleState, FmEnabled } from "../page";
 import type { PageValues } from "@kdp/shared/browser";
-import { PAGE_DEFINITIONS } from "@kdp/shared/browser";
+import { PAGE_DEFINITIONS, FONT_LABELS, LABEL_FORMAT_EXAMPLES } from "@kdp/shared/browser";
 
 interface Props {
   setup: BookSetupState;
+  bookStyle: BookStyleState;
   fmEnabled: FmEnabled;
   fmValues: Record<string, PageValues>;
   submitting: boolean;
@@ -26,6 +27,7 @@ const FM_PAGE_KEYS = ["titlePage", "copyrightPage", "howToPlay", "introduction"]
 
 export function StepReview({
   setup,
+  bookStyle,
   fmEnabled,
   fmValues,
   submitting,
@@ -57,6 +59,25 @@ export function StepReview({
             <span className="font-medium text-zinc-900">{value}</span>
           </div>
         ))}
+      </div>
+
+      {/* Style config */}
+      <div>
+        <p className="mb-2 text-sm font-medium text-zinc-700">Style</p>
+        <div className="divide-y divide-zinc-100 rounded-lg border border-zinc-200">
+          {[
+            ["Font",          FONT_LABELS[bookStyle.font]],
+            ["Grid style",    bookStyle.gridStyle === "minimal" ? "Minimal (grey)" : "Standard (black)"],
+            ["Puzzle label",  LABEL_FORMAT_EXAMPLES[bookStyle.labelFormat]],
+            ["Page numbers",  bookStyle.pageNumbers     ? "On"  : "Off"],
+            ["Difficulty dots", bookStyle.difficultyBadge ? "On"  : "Off"],
+          ].map(([label, value]) => (
+            <div key={label} className="flex justify-between px-4 py-2.5 text-sm">
+              <span className="text-zinc-500">{label}</span>
+              <span className="font-medium text-zinc-900">{value}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Front matter */}

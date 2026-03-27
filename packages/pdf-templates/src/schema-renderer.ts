@@ -5,6 +5,8 @@ import type {
   PageValues,
   TextElement,
   ImageElement,
+  Alignment,
+  VerticalAlignment,
 } from "@kdp/shared";
 import {
   ZONE_TOP_FRAC,
@@ -48,14 +50,16 @@ function wordWrap(
 /**
  * Render a front matter page from its schema definition.
  *
- * @param page       pdf-lib PDFPage to draw on
- * @param definition Static page template (zones, element types, defaults)
- * @param values     User-supplied content keyed by element ID
- * @param titleFont  Bold/display font (Roboto Bold)
- * @param bodyFont   Body font (Roboto Regular)
- * @param trimSize   KDP trim size for margin calculation
- * @param side       Recto or verso (gutter direction)
- * @param images     Pre-embedded PDFImage objects keyed by element ID
+ * @param page           pdf-lib PDFPage to draw on
+ * @param definition     Static page template (zones, element types, defaults)
+ * @param values         User-supplied content keyed by element ID
+ * @param titleFont      Bold/display font
+ * @param bodyFont       Body font
+ * @param trimSize       KDP trim size for margin calculation
+ * @param side           Recto or verso (gutter direction)
+ * @param images         Pre-embedded PDFImage objects keyed by element ID
+ * @param styleOverrides Per-element alignment overrides keyed by element ID.
+ *                       Falls back to the schema-defined alignment when absent.
  */
 export function renderPageFromSchema(
   page: PDFPage,
@@ -66,6 +70,7 @@ export function renderPageFromSchema(
   trimSize: KdpTrimSize,
   side: PageSide,
   images: Record<string, PDFImage> = {},
+  styleOverrides: Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }> = {},
 ): void {
   const area = usableArea(trimSize, side);
 
@@ -73,7 +78,6 @@ export function renderPageFromSchema(
     const value = values[element.id] ?? "";
 
     // Zone coordinates in pdf-lib space (Y increases upward from bottom).
-    // area.y + area.height = top of usable area.
     const zoneTopY    = area.y + area.height - ZONE_TOP_FRAC[element.zone]    * area.height;
     const zoneHeight  = ZONE_HEIGHT_FRAC[element.zone] * area.height;
     const zoneBottomY = zoneTopY - zoneHeight;
@@ -81,18 +85,17 @@ export function renderPageFromSchema(
 
     if (element.type === "text") {
       renderTextElement(
-        page,
-        element,
-        value,
-        titleFont,
-        bodyFont,
-        area,
-        zoneTopY,
-        zoneHeight,
-        zoneMidY,
+        page, element, value,
+        titleFont, bodyFont,
+        { x: area.x, y: area.y, width: area.width },
+        zoneTopY, zoneHeight, zoneMidY,
+        styleOverrides,
       );
     } else if (element.type === "image") {
-      renderImageElement(page, element, images[element.id], area, zoneTopY, zoneHeight, zoneMidY);
+      renderImageElement(
+        page, element, images[element.id],
+        area, zoneTopY, zoneHeight, zoneMidY,
+      );
     }
   }
 }
@@ -103,35 +106,61 @@ function renderTextElement(
   value: string,
   titleFont: PDFFont,
   bodyFont: PDFFont,
-  area: { x: number; width: number },
+  area: { x: number; y: number; width: number },
   zoneTopY: number,
   zoneHeight: number,
   zoneMidY: number,
+  styleOverrides: Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }>,
 ): void {
   if (!value) return;
 
-  const size = TEXT_SIZE_PT[element.size];
-  const font = element.weight === "bold" ? titleFont : bodyFont;
-  const color = element.weight === "bold" ? BLACK : GREY;
+  const size             = TEXT_SIZE_PT[element.size];
+  const font             = element.weight === "bold" ? titleFont : bodyFont;
+  const color            = element.weight === "bold" ? BLACK : GREY;
+  const alignment        = styleOverrides[element.id]?.alignment ?? element.alignment;
+  // Default vertical alignment: "top" for multiline (old behaviour preserved), "middle" for single-line.
+  const isMultilineEl    = element.multiline || value.includes("\n");
+  const verticalAlignment = styleOverrides[element.id]?.verticalAlignment
+    ?? (isMultilineEl ? "top" : "middle");
+  const zoneBottomY      = zoneTopY - zoneHeight;
 
   if (element.multiline || value.includes("\n")) {
-    // Multiline: word-wrap and flow downward from zone top
+    // Multiline: flow downward from computed start, stopping at the page margin.
     const lineHeight = font.heightAtSize(size) + 3;
     const lines = wordWrap(value, font, size, area.width);
-    let y = zoneTopY - font.heightAtSize(size);
+    const totalH = lines.length * lineHeight;
 
+    let startY: number;
+    switch (verticalAlignment) {
+      case "bottom":
+        startY = Math.max(zoneBottomY + totalH, zoneTopY) - font.heightAtSize(size);
+        break;
+      case "middle":
+        startY = zoneMidY + totalH / 2 - font.heightAtSize(size);
+        break;
+      default: // "top"
+        startY = zoneTopY - font.heightAtSize(size);
+    }
+
+    let y = startY;
     for (const line of lines) {
-      if (y < zoneTopY - zoneHeight) break;
+      if (y < area.y) break;  // stop at the bottom page margin
       if (line !== "") {
-        const x = textX(element.alignment, area, font.widthOfTextAtSize(line, size));
+        const x = textX(alignment, area, font.widthOfTextAtSize(line, size));
         page.drawText(line, { x, y, size, font, color });
       }
       y -= lineHeight;
     }
   } else {
-    // Single line: center vertically within the zone
-    const x = textX(element.alignment, area, font.widthOfTextAtSize(value, size));
-    page.drawText(value, { x, y: zoneMidY - size / 2, size, font, color });
+    // Single line: position vertically within the zone
+    let y: number;
+    switch (verticalAlignment) {
+      case "top":    y = zoneTopY - font.heightAtSize(size); break;
+      case "bottom": y = zoneBottomY; break;
+      default:       y = zoneMidY - size / 2; // "middle"
+    }
+    const x = textX(alignment, area, font.widthOfTextAtSize(value, size));
+    page.drawText(value, { x, y, size, font, color });
   }
 }
 
@@ -160,7 +189,7 @@ function renderImageElement(
 }
 
 function textX(
-  alignment: TextElement["alignment"],
+  alignment: Alignment,
   area: { x: number; width: number },
   textWidth: number,
 ): number {

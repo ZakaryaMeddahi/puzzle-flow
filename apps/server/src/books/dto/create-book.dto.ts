@@ -21,6 +21,11 @@ export class FrontMatterPageDto {
   @IsOptional()
   @IsObject()
   values?: Record<string, string>;
+
+  /** Per-element alignment overrides: elementId → { alignment }. */
+  @IsOptional()
+  @IsObject()
+  styles?: Record<string, { alignment: string }>;
 }
 
 export class FrontMatterDto {
@@ -42,6 +47,38 @@ export class FrontMatterDto {
 
   @IsBoolean()
   answerPages!: boolean;
+}
+
+export class StyleOptionsDto {
+  /** Font family: "roboto" | "merriweather" | "lato". Default: "roboto". */
+  @IsOptional()
+  @IsString()
+  font?: string;
+
+  /** Show page numbers in the bottom margin. Default: true. */
+  @IsOptional()
+  @IsBoolean()
+  pageNumbers?: boolean;
+
+  /** Puzzle label format. Default: "puzzle-n" → "Puzzle 1". */
+  @IsOptional()
+  @IsString()
+  labelFormat?: string;
+
+  /** Grid line style: "standard" | "minimal". Default: "standard". */
+  @IsOptional()
+  @IsString()
+  gridStyle?: string;
+
+  /** Show difficulty star indicators next to puzzle labels. Default: false. */
+  @IsOptional()
+  @IsBoolean()
+  difficultyBadge?: boolean;
+
+  /** Shade pre-filled clue cells with a light grey background. Default: false. */
+  @IsOptional()
+  @IsBoolean()
+  clueBackground?: boolean;
 }
 
 export class CreateBookDto {
@@ -73,4 +110,10 @@ export class CreateBookDto {
   @ValidateNested()
   @Type(() => FrontMatterDto)
   frontMatter!: FrontMatterDto;
+
+  /** Optional style / presentation options. */
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => StyleOptionsDto)
+  styleOptions?: StyleOptionsDto;
 }

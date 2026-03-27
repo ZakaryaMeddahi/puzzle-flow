@@ -6,7 +6,15 @@ import { useRequireAuth } from "../../hooks/use-require-auth";
 import { apiFetch } from "../../lib/api";
 import { NavHeader } from "../../components/nav-header";
 import { getPageDefinition, resolveValues, PAGE_DEFINITIONS } from "@kdp/shared/browser";
-import type { PageValues, PageType } from "@kdp/shared/browser";
+import type {
+  PageValues,
+  PageType,
+  Alignment,
+  VerticalAlignment,
+  BookFont,
+  PuzzleLabelFormat,
+  GridStyle,
+} from "@kdp/shared/browser";
 import { StepBookSetup } from "./steps/step-book-setup";
 import { StepPageEditor } from "./steps/step-page-editor";
 import { StepReview } from "./steps/step-review";
@@ -20,6 +28,15 @@ export interface BookSetupState {
   pageCount: number;
   layout: 1 | 2 | 4;
   uniquenessLevel: string;
+}
+
+export interface BookStyleState {
+  font:            BookFont;
+  pageNumbers:     boolean;
+  labelFormat:     PuzzleLabelFormat;
+  gridStyle:       GridStyle;
+  difficultyBadge: boolean;
+  clueBackground:  boolean;
 }
 
 export type FmEnabled = {
@@ -77,6 +94,16 @@ export default function NewBookPage() {
     uniquenessLevel: "book",
   });
 
+  // Book style options
+  const [bookStyle, setBookStyle] = useState<BookStyleState>({
+    font:            "roboto",
+    pageNumbers:     true,
+    labelFormat:     "puzzle-n",
+    gridStyle:       "standard",
+    difficultyBadge: false,
+    clueBackground:  false,
+  });
+
   // Front matter enabled flags
   const [fmEnabled, setFmEnabled] = useState<FmEnabled>({
     titlePage:     true,
@@ -86,12 +113,29 @@ export default function NewBookPage() {
     answerPages:   true,
   });
 
-  // Per-page values — initialised with schema defaults
+  // Per-page text values — initialised with schema defaults
   const [fmValues, setFmValues] = useState<Record<string, PageValues>>(() => {
     const init: Record<string, PageValues> = {};
     for (const key of FM_PAGE_KEYS) {
       const def = PAGE_DEFINITIONS[key as PageType];
       init[key] = resolveValues(def, {});
+    }
+    return init;
+  });
+
+  // Per-page per-element style overrides — initialised from schema defaults
+  const [fmStyles, setFmStyles] = useState<
+    Record<string, Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }>>
+  >(() => {
+    const init: Record<string, Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }>> = {};
+    for (const key of FM_PAGE_KEYS) {
+      const def = PAGE_DEFINITIONS[key as PageType];
+      init[key] = {};
+      for (const el of def.elements) {
+        if (el.type === "text") {
+          init[key]![el.id] = { alignment: el.alignment };
+        }
+      }
     }
     return init;
   });
@@ -124,6 +168,13 @@ export default function NewBookPage() {
     setSetup((prev) => ({ ...prev, [key]: value }));
   }
 
+  function handleBookStyleChange<K extends keyof BookStyleState>(
+    key: K,
+    value: BookStyleState[K],
+  ) {
+    setBookStyle((prev) => ({ ...prev, [key]: value }));
+  }
+
   function handleFmEnabledChange(key: keyof FmEnabled, value: boolean) {
     setFmEnabled((prev) => ({ ...prev, [key]: value }));
   }
@@ -132,18 +183,23 @@ export default function NewBookPage() {
     setFmValues((prev) => ({ ...prev, [pageType]: values }));
   }
 
+  function handleFmStylesChange(
+    pageType: string,
+    styles: Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }>,
+  ) {
+    setFmStyles((prev) => ({ ...prev, [pageType]: styles }));
+  }
+
   function handleImageUploaded(
     pageType: string,
     elementId: string,
     key: string,
     blobUrl: string,
   ) {
-    // Store blob URL for preview
     setImageUrls((prev) => ({
       ...prev,
       [pageType]: { ...(prev[pageType] ?? {}), [elementId]: blobUrl },
     }));
-    // Store S3/disk key in fmValues so it gets sent to the server
     setFmValues((prev) => ({
       ...prev,
       [pageType]: { ...(prev[pageType] ?? {}), [elementId]: key },
@@ -179,11 +235,19 @@ export default function NewBookPage() {
       pageCount:       setup.pageCount,
       layout:          setup.layout,
       uniquenessLevel: setup.uniquenessLevel,
+      styleOptions: {
+        font:            bookStyle.font,
+        pageNumbers:     bookStyle.pageNumbers,
+        labelFormat:     bookStyle.labelFormat,
+        gridStyle:       bookStyle.gridStyle,
+        difficultyBadge: bookStyle.difficultyBadge,
+        clueBackground:  bookStyle.clueBackground,
+      },
       frontMatter: {
-        titlePage:     { enabled: fmEnabled.titlePage,     values: fmValues["titlePage"]     ?? {} },
-        copyrightPage: { enabled: fmEnabled.copyrightPage, values: fmValues["copyrightPage"] ?? {} },
-        howToPlay:     { enabled: fmEnabled.howToPlay,     values: fmValues["howToPlay"]     ?? {} },
-        introduction:  { enabled: fmEnabled.introduction,  values: fmValues["introduction"]  ?? {} },
+        titlePage:     { enabled: fmEnabled.titlePage,     values: fmValues["titlePage"]     ?? {}, styles: fmStyles["titlePage"]     ?? {} },
+        copyrightPage: { enabled: fmEnabled.copyrightPage, values: fmValues["copyrightPage"] ?? {}, styles: fmStyles["copyrightPage"] ?? {} },
+        howToPlay:     { enabled: fmEnabled.howToPlay,     values: fmValues["howToPlay"]     ?? {}, styles: fmStyles["howToPlay"]     ?? {} },
+        introduction:  { enabled: fmEnabled.introduction,  values: fmValues["introduction"]  ?? {}, styles: fmStyles["introduction"]  ?? {} },
         answerPages:   fmEnabled.answerPages,
       },
     };
@@ -252,6 +316,8 @@ export default function NewBookPage() {
               onChange={handleSetupChange}
               fmEnabled={fmEnabled}
               onFmEnabledChange={handleFmEnabledChange}
+              bookStyle={bookStyle}
+              onBookStyleChange={handleBookStyleChange}
             />
           )}
 
@@ -265,12 +331,16 @@ export default function NewBookPage() {
                 handleImageUploaded(currentStep, elId, key, blobUrl)
               }
               trimSize={setup.trimSize}
+              styles={fmStyles[currentStep] ?? {}}
+              onStylesChange={(styles) => handleFmStylesChange(currentStep, styles)}
+              font={bookStyle.font}
             />
           )}
 
           {currentStep === "review" && (
             <StepReview
               setup={setup}
+              bookStyle={bookStyle}
               fmEnabled={fmEnabled}
               fmValues={fmValues}
               submitting={submitting}

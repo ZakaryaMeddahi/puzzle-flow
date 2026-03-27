@@ -1,14 +1,54 @@
 import type { PDFPage, PDFFont } from "pdf-lib";
 import { rgb } from "pdf-lib";
-import type { PuzzleEntry, KdpTrimSize, PuzzlesPerPage } from "../types";
+import type {
+  PuzzleEntry,
+  KdpTrimSize,
+  PuzzlesPerPage,
+  PuzzleLabelFormat,
+  GridStyle,
+} from "../types";
 import { usableArea, type PageSide } from "../layout";
 import { drawGrid } from "../grid";
+import { drawPageNumber } from "../page-number";
 
 const BLACK = rgb(0, 0, 0);
 const GREY  = rgb(0.45, 0.45, 0.45);
 
+/**
+ * Draw a filled 5-pointed star centred at (cx, cy) in PDF coordinate space.
+ * Uses drawSvgPath so no glyph support is required from the embedded font.
+ * The path is defined in SVG convention (y-down); pdf-lib flips it to PDF (y-up).
+ */
+function drawFilledStar(page: PDFPage, cx: number, cy: number, size: number): void {
+  const R = size * 0.50; // outer radius
+  const r = size * 0.20; // inner radius  — gives a classic sharp star
+
+  const segs: string[] = [];
+  for (let k = 0; k < 5; k++) {
+    // Outer point — clockwise from the top in SVG (y-down) convention
+    const oa = (k * 72 - 90) * (Math.PI / 180);
+    const ox = R * Math.cos(oa);
+    const oy = R * Math.sin(oa);
+    segs.push((k === 0 ? "M" : "L") + ` ${ox.toFixed(3)} ${oy.toFixed(3)}`);
+    // Inner point
+    const ia = oa + 36 * (Math.PI / 180);
+    segs.push(`L ${(r * Math.cos(ia)).toFixed(3)} ${(r * Math.sin(ia)).toFixed(3)}`);
+  }
+  segs.push("Z");
+
+  page.drawSvgPath(segs.join(" "), { x: cx, y: cy, color: GREY });
+}
+
 const LABEL_SIZE = 13;
-const LABEL_PAD  = 6;  // pts between label baseline and grid top
+const LABEL_PAD  = 6; // pts between label baseline and grid top
+
+/** Number of difficulty stars per level. */
+const DIFFICULTY_STARS: Record<string, number> = {
+  easy:   1,
+  medium: 2,
+  hard:   3,
+  expert: 4,
+};
 
 interface CellArea {
   x: number;
@@ -42,15 +82,20 @@ function computeCells(
   const cellW = (area.width  - PAD) / 2;
   const cellH = (area.height - PAD) / 2;
   return [
-    // Top-left
-    { x: area.x,           y: area.y + cellH + PAD, width: cellW, height: cellH },
-    // Top-right
+    { x: area.x,              y: area.y + cellH + PAD, width: cellW, height: cellH },
     { x: area.x + cellW + PAD, y: area.y + cellH + PAD, width: cellW, height: cellH },
-    // Bottom-left
-    { x: area.x,           y: area.y,               width: cellW, height: cellH },
-    // Bottom-right
-    { x: area.x + cellW + PAD, y: area.y,           width: cellW, height: cellH },
+    { x: area.x,              y: area.y,               width: cellW, height: cellH },
+    { x: area.x + cellW + PAD, y: area.y,               width: cellW, height: cellH },
   ];
+}
+
+function formatLabel(puzzle: PuzzleEntry, format: PuzzleLabelFormat): string {
+  switch (format) {
+    case "hash-n": return `#${puzzle.number}`;
+    case "no-n":   return `No. ${puzzle.number}`;
+    case "n":      return String(puzzle.number);
+    default:       return `Puzzle ${puzzle.number}`;
+  }
 }
 
 /** Render one puzzle inside its cell area. */
@@ -61,28 +106,54 @@ function renderPuzzleCell(
   puzzle: PuzzleEntry,
   cell: CellArea,
   compact: boolean,
+  labelFormat: PuzzleLabelFormat,
+  gridStyle: GridStyle,
+  showBadge: boolean,
+  clueBackground: boolean,
 ): void {
-  const labelSize  = compact ? 10 : LABEL_SIZE;
-  const labelPad   = compact ? 4 : LABEL_PAD;
-  const labelH     = titleFont.heightAtSize(labelSize);
+  const labelSize = compact ? 10 : LABEL_SIZE;
+  const labelPad  = compact ? 4  : LABEL_PAD;
+  const labelH    = titleFont.heightAtSize(labelSize);
 
-  // Label
-  const label = `Puzzle ${puzzle.number}`;
+  const label  = formatLabel(puzzle, labelFormat);
   const labelW = titleFont.widthOfTextAtSize(label, labelSize);
-  const labelY = cell.y + cell.height - labelH;
+
+  // Difficulty badge: drawn stars to the right of the label
+  const starSize    = compact ? 7 : 9;
+  const starGap     = compact ? 2 : 3;
+  const starCount   = showBadge && puzzle.difficulty
+    ? (DIFFICULTY_STARS[puzzle.difficulty] ?? 0)
+    : 0;
+  const badgeTotalW = starCount > 0 ? starCount * starSize + (starCount - 1) * starGap : 0;
+
+  // Compute label x so that (label + badge) is centered in the cell
+  const totalW  = labelW + (starCount > 0 ? 8 + badgeTotalW : 0);
+  const labelX  = cell.x + cell.width / 2 - totalW / 2;
+  const labelY  = cell.y + cell.height - labelH;
+
   page.drawText(label, {
-    x: cell.x + cell.width / 2 - labelW / 2,
-    y: labelY,
+    x:    labelX,
+    y:    labelY,
     size: labelSize,
     font: titleFont,
     color: BLACK,
   });
 
+  // Draw difficulty stars (geometric, font-independent)
+  if (starCount > 0) {
+    const starsStartX = labelX + labelW + 8;
+    const starCenterY = labelY + labelH * 0.5; // vertically centred on the label cap-height
+    for (let d = 0; d < starCount; d++) {
+      const cx = starsStartX + d * (starSize + starGap) + starSize / 2;
+      drawFilledStar(page, cx, starCenterY, starSize);
+    }
+  }
+
   // Thin rule under label (only for single-puzzle layout)
   if (!compact) {
     const ruleY = labelY - 5;
     page.drawLine({
-      start: { x: cell.x, y: ruleY },
+      start: { x: cell.x,              y: ruleY },
       end:   { x: cell.x + cell.width, y: ruleY },
       thickness: 0.5,
       color: GREY,
@@ -98,7 +169,16 @@ function renderPuzzleCell(
   const cellSize = gridSize / 9;
   const fontSize = Math.max(6, Math.floor(cellSize * (compact ? 0.45 : 0.52)));
 
-  drawGrid(page, bodyFont, puzzle.puzzle, gridX, gridY, gridSize, fontSize);
+  drawGrid(page, bodyFont, puzzle.puzzle, gridX, gridY, gridSize, fontSize, gridStyle, clueBackground);
+}
+
+export interface PuzzlePageOptions {
+  labelFormat:     PuzzleLabelFormat;
+  gridStyle:       GridStyle;
+  difficultyBadge: boolean;
+  clueBackground:  boolean;
+  /** When provided a page number is drawn in the bottom margin. */
+  pageNumber?: number;
 }
 
 /**
@@ -115,14 +195,22 @@ export function drawPuzzlePage(
   trimSize: KdpTrimSize,
   side: PageSide,
   puzzlesPerPage: PuzzlesPerPage,
+  opts: PuzzlePageOptions,
 ): void {
-  const area  = usableArea(trimSize, side);
-  const cells = computeCells(area, puzzlesPerPage);
+  const area    = usableArea(trimSize, side);
+  const cells   = computeCells(area, puzzlesPerPage);
   const compact = puzzlesPerPage > 1;
 
   puzzles.forEach((puzzle, i) => {
     if (cells[i]) {
-      renderPuzzleCell(page, titleFont, bodyFont, puzzle, cells[i]!, compact);
+      renderPuzzleCell(
+        page, titleFont, bodyFont, puzzle, cells[i]!,
+        compact, opts.labelFormat, opts.gridStyle, opts.difficultyBadge, opts.clueBackground,
+      );
     }
   });
+
+  if (opts.pageNumber !== undefined) {
+    drawPageNumber(page, bodyFont, opts.pageNumber, side, area);
+  }
 }

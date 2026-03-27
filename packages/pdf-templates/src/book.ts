@@ -2,12 +2,12 @@ import { PDFDocument } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import { readFileSync } from "fs";
 import { join } from "path";
-import type { FrontMatterConfig, PageType } from "@kdp/shared";
+import type { FrontMatterConfig, PageType, Alignment, VerticalAlignment } from "@kdp/shared";
 import {
   getPageDefinition,
   resolveValues,
 } from "@kdp/shared";
-import type { BookOptions } from "./types";
+import type { BookOptions, BookFont } from "./types";
 import { PAGE_SIZE, pageSide } from "./layout";
 import { buildPagePlan } from "./page-plan";
 import { renderPageFromSchema } from "./schema-renderer";
@@ -15,10 +15,31 @@ import { drawBlankPage }  from "./pages/blank-page";
 import { drawPuzzlePage } from "./pages/puzzle-page";
 import { addAnswerPages } from "./pages/answer-page";
 
+/** Map a BookFont name to its TTF file pair. */
+function getFontFiles(font: BookFont): { boldFile: string; regularFile: string } {
+  switch (font) {
+    case "merriweather":
+      return {
+        boldFile:    "Merriweather_24pt-Bold.ttf",
+        regularFile: "Merriweather_24pt-Regular.ttf",
+      };
+    case "lato":
+      return {
+        boldFile:    "Lato-Bold.ttf",
+        regularFile: "Lato-Regular.ttf",
+      };
+    default:
+      return {
+        boldFile:    "Roboto-Bold.ttf",
+        regularFile: "Roboto-Regular.ttf",
+      };
+  }
+}
+
 /**
  * Generate a complete KDP-ready Sudoku puzzle book as a PDF.
  *
- * @param options     Book configuration (title, difficulty, trim size, puzzles, layout)
+ * @param options     Book configuration (title, difficulty, trim size, puzzles, layout, style)
  * @param frontMatter Optional front matter config; defaults to all pages enabled.
  * @param imageBytes  Pre-downloaded image bytes keyed by pageType → elementId → Uint8Array.
  *                    The worker downloads S3 images before calling this function.
@@ -36,13 +57,13 @@ export async function generateBook(
   doc.registerFontkit(fontkit);
 
   // Embed TTF fonts — KDP requires fully embedded fonts.
-  const boldBytes    = readFileSync(join(__dirname, "../fonts/Roboto-Bold.ttf"));
-  const regularBytes = readFileSync(join(__dirname, "../fonts/Roboto-Regular.ttf"));
+  const { boldFile, regularFile } = getFontFiles(options.font ?? "roboto");
+  const boldBytes    = readFileSync(join(__dirname, "../fonts", boldFile));
+  const regularBytes = readFileSync(join(__dirname, "../fonts", regularFile));
   const titleFont = await doc.embedFont(boldBytes);
   const bodyFont  = await doc.embedFont(regularBytes);
 
   // Pre-embed all images referenced in front matter.
-  // imageBytes: { titlePage: { logo: Uint8Array }, ... }
   const embeddedImages: Record<string, Record<string, import("pdf-lib").PDFImage>> = {};
   for (const [pt, pageImages] of Object.entries(imageBytes)) {
     embeddedImages[pt] = {};
@@ -61,11 +82,22 @@ export async function generateBook(
 
   // Map slot kind → pageType for front matter slots
   const SLOT_TO_PAGE_TYPE: Partial<Record<string, PageType>> = {
-    title:        "titlePage",
-    copyright:    "copyrightPage",
-    "how-to-play": "howToPlay",
-    introduction: "introduction",
+    title:          "titlePage",
+    copyright:      "copyrightPage",
+    "how-to-play":  "howToPlay",
+    introduction:   "introduction",
   };
+
+  // Resolved style options with defaults
+  const labelFormat     = options.labelFormat     ?? "puzzle-n";
+  const gridStyle       = options.gridStyle       ?? "standard";
+  const difficultyBadge = options.difficultyBadge ?? false;
+  const clueBackground  = options.clueBackground  ?? false;
+  const showPageNumbers = options.pageNumbers !== false; // default true
+
+  // Track display page number — starts at 1 for the first puzzle page.
+  // Front matter and blank pages are not numbered.
+  let puzzleDisplayPage = 0;
 
   for (const slot of plan.slots) {
     if (slot.kind === "answer") continue;
@@ -78,8 +110,12 @@ export async function generateBook(
     if (pageType) {
       // Front matter page — rendered via schema
       const def    = getPageDefinition(pageType);
-      const stored = (frontMatter as unknown as Record<string, { values?: Record<string, string> }>)?.[pageType];
+      const stored = (frontMatter as unknown as Record<string, {
+        values?: Record<string, string>;
+        styles?: Record<string, { alignment: Alignment; verticalAlignment?: VerticalAlignment }>;
+      }>)?.[pageType];
       const values = resolveValues(def, stored?.values ?? {});
+      const styleOverrides = stored?.styles ?? {};
 
       // Pre-fill title from options if user didn't override
       if (pageType === "titlePage" && !values["title"]) {
@@ -90,20 +126,34 @@ export async function generateBook(
         page, def, values,
         titleFont, bodyFont, trimSize, side,
         embeddedImages[pageType] ?? {},
+        styleOverrides,
       );
     } else if (slot.kind === "blank") {
       drawBlankPage(page);
     } else if (slot.kind === "puzzle") {
+      puzzleDisplayPage++;
       drawPuzzlePage(
         page, titleFont, bodyFont,
         slot.puzzles!, trimSize, side, puzzlesPerPage,
+        {
+          labelFormat,
+          gridStyle,
+          difficultyBadge,
+          clueBackground,
+          pageNumber: showPageNumbers ? puzzleDisplayPage : undefined,
+        },
       );
     }
   }
 
   const fm = frontMatter ?? { answerPages: true } as unknown as FrontMatterConfig;
   if (fm.answerPages !== false && puzzles.length > 0) {
-    addAnswerPages(doc, titleFont, bodyFont, puzzles, trimSize, answerFirstPageIndex);
+    addAnswerPages(doc, titleFont, bodyFont, puzzles, trimSize, answerFirstPageIndex, {
+      pageNumbers:     showPageNumbers,
+      firstPageNumber: puzzleDisplayPage + 1,
+      gridStyle,
+      clueBackground: false, // answer grids always show all digits — background not needed
+    });
   }
 
   return doc.save();

@@ -2,7 +2,14 @@ import { Worker, type Job } from "bullmq";
 import { writeFile, mkdir, readFile } from "fs/promises";
 import { join } from "path";
 import { generateBook } from "@kdp/pdf-templates";
-import type { BookOptions, PuzzleEntry, PuzzlesPerPage } from "@kdp/pdf-templates";
+import type {
+  BookOptions,
+  PuzzleEntry,
+  PuzzlesPerPage,
+  BookFont,
+  PuzzleLabelFormat,
+  GridStyle,
+} from "@kdp/pdf-templates";
 import { generatePuzzle, seedToMetadata } from "@kdp/puzzle-core";
 import { toUnsignedBigInt } from "./puzzle-generation.worker";
 import { prisma, BookStatus, getPageDefinition } from "@kdp/shared";
@@ -21,6 +28,15 @@ const FRONT_MATTER_PAGE_TYPES: PageType[] = [
   "howToPlay",
   "introduction",
 ];
+
+interface StyleOptions {
+  font?:            BookFont;
+  pageNumbers?:     boolean;
+  labelFormat?:     PuzzleLabelFormat;
+  gridStyle?:       GridStyle;
+  difficultyBadge?: boolean;
+  clueBackground?:  boolean;
+}
 
 /**
  * Read any image files referenced in frontMatter values from local disk.
@@ -68,9 +84,9 @@ async function processPdfGenerationJob(
 
   // 2. Load confirmed puzzle seeds — order by difficulty category then id so
   //    progressive books appear easy → medium → hard → expert.
-  const rows = await prisma.$queryRawUnsafe<Array<{ seed: string | bigint }>>(
+  const rows = await prisma.$queryRawUnsafe<Array<{ seed: string | bigint; difficulty: string }>>(
     `
-    SELECT seed
+    SELECT seed, difficulty
     FROM puzzle_registry
     WHERE book_id = $1
       AND status  = 'confirmed'
@@ -98,7 +114,7 @@ async function processPdfGenerationJob(
     const seed = toUnsignedBigInt(BigInt(String(row.seed)));
     const { difficulty } = seedToMetadata(seed);
     const { puzzle, solution } = generatePuzzle(seed, difficulty);
-    return { number: idx + 1, puzzle, solution };
+    return { number: idx + 1, puzzle, solution, difficulty };
   });
 
   // 4. Build BookOptions
@@ -107,16 +123,29 @@ async function processPdfGenerationJob(
     ? (book.layout as PuzzlesPerPage)
     : 1;
 
-  const options: BookOptions = {
-    title:        book.title ?? "Sudoku Puzzle Book",
-    difficulty:   book.difficulty,
-    trimSize:     book.trimSize as BookOptions["trimSize"],
-    puzzles:      puzzleEntries,
-    puzzlesPerPage,
-  };
-
   // 5. Load any uploaded images from disk
-  const fm = book.frontMatter as FrontMatterConfig | null;
+  // styleOptions is embedded in frontMatter under "_style" to avoid a separate DB column.
+  type StoredFrontMatter = FrontMatterConfig & { _style?: StyleOptions };
+  const storedFm = book.frontMatter as StoredFrontMatter | null;
+  const styleOptions: StyleOptions = storedFm?._style ?? {};
+  // Strip _style before passing frontMatter to the PDF renderer
+  const fm: FrontMatterConfig | null = storedFm
+    ? (({ _style: _removed, ...rest }) => rest)(storedFm) as FrontMatterConfig
+    : null;
+
+  const options: BookOptions = {
+    title:           book.title ?? "Sudoku Puzzle Book",
+    difficulty:      book.difficulty,
+    trimSize:        book.trimSize as BookOptions["trimSize"],
+    puzzles:         puzzleEntries,
+    puzzlesPerPage,
+    font:            styleOptions.font            ?? "roboto",
+    pageNumbers:     styleOptions.pageNumbers     ?? true,
+    labelFormat:     styleOptions.labelFormat     ?? "puzzle-n",
+    gridStyle:       styleOptions.gridStyle       ?? "standard",
+    difficultyBadge: styleOptions.difficultyBadge ?? false,
+    clueBackground:  styleOptions.clueBackground  ?? false,
+  };
   await job.updateProgress(20);
   const imageBytes = fm ? await loadFrontMatterImages(fm) : {};
 

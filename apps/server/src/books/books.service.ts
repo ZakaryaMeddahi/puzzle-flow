@@ -39,16 +39,22 @@ export class BooksService {
     const reserved = await this.reservePuzzles(userId, dto);
 
     // Persist draft book
+    // Embed styleOptions inside the frontMatter JSON blob so no extra column is needed.
+    const frontMatterPayload = {
+      ...dto.frontMatter,
+      _style: dto.styleOptions ?? {},
+    };
+
     const book = await this.prisma.db.book.create({
       data: {
         userId,
-        title: dto.title,
-        trimSize: dto.trimSize,
-        difficulty: dto.difficulty,
-        pageCount: dto.pageCount,
-        layout: dto.layout,
-        frontMatter: JSON.parse(JSON.stringify(dto.frontMatter)),
-        status: BookStatus.DRAFT,
+        title:       dto.title,
+        trimSize:    dto.trimSize,
+        difficulty:  dto.difficulty,
+        pageCount:   dto.pageCount,
+        layout:      dto.layout,
+        frontMatter: JSON.parse(JSON.stringify(frontMatterPayload)),
+        status:      BookStatus.DRAFT,
       },
     });
 
