@@ -2,7 +2,11 @@ import type { PDFPage, PDFFont } from "pdf-lib";
 import { rgb } from "pdf-lib";
 import type { KdpTrimSize } from "../types";
 import { usableArea, type PageSide } from "../layout";
-import { DEFAULT_HOW_TO_PLAY_TEXT } from "../page-plan";
+const DEFAULT_HOW_TO_PLAY_TEXT =
+  "Fill in the 9×9 grid so that every row, every column, and every " +
+  "3×3 box contains the digits 1 through 9. Each digit may appear " +
+  "only once in each row, column, and box. No mathematics required — " +
+  "only logic and patience.";
 
 const BLACK = rgb(0, 0, 0);
 const GREY  = rgb(0.35, 0.35, 0.35);

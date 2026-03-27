@@ -2,6 +2,7 @@ import {
   IsBoolean,
   IsEnum,
   IsInt,
+  IsObject,
   IsOptional,
   IsString,
   Max,
@@ -12,23 +13,32 @@ import {
 import { Type } from 'class-transformer';
 import { Difficulty, TrimSize, UniquenessLevel } from '@kdp/shared';
 
-export class FrontMatterDto {
+export class FrontMatterPageDto {
   @IsBoolean()
-  titlePage!: boolean;
+  enabled!: boolean;
 
-  @IsBoolean()
-  copyrightPage!: boolean;
-
-  @IsBoolean()
-  howToPlay!: boolean;
-
-  @IsBoolean()
-  introduction!: boolean;
-
+  /** User-supplied element values: elementId → text content or upload key. */
   @IsOptional()
-  @IsString()
-  @MaxLength(3000)
-  introText?: string;
+  @IsObject()
+  values?: Record<string, string>;
+}
+
+export class FrontMatterDto {
+  @ValidateNested()
+  @Type(() => FrontMatterPageDto)
+  titlePage!: FrontMatterPageDto;
+
+  @ValidateNested()
+  @Type(() => FrontMatterPageDto)
+  copyrightPage!: FrontMatterPageDto;
+
+  @ValidateNested()
+  @Type(() => FrontMatterPageDto)
+  howToPlay!: FrontMatterPageDto;
+
+  @ValidateNested()
+  @Type(() => FrontMatterPageDto)
+  introduction!: FrontMatterPageDto;
 
   @IsBoolean()
   answerPages!: boolean;
