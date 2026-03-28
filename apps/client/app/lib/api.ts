@@ -49,6 +49,42 @@ export async function apiFetch<T>(
   return res.json() as Promise<T>;
 }
 
+/**
+ * Authenticated fetch that returns a raw Blob (e.g. for binary PDF responses).
+ * Handles 401 + token refresh the same way as apiFetch.
+ */
+export async function apiFetchBlob(
+  path: string,
+  options: FetchOptions = {},
+): Promise<Blob> {
+  const { skipAuth, ...fetchOptions } = options;
+  const headers = new Headers(fetchOptions.headers);
+
+  if (!skipAuth) {
+    const token = getAccessToken();
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  if (fetchOptions.body && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  let res = await fetch(`${API_URL}${path}`, { ...fetchOptions, headers });
+
+  if (res.status === 401 && !skipAuth) {
+    const refreshed = await tryRefresh();
+    if (refreshed) {
+      headers.set("Authorization", `Bearer ${getAccessToken()}`);
+      res = await fetch(`${API_URL}${path}`, { ...fetchOptions, headers });
+    } else {
+      throw new Error("Session expired");
+    }
+  }
+
+  if (!res.ok) throw new Error(`API error ${res.status}`);
+  return res.blob();
+}
+
 async function tryRefresh(): Promise<boolean> {
   const refreshToken = getRefreshToken();
   if (!refreshToken) return false;

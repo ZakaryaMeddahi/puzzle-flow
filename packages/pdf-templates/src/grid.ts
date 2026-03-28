@@ -27,6 +27,9 @@ export function drawGrid(
   fontSize: number,
   gridStyle: "standard" | "minimal" = "standard",
   clueBackground = false,
+  /** When provided, used instead of `grid` to decide which cells get a background.
+   *  Pass the original puzzle string when drawing a solution grid. */
+  clueMask?: string,
 ): void {
   const cell = size / 9;
 
@@ -37,8 +40,9 @@ export function drawGrid(
   // ── clue cell backgrounds (drawn first so grid lines appear on top) ─────────
   if (clueBackground) {
     const bgColor = rgb(0.88, 0.88, 0.88);
+    const mask = clueMask ?? grid;
     for (let i = 0; i < 81; i++) {
-      const ch = grid[i]!;
+      const ch = mask[i]!;
       if (ch === "0" || ch === ".") continue;
       const col = i % 9;
       const row = (i / 9) | 0;

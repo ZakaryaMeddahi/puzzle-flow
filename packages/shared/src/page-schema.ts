@@ -1,5 +1,9 @@
 import type {
-  ElementZone, TextSize, FontWeight, Alignment, VerticalAlignment,
+  ElementZone,
+  TextSize,
+  FontWeight,
+  Alignment,
+  VerticalAlignment,
 } from "./layout-constants";
 
 export type { ElementZone, TextSize, FontWeight, Alignment, VerticalAlignment };
@@ -40,7 +44,11 @@ export type PageElement = TextElement | ImageElement;
 
 // ── Page definition ───────────────────────────────────────────────────────────
 
-export type PageType = "titlePage" | "copyrightPage" | "howToPlay" | "introduction";
+export type PageType =
+  | "titlePage"
+  | "copyrightPage"
+  | "howToPlay"
+  | "introduction";
 
 export interface PageDefinition {
   pageType: PageType;
@@ -71,11 +79,11 @@ export interface FrontMatterPageConfig {
 }
 
 export interface FrontMatterConfig {
-  titlePage:     FrontMatterPageConfig;
+  titlePage: FrontMatterPageConfig;
   copyrightPage: FrontMatterPageConfig;
-  howToPlay:     FrontMatterPageConfig;
-  introduction:  FrontMatterPageConfig;
-  answerPages:   boolean;
+  howToPlay: FrontMatterPageConfig;
+  introduction: FrontMatterPageConfig;
+  answerPages: boolean;
 }
 
 // ── Default page definitions ──────────────────────────────────────────────────
@@ -87,7 +95,7 @@ export const TITLE_PAGE_DEFINITION: PageDefinition = {
     {
       type: "image",
       id: "logo",
-      label: "Logo (optional)",
+      label: "Logo",
       zone: "header",
       maxWidthFrac: 0.5,
       maxHeightFrac: 0.8,
@@ -142,8 +150,7 @@ export const COPYRIGHT_PAGE_DEFINITION: PageDefinition = {
       id: "copyright",
       label: "Copyright Text",
       zone: "lower",
-      defaultValue:
-        `Copyright © ${new Date().getFullYear()} by the Author\n\nAll rights reserved. No part of this publication may be reproduced, distributed, or transmitted in any form or by any means without prior written permission.\n\nPublished independently.`,
+      defaultValue: `Copyright © ${new Date().getFullYear()} by the Author\n\nAll rights reserved. No part of this publication may be reproduced, distributed, or transmitted in any form or by any means without prior written permission.\n\nPublished independently.`,
       size: "sm",
       weight: "regular",
       alignment: "left",
@@ -221,10 +228,10 @@ export const INTRODUCTION_DEFINITION: PageDefinition = {
 };
 
 export const PAGE_DEFINITIONS: Record<PageType, PageDefinition> = {
-  titlePage:     TITLE_PAGE_DEFINITION,
+  titlePage: TITLE_PAGE_DEFINITION,
   copyrightPage: COPYRIGHT_PAGE_DEFINITION,
-  howToPlay:     HOW_TO_PLAY_DEFINITION,
-  introduction:  INTRODUCTION_DEFINITION,
+  howToPlay: HOW_TO_PLAY_DEFINITION,
+  introduction: INTRODUCTION_DEFINITION,
 };
 
 /** Get the static definition (template) for a given page type. */

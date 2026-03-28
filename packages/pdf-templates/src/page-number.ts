@@ -25,8 +25,10 @@ export function drawPageNumber(
   const textW = font.widthOfTextAtSize(text, SIZE);
   const textH = font.heightAtSize(SIZE);
 
-  // Vertically center the number in the bottom margin (area.y → 0)
-  const y = area.y / 2 - textH / 2;
+  // Place the number just inside the bottom of the usable area so it stays
+  // within KDP's required minimum margin (≥ 0.25" from page edge).
+  // area.y = 36pt (0.5") — positioning at area.y puts the baseline at 36pt from edge.
+  const y = area.y;
 
   const x = side === "recto"
     ? area.x + area.width - textW  // right-aligned

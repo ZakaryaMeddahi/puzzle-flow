@@ -6,7 +6,11 @@ import { useRequireAuth } from "../../hooks/use-require-auth";
 import { apiFetch } from "../../lib/api";
 import { NavHeader } from "../../components/nav-header";
 import { Button } from "../../ui";
-import { getPageDefinition, resolveValues, PAGE_DEFINITIONS } from "@kdp/shared/browser";
+import {
+  getPageDefinition,
+  resolveValues,
+  PAGE_DEFINITIONS,
+} from "@kdp/shared/browser";
 import type {
   PageValues,
   PageType,
@@ -31,20 +35,20 @@ export interface BookSetupState {
 }
 
 export interface BookStyleState {
-  font:            BookFont;
-  pageNumbers:     boolean;
-  labelFormat:     PuzzleLabelFormat;
-  gridStyle:       GridStyle;
+  font: BookFont;
+  pageNumbers: boolean;
+  labelFormat: PuzzleLabelFormat;
+  gridStyle: GridStyle;
   difficultyBadge: boolean;
-  clueBackground:  boolean;
+  clueBackground: boolean;
 }
 
 export type FmEnabled = {
-  titlePage:     boolean;
+  titlePage: boolean;
   copyrightPage: boolean;
-  howToPlay:     boolean;
-  introduction:  boolean;
-  answerPages:   boolean;
+  howToPlay: boolean;
+  introduction: boolean;
+  answerPages: boolean;
 };
 
 // ── Step definitions ──────────────────────────────────────────────────────────
@@ -53,7 +57,10 @@ type FmPageKey = "titlePage" | "copyrightPage" | "howToPlay" | "introduction";
 type StepId = "setup" | FmPageKey | "review";
 
 const FM_PAGE_KEYS: FmPageKey[] = [
-  "titlePage", "copyrightPage", "howToPlay", "introduction",
+  "titlePage",
+  "copyrightPage",
+  "howToPlay",
+  "introduction",
 ];
 
 function computeSteps(fmEnabled: FmEnabled): StepId[] {
@@ -66,12 +73,12 @@ function computeSteps(fmEnabled: FmEnabled): StepId[] {
 }
 
 const STEP_LABELS: Record<StepId, string> = {
-  setup:         "Setup",
-  titlePage:     "Title Page",
+  setup: "Setup",
+  titlePage: "Title Page",
   copyrightPage: "Copyright",
-  howToPlay:     "How to Play",
-  introduction:  "Introduction",
-  review:        "Review",
+  howToPlay: "How to Play",
+  introduction: "Introduction",
+  review: "Review",
 };
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -85,29 +92,29 @@ export default function NewBookPage() {
   const { loading: authLoading } = useRequireAuth();
 
   const [setup, setSetup] = useState<BookSetupState>({
-    title:           "",
-    trimSize:        "8.5x11",
-    difficulty:      "progressive",
-    pageCount:       100,
-    layout:          2,
+    title: "",
+    trimSize: "8.5x11",
+    difficulty: "progressive",
+    pageCount: 100,
+    layout: 2,
     uniquenessLevel: "book",
   });
 
   const [bookStyle, setBookStyle] = useState<BookStyleState>({
-    font:            "roboto",
-    pageNumbers:     true,
-    labelFormat:     "puzzle-n",
-    gridStyle:       "standard",
-    difficultyBadge: false,
-    clueBackground:  false,
+    font: "roboto",
+    pageNumbers: true,
+    labelFormat: "puzzle-n",
+    gridStyle: "standard",
+    difficultyBadge: true,
+    clueBackground: true,
   });
 
   const [fmEnabled, setFmEnabled] = useState<FmEnabled>({
-    titlePage:     true,
+    titlePage: true,
     copyrightPage: true,
-    howToPlay:     true,
-    introduction:  false,
-    answerPages:   true,
+    howToPlay: true,
+    introduction: false,
+    answerPages: true,
   });
 
   const [fmValues, setFmValues] = useState<Record<string, PageValues>>(() => {
@@ -135,10 +142,12 @@ export default function NewBookPage() {
     return init;
   });
 
-  const [imageUrls, setImageUrls] = useState<Record<string, Record<string, string>>>({});
+  const [imageUrls, setImageUrls] = useState<
+    Record<string, Record<string, string>>
+  >({});
   const [currentStep, setCurrentStep] = useState<StepId>("setup");
-  const [submitting, setSubmitting]   = useState(false);
-  const [error, setError]             = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (authLoading) {
     return (
@@ -153,11 +162,17 @@ export default function NewBookPage() {
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
-  function handleSetupChange<K extends keyof BookSetupState>(key: K, value: BookSetupState[K]) {
+  function handleSetupChange<K extends keyof BookSetupState>(
+    key: K,
+    value: BookSetupState[K],
+  ) {
     setSetup((prev) => ({ ...prev, [key]: value }));
   }
 
-  function handleBookStyleChange<K extends keyof BookStyleState>(key: K, value: BookStyleState[K]) {
+  function handleBookStyleChange<K extends keyof BookStyleState>(
+    key: K,
+    value: BookStyleState[K],
+  ) {
     setBookStyle((prev) => ({ ...prev, [key]: value }));
   }
 
@@ -169,11 +184,19 @@ export default function NewBookPage() {
     setFmValues((prev) => ({ ...prev, [pageType]: values }));
   }
 
-  function handleFmStylesChange(pageType: string, styles: Record<string, { alignment: Alignment }>) {
+  function handleFmStylesChange(
+    pageType: string,
+    styles: Record<string, { alignment: Alignment }>,
+  ) {
     setFmStyles((prev) => ({ ...prev, [pageType]: styles }));
   }
 
-  function handleImageUploaded(pageType: string, elementId: string, key: string, blobUrl: string) {
+  function handleImageUploaded(
+    pageType: string,
+    elementId: string,
+    key: string,
+    blobUrl: string,
+  ) {
     setImageUrls((prev) => ({
       ...prev,
       [pageType]: { ...(prev[pageType] ?? {}), [elementId]: blobUrl },
@@ -184,7 +207,7 @@ export default function NewBookPage() {
     }));
   }
 
-  const steps   = computeSteps(fmEnabled);
+  const steps = computeSteps(fmEnabled);
   const stepIdx = steps.indexOf(currentStep);
 
   function goNext() {
@@ -205,32 +228,48 @@ export default function NewBookPage() {
     setSubmitting(true);
     setError(null);
     const payload = {
-      title:           setup.title.trim() || "Sudoku Puzzle Book",
-      trimSize:        setup.trimSize,
-      difficulty:      setup.difficulty,
-      pageCount:       setup.pageCount,
-      layout:          setup.layout,
+      title: setup.title.trim() || "Sudoku Puzzle Book",
+      trimSize: setup.trimSize,
+      difficulty: setup.difficulty,
+      pageCount: setup.pageCount,
+      layout: setup.layout,
       uniquenessLevel: setup.uniquenessLevel,
       styleOptions: {
-        font:            bookStyle.font,
-        pageNumbers:     bookStyle.pageNumbers,
-        labelFormat:     bookStyle.labelFormat,
-        gridStyle:       bookStyle.gridStyle,
+        font: bookStyle.font,
+        pageNumbers: bookStyle.pageNumbers,
+        labelFormat: bookStyle.labelFormat,
+        gridStyle: bookStyle.gridStyle,
         difficultyBadge: bookStyle.difficultyBadge,
-        clueBackground:  bookStyle.clueBackground,
+        clueBackground: bookStyle.clueBackground,
       },
       frontMatter: {
-        titlePage:     { enabled: fmEnabled.titlePage,     values: fmValues["titlePage"]     ?? {}, styles: fmStyles["titlePage"]     ?? {} },
-        copyrightPage: { enabled: fmEnabled.copyrightPage, values: fmValues["copyrightPage"] ?? {}, styles: fmStyles["copyrightPage"] ?? {} },
-        howToPlay:     { enabled: fmEnabled.howToPlay,     values: fmValues["howToPlay"]     ?? {}, styles: fmStyles["howToPlay"]     ?? {} },
-        introduction:  { enabled: fmEnabled.introduction,  values: fmValues["introduction"]  ?? {}, styles: fmStyles["introduction"]  ?? {} },
-        answerPages:   fmEnabled.answerPages,
+        titlePage: {
+          enabled: fmEnabled.titlePage,
+          values: fmValues["titlePage"] ?? {},
+          styles: fmStyles["titlePage"] ?? {},
+        },
+        copyrightPage: {
+          enabled: fmEnabled.copyrightPage,
+          values: fmValues["copyrightPage"] ?? {},
+          styles: fmStyles["copyrightPage"] ?? {},
+        },
+        howToPlay: {
+          enabled: fmEnabled.howToPlay,
+          values: fmValues["howToPlay"] ?? {},
+          styles: fmStyles["howToPlay"] ?? {},
+        },
+        introduction: {
+          enabled: fmEnabled.introduction,
+          values: fmValues["introduction"] ?? {},
+          styles: fmStyles["introduction"] ?? {},
+        },
+        answerPages: fmEnabled.answerPages,
       },
     };
     try {
       const { checkoutUrl } = await apiFetch<CreateBookResponse>("/books", {
         method: "POST",
-        body:   JSON.stringify(payload),
+        body: JSON.stringify(payload),
       });
       window.location.href = checkoutUrl;
     } catch (err) {
@@ -246,7 +285,6 @@ export default function NewBookPage() {
       <NavHeader />
 
       <main className="mx-auto max-w-4xl px-6 py-8">
-
         {/* Back link */}
         <Link
           href="/dashboard"
@@ -261,7 +299,8 @@ export default function NewBookPage() {
             Create a new book
           </h1>
           <p className="mt-1 text-sm text-zinc-500">
-            Configure your Sudoku puzzle book. You&apos;ll be taken to checkout after.
+            Configure your Sudoku puzzle book. You&apos;ll be taken to checkout
+            after.
           </p>
         </div>
 
@@ -269,7 +308,7 @@ export default function NewBookPage() {
         <nav aria-label="Steps" className="mb-6 overflow-x-auto pb-1">
           <ol className="flex min-w-max items-center">
             {steps.map((step, i) => {
-              const done   = i < stepIdx;
+              const done = i < stepIdx;
               const active = step === currentStep;
               return (
                 <li key={step} className="flex items-center">
@@ -280,8 +319,8 @@ export default function NewBookPage() {
                         done
                           ? "bg-indigo-600 text-white"
                           : active
-                          ? "border-2 border-indigo-600 text-indigo-600"
-                          : "border-2 border-zinc-300 text-zinc-400"
+                            ? "border-2 border-indigo-600 text-indigo-600"
+                            : "border-2 border-zinc-300 text-zinc-400"
                       }`}
                     >
                       {done ? "✓" : i + 1}
@@ -289,7 +328,11 @@ export default function NewBookPage() {
                     {/* Label */}
                     <span
                       className={`whitespace-nowrap text-xs font-medium transition-colors ${
-                        active ? "text-zinc-900" : done ? "text-indigo-600" : "text-zinc-400"
+                        active
+                          ? "text-zinc-900"
+                          : done
+                            ? "text-indigo-600"
+                            : "text-zinc-400"
                       }`}
                     >
                       {STEP_LABELS[step]}
@@ -333,7 +376,9 @@ export default function NewBookPage() {
               }
               trimSize={setup.trimSize}
               styles={fmStyles[currentStep] ?? {}}
-              onStylesChange={(styles) => handleFmStylesChange(currentStep, styles)}
+              onStylesChange={(styles) =>
+                handleFmStylesChange(currentStep, styles)
+              }
               font={bookStyle.font}
             />
           )}
@@ -367,7 +412,6 @@ export default function NewBookPage() {
             </Button>
           </div>
         )}
-
       </main>
     </div>
   );

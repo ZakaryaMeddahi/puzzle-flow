@@ -8,7 +8,7 @@ import type {
   Alignment,
   BookFont,
 } from "@kdp/shared/browser";
-import { PagePreview } from "../components/page-preview";
+import { PdfPagePreview } from "../components/pdf-page-preview";
 import { ImageUploader } from "../components/image-uploader";
 
 interface Props {
@@ -142,21 +142,20 @@ export function StepPageEditor({
         })}
       </div>
 
-      {/* ── Right: live preview ────────────────────────────────────────── */}
+      {/* ── Right: live PDF preview ───────────────────────────────────── */}
       <div className="flex flex-col gap-2">
         <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
           Preview
         </p>
-        <PagePreview
-          definition={definition}
+        <PdfPagePreview
+          pageType={definition.pageType}
           values={values}
-          imageUrls={imageUrls}
-          trimSize={trimSize as "6x9" | "8x10" | "8.5x11"}
           styles={styles}
           font={font}
+          trimSize={trimSize}
         />
         <p className="text-xs text-zinc-400">
-          Approximate — final output may differ slightly.
+          Exact PDF rendering — matches the final output.
         </p>
       </div>
     </div>

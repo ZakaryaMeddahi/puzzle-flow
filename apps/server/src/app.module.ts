@@ -11,6 +11,7 @@ import { BooksModule } from './books/books.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { QueuesModule } from './queues/queues.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { PreviewModule } from './preview/preview.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 @Module({
@@ -24,6 +25,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     WebhooksModule,
     QueuesModule,
     UploadsModule,
+    PreviewModule,
   ],
   controllers: [AppController],
   providers: [

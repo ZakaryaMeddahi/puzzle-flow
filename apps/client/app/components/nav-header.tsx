@@ -16,12 +16,13 @@ export function NavHeader() {
             alt=""
             width={80}
             height={80}
-            className="h-14 w-auto object-contain"
+            className="h-10 w-auto object-contain"
             priority
             suppressHydrationWarning
           />
           <span className="text-lg font-bold tracking-tight">
-            <span className="text-zinc-900">Puzzle</span><span className="text-indigo-600">Flow</span>
+            <span className="text-zinc-900">Puzzle</span>
+            <span className="text-indigo-600">Flow</span>
           </span>
         </div>
 

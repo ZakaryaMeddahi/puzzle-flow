@@ -5,8 +5,8 @@ import { PAGE_SIZE, usableArea, pageSide } from "../layout";
 import { drawGrid } from "../grid";
 import { drawPageNumber } from "../page-number";
 
-const BLACK = rgb(0, 0, 0);
-const GREY  = rgb(0.45, 0.45, 0.45);
+const HEADING = rgb(0.08, 0.08, 0.08);
+const SUBTLE  = rgb(0.55, 0.55, 0.55);
 
 /** Number of mini answer grids per row and column on an answer page. */
 const COLS = 2;
@@ -47,7 +47,8 @@ export function addAnswerPages(
   const rectoArea = usableArea(trimSize, "recto");
   const versoArea = usableArea(trimSize, "verso");
   const gridAreaWidth  = Math.min(rectoArea.width, versoArea.width);
-  const gridAreaHeight = rectoArea.height - sectionHeaderHeight;
+  const PAGE_NUM_H     = 20; // pt — reserved at the bottom for the page number
+  const gridAreaHeight = rectoArea.height - sectionHeaderHeight - PAGE_NUM_H;
 
   const padX = 16;
   const padY = 20;
@@ -70,13 +71,22 @@ export function addAnswerPages(
     // "Answer Key" heading on first page only
     if (pageIdx === 0) {
       const headerText = "Answer Key";
-      const hw = titleFont.widthOfTextAtSize(headerText, sectionHeaderSize);
+      const hw   = titleFont.widthOfTextAtSize(headerText, sectionHeaderSize);
+      const headY = area.y + area.height - titleFont.heightAtSize(sectionHeaderSize);
       page.drawText(headerText, {
         x:    area.x + area.width / 2 - hw / 2,
-        y:    area.y + area.height - titleFont.heightAtSize(sectionHeaderSize),
+        y:    headY,
         size: sectionHeaderSize,
         font: titleFont,
-        color: BLACK,
+        color: HEADING,
+      });
+      // Thin rule below heading
+      const ruleY = headY - 6;
+      page.drawLine({
+        start: { x: area.x,              y: ruleY },
+        end:   { x: area.x + area.width, y: ruleY },
+        thickness: 0.5,
+        color: SUBTLE,
       });
     }
 
@@ -91,7 +101,7 @@ export function addAnswerPages(
 
       const cellLeft   = area.x + col * (cellW + padX);
       const cellBottom =
-        area.y +
+        area.y + PAGE_NUM_H +
         gridAreaHeight -
         (row + 1) * (cellH + padY) +
         padY;
@@ -103,14 +113,14 @@ export function addAnswerPages(
         y:    cellBottom + gridSize + 3,
         size: labelSize,
         font: bodyFont,
-        color: GREY,
+        color: SUBTLE,
       });
 
       const gridLeft = cellLeft + (cellW - gridSize) / 2;
       drawGrid(
         page, bodyFont, entry.solution,
         gridLeft, cellBottom, gridSize, fontSize,
-        opts.gridStyle, false,
+        opts.gridStyle, opts.clueBackground, entry.puzzle,
       );
     });
 

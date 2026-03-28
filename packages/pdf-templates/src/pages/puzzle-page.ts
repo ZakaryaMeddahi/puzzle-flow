@@ -11,8 +11,8 @@ import { usableArea, type PageSide } from "../layout";
 import { drawGrid } from "../grid";
 import { drawPageNumber } from "../page-number";
 
-const BLACK = rgb(0, 0, 0);
-const GREY  = rgb(0.45, 0.45, 0.45);
+const HEADING = rgb(0.08, 0.08, 0.08);
+const SUBTLE  = rgb(0.55, 0.55, 0.55);
 
 /**
  * Draw a filled 5-pointed star centred at (cx, cy) in PDF coordinate space.
@@ -36,7 +36,7 @@ function drawFilledStar(page: PDFPage, cx: number, cy: number, size: number): vo
   }
   segs.push("Z");
 
-  page.drawSvgPath(segs.join(" "), { x: cx, y: cy, color: GREY });
+  page.drawSvgPath(segs.join(" "), { x: cx, y: cy, color: SUBTLE });
 }
 
 const LABEL_SIZE = 13;
@@ -62,7 +62,7 @@ function computeCells(
   area: ReturnType<typeof usableArea>,
   puzzlesPerPage: PuzzlesPerPage,
 ): CellArea[] {
-  const PAD = 14; // points between cells
+  const PAD = 20; // points between cells
 
   if (puzzlesPerPage === 1) {
     return [{ x: area.x, y: area.y, width: area.width, height: area.height }];
@@ -106,6 +106,7 @@ function renderPuzzleCell(
   puzzle: PuzzleEntry,
   cell: CellArea,
   compact: boolean,
+  puzzlesPerPage: PuzzlesPerPage,
   labelFormat: PuzzleLabelFormat,
   gridStyle: GridStyle,
   showBadge: boolean,
@@ -136,7 +137,7 @@ function renderPuzzleCell(
     y:    labelY,
     size: labelSize,
     font: titleFont,
-    color: BLACK,
+    color: HEADING,
   });
 
   // Draw difficulty stars (geometric, font-independent)
@@ -149,22 +150,15 @@ function renderPuzzleCell(
     }
   }
 
-  // Thin rule under label (only for single-puzzle layout)
-  if (!compact) {
-    const ruleY = labelY - 5;
-    page.drawLine({
-      start: { x: cell.x,              y: ruleY },
-      end:   { x: cell.x + cell.width, y: ruleY },
-      thickness: 0.5,
-      color: GREY,
-    });
-  }
 
-  // Grid — square, centred in remaining cell height
-  const gridAreaH = cell.height - labelH - labelPad - (compact ? 0 : 10);
-  const gridSize  = Math.min(cell.width, gridAreaH) * 0.92;
-  const gridX = cell.x + (cell.width  - gridSize) / 2;
-  const gridY = cell.y + (gridAreaH   - gridSize) / 2;
+  // Grid — square, horizontally centred, top-aligned below the label for
+  // single-puzzle (avoids a large gap when width constrains the grid size),
+  // vertically centred for compact multi-puzzle layouts.
+  const gridAreaH = cell.height - labelH - labelPad;
+  const gridFill  = puzzlesPerPage === 1 ? 0.96 : 0.92;
+  const gridSize  = Math.min(cell.width, gridAreaH) * gridFill;
+  const gridX = cell.x + (cell.width - gridSize) / 2;
+  const gridY = cell.y + gridAreaH - gridSize - 6; // small gap below the label
 
   const cellSize = gridSize / 9;
   const fontSize = Math.max(6, Math.floor(cellSize * (compact ? 0.45 : 0.52)));
@@ -179,6 +173,8 @@ export interface PuzzlePageOptions {
   clueBackground:  boolean;
   /** When provided a page number is drawn in the bottom margin. */
   pageNumber?: number;
+  /** Book title shown as a subtle section header at the top of each puzzle page. */
+  pageTitle?: string;
 }
 
 /**
@@ -187,6 +183,10 @@ export interface PuzzlePageOptions {
  * @param puzzles       1, 2, or 4 PuzzleEntry objects to place on this page.
  * @param puzzlesPerPage Total puzzles-per-page setting (determines layout).
  */
+const HEADER_TITLE_SIZE = 9;   // pt — subtle, not competing with puzzles
+const HEADER_RULE_GAP   = 22;  // pt — space between rule and first puzzle cell
+const HEADER_TOTAL_H    = HEADER_TITLE_SIZE + 4 + HEADER_RULE_GAP; // ~27pt
+
 export function drawPuzzlePage(
   page: PDFPage,
   titleFont: PDFFont,
@@ -197,7 +197,36 @@ export function drawPuzzlePage(
   puzzlesPerPage: PuzzlesPerPage,
   opts: PuzzlePageOptions,
 ): void {
-  const area    = usableArea(trimSize, side);
+  const fullArea = usableArea(trimSize, side);
+
+  // ── Page header ─────────────────────────────────────────────────────────────
+  if (opts.pageTitle) {
+    const titleW = bodyFont.widthOfTextAtSize(opts.pageTitle, HEADER_TITLE_SIZE);
+    const titleX = fullArea.x + (fullArea.width - titleW) / 2;
+    const titleY = fullArea.y + fullArea.height - bodyFont.heightAtSize(HEADER_TITLE_SIZE);
+    page.drawText(opts.pageTitle, {
+      x: titleX, y: titleY,
+      size: HEADER_TITLE_SIZE,
+      font: bodyFont,
+      color: SUBTLE,
+    });
+    // Thin rule below the title text
+    const ruleY = titleY - 4;
+    page.drawLine({
+      start: { x: fullArea.x,              y: ruleY },
+      end:   { x: fullArea.x + fullArea.width, y: ruleY },
+      thickness: 0.4,
+      color: SUBTLE,
+    });
+  }
+
+  // Shrink area available to puzzle cells so they don't overlap the header
+  const headerReserved = opts.pageTitle ? HEADER_TOTAL_H : 0;
+  const area = {
+    ...fullArea,
+    height: fullArea.height - headerReserved,
+  };
+
   const cells   = computeCells(area, puzzlesPerPage);
   const compact = puzzlesPerPage > 1;
 
@@ -205,7 +234,7 @@ export function drawPuzzlePage(
     if (cells[i]) {
       renderPuzzleCell(
         page, titleFont, bodyFont, puzzle, cells[i]!,
-        compact, opts.labelFormat, opts.gridStyle, opts.difficultyBadge, opts.clueBackground,
+        compact, puzzlesPerPage, opts.labelFormat, opts.gridStyle, opts.difficultyBadge, opts.clueBackground,
       );
     }
   });

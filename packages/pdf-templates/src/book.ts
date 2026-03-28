@@ -141,6 +141,7 @@ export async function generateBook(
           difficultyBadge,
           clueBackground,
           pageNumber: showPageNumbers ? puzzleDisplayPage : undefined,
+          pageTitle:  options.title || undefined,
         },
       );
     }
@@ -152,7 +153,7 @@ export async function generateBook(
       pageNumbers:     showPageNumbers,
       firstPageNumber: puzzleDisplayPage + 1,
       gridStyle,
-      clueBackground: false, // answer grids always show all digits — background not needed
+      clueBackground,
     });
   }
 
