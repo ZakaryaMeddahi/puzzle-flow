@@ -3,6 +3,7 @@
 import type { BookSetupState, BookStyleState, FmEnabled } from "../page";
 import type { PageValues } from "@kdp/shared/browser";
 import { PAGE_DEFINITIONS, FONT_LABELS, LABEL_FORMAT_EXAMPLES } from "@kdp/shared/browser";
+import { Button } from "../../../ui";
 
 interface Props {
   setup: BookSetupState;
@@ -119,21 +120,23 @@ export function StepReview({
       )}
 
       <div className="space-y-3">
-        <button
-          type="button"
+        <Button
+          variant="primary"
+          size="lg"
+          className="w-full justify-center"
+          loading={submitting}
           onClick={onSubmit}
-          disabled={submitting}
-          className="w-full rounded-lg bg-zinc-900 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? "Reserving puzzles…" : "Generate Book →"}
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          variant="secondary"
+          size="md"
+          className="w-full justify-center"
           onClick={onBack}
-          className="w-full rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400"
         >
           ← Back
-        </button>
+        </Button>
       </div>
     </div>
   );

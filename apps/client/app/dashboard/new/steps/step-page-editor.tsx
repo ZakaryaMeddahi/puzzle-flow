@@ -106,7 +106,7 @@ export function StepPageEditor({
                         onClick={() => setAlignment(el.id, align)}
                         className={`px-2.5 py-1 text-xs transition-colors ${
                           currentAlignment === align
-                            ? "bg-zinc-900 text-white"
+                            ? "bg-indigo-600 text-white"
                             : "bg-white text-zinc-400 hover:text-zinc-700"
                         }`}
                       >
@@ -122,7 +122,7 @@ export function StepPageEditor({
                     rows={5}
                     maxLength={textEl.maxLength}
                     placeholder={textEl.defaultValue || textEl.label}
-                    className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                    className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                   />
                 ) : (
                   <input
@@ -131,7 +131,7 @@ export function StepPageEditor({
                     onChange={(e) => setField(el.id, e.target.value)}
                     maxLength={textEl.maxLength}
                     placeholder={textEl.defaultValue || textEl.label}
-                    className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                    className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                   />
                 )}
               </div>

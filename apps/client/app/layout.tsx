@@ -9,8 +9,8 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "KDP Puzzle Platform",
-  description: "Generate unique Sudoku puzzle books for Kindle Direct Publishing",
+  title: "PuzzleFlow",
+  description: "Create and publish unique Sudoku puzzle books on KDP in minutes",
 };
 
 export default function RootLayout({
@@ -20,7 +20,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geist.variable} font-sans antialiased`} suppressHydrationWarning>
+      <body
+        className={`${geist.variable} font-sans antialiased`}
+        suppressHydrationWarning
+      >
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

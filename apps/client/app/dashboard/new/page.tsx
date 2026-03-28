@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRequireAuth } from "../../hooks/use-require-auth";
 import { apiFetch } from "../../lib/api";
 import { NavHeader } from "../../components/nav-header";
+import { Button } from "../../ui";
 import { getPageDefinition, resolveValues, PAGE_DEFINITIONS } from "@kdp/shared/browser";
 import type {
   PageValues,
@@ -83,7 +84,6 @@ interface CreateBookResponse {
 export default function NewBookPage() {
   const { loading: authLoading } = useRequireAuth();
 
-  // Book setup
   const [setup, setSetup] = useState<BookSetupState>({
     title:           "",
     trimSize:        "8.5x11",
@@ -93,7 +93,6 @@ export default function NewBookPage() {
     uniquenessLevel: "book",
   });
 
-  // Book style options
   const [bookStyle, setBookStyle] = useState<BookStyleState>({
     font:            "roboto",
     pageNumbers:     true,
@@ -103,7 +102,6 @@ export default function NewBookPage() {
     clueBackground:  false,
   });
 
-  // Front matter enabled flags
   const [fmEnabled, setFmEnabled] = useState<FmEnabled>({
     titlePage:     true,
     copyrightPage: true,
@@ -112,7 +110,6 @@ export default function NewBookPage() {
     answerPages:   true,
   });
 
-  // Per-page text values — initialised with schema defaults
   const [fmValues, setFmValues] = useState<Record<string, PageValues>>(() => {
     const init: Record<string, PageValues> = {};
     for (const key of FM_PAGE_KEYS) {
@@ -122,7 +119,6 @@ export default function NewBookPage() {
     return init;
   });
 
-  // Per-page per-element style overrides — initialised from schema defaults
   const [fmStyles, setFmStyles] = useState<
     Record<string, Record<string, { alignment: Alignment }>>
   >(() => {
@@ -139,38 +135,29 @@ export default function NewBookPage() {
     return init;
   });
 
-  // Blob URLs for image preview (client-side only)
   const [imageUrls, setImageUrls] = useState<Record<string, Record<string, string>>>({});
-
-  // Wizard navigation
   const [currentStep, setCurrentStep] = useState<StepId>("setup");
   const [submitting, setSubmitting]   = useState(false);
   const [error, setError]             = useState<string | null>(null);
 
   if (authLoading) {
     return (
-      <>
+      <div className="min-h-screen bg-zinc-100">
         <NavHeader />
         <div className="flex min-h-[60vh] items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-zinc-900" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-indigo-600" />
         </div>
-      </>
+      </div>
     );
   }
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
+  // ── Handlers ──────────────────────────────────────────────────────────────
 
-  function handleSetupChange<K extends keyof BookSetupState>(
-    key: K,
-    value: BookSetupState[K],
-  ) {
+  function handleSetupChange<K extends keyof BookSetupState>(key: K, value: BookSetupState[K]) {
     setSetup((prev) => ({ ...prev, [key]: value }));
   }
 
-  function handleBookStyleChange<K extends keyof BookStyleState>(
-    key: K,
-    value: BookStyleState[K],
-  ) {
+  function handleBookStyleChange<K extends keyof BookStyleState>(key: K, value: BookStyleState[K]) {
     setBookStyle((prev) => ({ ...prev, [key]: value }));
   }
 
@@ -182,19 +169,11 @@ export default function NewBookPage() {
     setFmValues((prev) => ({ ...prev, [pageType]: values }));
   }
 
-  function handleFmStylesChange(
-    pageType: string,
-    styles: Record<string, { alignment: Alignment }>,
-  ) {
+  function handleFmStylesChange(pageType: string, styles: Record<string, { alignment: Alignment }>) {
     setFmStyles((prev) => ({ ...prev, [pageType]: styles }));
   }
 
-  function handleImageUploaded(
-    pageType: string,
-    elementId: string,
-    key: string,
-    blobUrl: string,
-  ) {
+  function handleImageUploaded(pageType: string, elementId: string, key: string, blobUrl: string) {
     setImageUrls((prev) => ({
       ...prev,
       [pageType]: { ...(prev[pageType] ?? {}), [elementId]: blobUrl },
@@ -205,7 +184,6 @@ export default function NewBookPage() {
     }));
   }
 
-  // Navigation
   const steps   = computeSteps(fmEnabled);
   const stepIdx = steps.indexOf(currentStep);
 
@@ -226,7 +204,6 @@ export default function NewBookPage() {
   async function handleSubmit() {
     setSubmitting(true);
     setError(null);
-
     const payload = {
       title:           setup.title.trim() || "Sudoku Puzzle Book",
       trimSize:        setup.trimSize,
@@ -250,7 +227,6 @@ export default function NewBookPage() {
         answerPages:   fmEnabled.answerPages,
       },
     };
-
     try {
       const { checkoutUrl } = await apiFetch<CreateBookResponse>("/books", {
         method: "POST",
@@ -263,52 +239,78 @@ export default function NewBookPage() {
     }
   }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
-
   const isFmStep = FM_PAGE_KEYS.includes(currentStep as FmPageKey);
 
   return (
-    <>
+    <div className="min-h-screen bg-zinc-100">
       <NavHeader />
-      <main className="mx-auto max-w-4xl px-6 py-10">
+
+      <main className="mx-auto max-w-4xl px-6 py-8">
+
+        {/* Back link */}
         <Link
           href="/dashboard"
-          className="mb-6 inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-900"
+          className="mb-6 inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-900"
         >
           ← Back to dashboard
         </Link>
 
-        <h1 className="mb-1 text-2xl font-bold tracking-tight text-zinc-900">
-          Create a new book
-        </h1>
-        <p className="mb-8 text-sm text-zinc-500">
-          Configure your Sudoku puzzle book. You&apos;ll be taken to checkout after.
-        </p>
+        {/* Page header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+            Create a new book
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500">
+            Configure your Sudoku puzzle book. You&apos;ll be taken to checkout after.
+          </p>
+        </div>
 
-        {/* Progress bar */}
-        <nav aria-label="Steps" className="mb-8 flex items-center gap-1 overflow-x-auto pb-1">
-          {steps.map((step, i) => (
-            <div key={step} className="flex items-center gap-1">
-              <div
-                className={`flex h-7 min-w-max items-center rounded-full px-3 text-xs font-medium transition-colors ${
-                  step === currentStep
-                    ? "bg-zinc-900 text-white"
-                    : i < stepIdx
-                    ? "bg-zinc-200 text-zinc-600"
-                    : "bg-zinc-100 text-zinc-400"
-                }`}
-              >
-                {i < stepIdx && "✓ "}{STEP_LABELS[step]}
-              </div>
-              {i < steps.length - 1 && (
-                <div className="h-px w-4 shrink-0 bg-zinc-200" />
-              )}
-            </div>
-          ))}
+        {/* Step progress */}
+        <nav aria-label="Steps" className="mb-6 overflow-x-auto pb-1">
+          <ol className="flex min-w-max items-center">
+            {steps.map((step, i) => {
+              const done   = i < stepIdx;
+              const active = step === currentStep;
+              return (
+                <li key={step} className="flex items-center">
+                  <div className="flex items-center gap-2">
+                    {/* Circle */}
+                    <div
+                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all ${
+                        done
+                          ? "bg-indigo-600 text-white"
+                          : active
+                          ? "border-2 border-indigo-600 text-indigo-600"
+                          : "border-2 border-zinc-300 text-zinc-400"
+                      }`}
+                    >
+                      {done ? "✓" : i + 1}
+                    </div>
+                    {/* Label */}
+                    <span
+                      className={`whitespace-nowrap text-xs font-medium transition-colors ${
+                        active ? "text-zinc-900" : done ? "text-indigo-600" : "text-zinc-400"
+                      }`}
+                    >
+                      {STEP_LABELS[step]}
+                    </span>
+                  </div>
+                  {/* Connector line */}
+                  {i < steps.length - 1 && (
+                    <div
+                      className={`mx-3 h-px w-8 shrink-0 transition-colors ${
+                        done ? "bg-indigo-300" : "bg-zinc-200"
+                      }`}
+                    />
+                  )}
+                </li>
+              );
+            })}
+          </ol>
         </nav>
 
-        {/* Step content */}
-        <div className="mb-10">
+        {/* Step content card */}
+        <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
           {currentStep === "setup" && (
             <StepBookSetup
               state={setup}
@@ -350,27 +352,23 @@ export default function NewBookPage() {
           )}
         </div>
 
-        {/* Navigation — shown on all steps except review (which has its own buttons) */}
+        {/* Navigation */}
         {currentStep !== "review" && (
-          <div className="flex justify-between">
-            <button
-              type="button"
+          <div className="mt-6 flex items-center justify-between">
+            <Button
+              variant="secondary"
               onClick={goBack}
               disabled={stepIdx === 0}
-              className="rounded-lg border border-zinc-300 px-5 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 disabled:cursor-not-allowed disabled:opacity-40"
             >
               ← Back
-            </button>
-            <button
-              type="button"
-              onClick={goNext}
-              className="rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700"
-            >
+            </Button>
+            <Button variant="primary" onClick={goNext}>
               {stepIdx === steps.length - 2 ? "Review →" : "Next →"}
-            </button>
+            </Button>
           </div>
         )}
+
       </main>
-    </>
+    </div>
   );
 }

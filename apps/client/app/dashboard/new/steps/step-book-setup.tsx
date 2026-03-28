@@ -99,7 +99,7 @@ export function StepBookSetup({
               onChange={(e) => onChange("title", e.target.value)}
               placeholder="My Sudoku Puzzle Book"
               maxLength={120}
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+              className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
             />
           </div>
 
@@ -111,7 +111,7 @@ export function StepBookSetup({
                   key={ts.value}
                   className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-colors ${
                     state.trimSize === ts.value
-                      ? "border-zinc-900 bg-zinc-50"
+                      ? "border-indigo-600 bg-indigo-50"
                       : "border-zinc-200 hover:border-zinc-300"
                   }`}
                 >
@@ -121,7 +121,7 @@ export function StepBookSetup({
                     value={ts.value}
                     checked={state.trimSize === ts.value}
                     onChange={() => onChange("trimSize", ts.value)}
-                    className="accent-zinc-900"
+                    className="accent-indigo-600"
                   />
                   <div>
                     <span className="text-sm font-medium text-zinc-900">{ts.label}</span>
@@ -153,7 +153,7 @@ export function StepBookSetup({
                   key={d.value}
                   className={`flex cursor-pointer flex-col gap-0.5 rounded-lg border px-4 py-3 transition-colors ${
                     state.difficulty === d.value
-                      ? "border-zinc-900 bg-zinc-50"
+                      ? "border-indigo-600 bg-indigo-50"
                       : "border-zinc-200 hover:border-zinc-300"
                   }`}
                 >
@@ -189,7 +189,7 @@ export function StepBookSetup({
               min={10} max={300} step={5}
               value={state.pageCount}
               onChange={(e) => onChange("pageCount", Number(e.target.value))}
-              className="w-full accent-zinc-900"
+              className="w-full accent-indigo-600"
             />
             <div className="mt-1 flex justify-between text-xs text-zinc-400">
               <span>10</span>
@@ -213,7 +213,7 @@ export function StepBookSetup({
                 key={l.value}
                 className={`flex cursor-pointer flex-col items-center gap-1 rounded-lg border px-4 py-4 text-center transition-colors ${
                   state.layout === l.value
-                    ? "border-zinc-900 bg-zinc-50"
+                    ? "border-indigo-600 bg-indigo-50"
                     : "border-zinc-200 hover:border-zinc-300"
                 }`}
               >
@@ -254,7 +254,7 @@ export function StepBookSetup({
                   key={f}
                   className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-colors ${
                     bookStyle.font === f
-                      ? "border-zinc-900 bg-zinc-50"
+                      ? "border-indigo-600 bg-indigo-50"
                       : "border-zinc-200 hover:border-zinc-300"
                   }`}
                 >
@@ -264,7 +264,7 @@ export function StepBookSetup({
                     value={f}
                     checked={bookStyle.font === f}
                     onChange={() => onBookStyleChange("font", f as BookFont)}
-                    className="accent-zinc-900"
+                    className="accent-indigo-600"
                   />
                   <div className="flex flex-1 items-baseline justify-between gap-3">
                     <div>
@@ -297,7 +297,7 @@ export function StepBookSetup({
                   key={gs.value}
                   className={`flex cursor-pointer flex-col gap-0.5 rounded-lg border px-4 py-3 transition-colors ${
                     bookStyle.gridStyle === gs.value
-                      ? "border-zinc-900 bg-zinc-50"
+                      ? "border-indigo-600 bg-indigo-50"
                       : "border-zinc-200 hover:border-zinc-300"
                   }`}
                 >
@@ -325,7 +325,7 @@ export function StepBookSetup({
                   key={lf.value}
                   className={`flex cursor-pointer items-center justify-center rounded-lg border px-3 py-2.5 text-sm transition-colors ${
                     bookStyle.labelFormat === lf.value
-                      ? "border-zinc-900 bg-zinc-50 font-medium text-zinc-900"
+                      ? "border-indigo-600 bg-indigo-50 font-medium text-zinc-900"
                       : "border-zinc-200 text-zinc-500 hover:border-zinc-300"
                   }`}
                 >
@@ -350,7 +350,7 @@ export function StepBookSetup({
                 type="checkbox"
                 checked={bookStyle.pageNumbers}
                 onChange={(e) => onBookStyleChange("pageNumbers", e.target.checked)}
-                className="h-4 w-4 rounded border-zinc-300 accent-zinc-900"
+                className="h-4 w-4 rounded border-zinc-300 accent-indigo-600"
               />
               <div>
                 <span className="text-sm text-zinc-700">Page numbers</span>
@@ -362,7 +362,7 @@ export function StepBookSetup({
                 type="checkbox"
                 checked={bookStyle.difficultyBadge}
                 onChange={(e) => onBookStyleChange("difficultyBadge", e.target.checked)}
-                className="h-4 w-4 rounded border-zinc-300 accent-zinc-900"
+                className="h-4 w-4 rounded border-zinc-300 accent-indigo-600"
               />
               <div>
                 <span className="text-sm text-zinc-700">Difficulty stars</span>
@@ -376,7 +376,7 @@ export function StepBookSetup({
                 type="checkbox"
                 checked={bookStyle.clueBackground}
                 onChange={(e) => onBookStyleChange("clueBackground", e.target.checked)}
-                className="h-4 w-4 rounded border-zinc-300 accent-zinc-900"
+                className="h-4 w-4 rounded border-zinc-300 accent-indigo-600"
               />
               <div>
                 <span className="text-sm text-zinc-700">Clue cell shading</span>
@@ -405,7 +405,7 @@ export function StepBookSetup({
                   key={u.value}
                   className={`flex cursor-pointer items-start gap-3 rounded-lg border px-4 py-3 transition-colors ${
                     state.uniquenessLevel === u.value
-                      ? "border-zinc-900 bg-zinc-50"
+                      ? "border-indigo-600 bg-indigo-50"
                       : "border-zinc-200 hover:border-zinc-300"
                   }`}
                 >
@@ -415,7 +415,7 @@ export function StepBookSetup({
                     value={u.value}
                     checked={state.uniquenessLevel === u.value}
                     onChange={() => onChange("uniquenessLevel", u.value)}
-                    className="mt-0.5 accent-zinc-900"
+                    className="mt-0.5 accent-indigo-600"
                   />
                   <div>
                     <p className="text-sm font-medium text-zinc-900">{u.label}</p>
@@ -435,7 +435,7 @@ export function StepBookSetup({
                     type="checkbox"
                     checked={fmEnabled[item.key]}
                     onChange={(e) => onFmEnabledChange(item.key, e.target.checked)}
-                    className="h-4 w-4 rounded border-zinc-300 accent-zinc-900"
+                    className="h-4 w-4 rounded border-zinc-300 accent-indigo-600"
                   />
                   <span className="text-sm text-zinc-700">{item.label}</span>
                 </label>
