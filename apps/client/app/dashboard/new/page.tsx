@@ -284,7 +284,7 @@ export default function NewBookPage() {
     <div className="min-h-screen bg-zinc-100">
       <NavHeader />
 
-      <main className="mx-auto max-w-4xl px-6 py-8">
+      <main className="mx-auto max-w-6xl px-6 py-8">
         {/* Back link */}
         <Link
           href="/dashboard"
@@ -353,7 +353,10 @@ export default function NewBookPage() {
         </nav>
 
         {/* Step content card */}
-        <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
+        <div
+          className={`rounded-2xl border border-zinc-200 shadow-sm ${isFmStep ? "" : "bg-white p-8"}`}
+          style={isFmStep ? { overflow: "clip" } : undefined}
+        >
           {currentStep === "setup" && (
             <StepBookSetup
               state={setup}
