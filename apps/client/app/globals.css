@@ -17,6 +17,13 @@ body {
   color: #171717;
 }
 
+/* ── Book generation progress bar ───────────────────────────────────────── */
+@keyframes progress {
+  0%   { width: 15%; }
+  50%  { width: 75%; }
+  100% { width: 15%; }
+}
+
 /* ── Hero page stack animations ─────────────────────────────────────────── */
 @keyframes page-enter {
   from { opacity: 0; transform: translateY(36px); }

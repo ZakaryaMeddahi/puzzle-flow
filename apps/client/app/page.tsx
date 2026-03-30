@@ -111,6 +111,7 @@ export default function LandingPage() {
             <a href="#how-it-works" className="text-sm text-zinc-500 transition-colors hover:text-zinc-900">How it works</a>
             <a href="#features" className="text-sm text-zinc-500 transition-colors hover:text-zinc-900">Features</a>
             <a href="#sample" className="text-sm text-zinc-500 transition-colors hover:text-zinc-900">Sample output</a>
+            <Link href="/pricing" className="text-sm text-zinc-500 transition-colors hover:text-zinc-900">Pricing</Link>
           </nav>
           <div className="flex items-center gap-3">
             <Link href="/login" className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900">

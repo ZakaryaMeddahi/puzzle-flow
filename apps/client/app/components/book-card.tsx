@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { apiFetch, API_URL } from "../lib/api";
 import { getAccessToken } from "../lib/auth";
 import { DifficultyBadge, Button } from "../ui";
@@ -142,9 +143,9 @@ export function BookCard({
       <div className="flex flex-1 flex-col p-5">
 
         {/* Title */}
-        <h3 className="mb-1 truncate text-base font-semibold text-zinc-900">
+        <Link href={`/dashboard/books/${book.id}`} className="mb-1 block truncate text-base font-semibold text-zinc-900 hover:text-indigo-600 transition-colors">
           {title}
-        </h3>
+        </Link>
 
         {/* Metadata */}
         <p className="mb-4 text-xs text-zinc-400">
