@@ -284,73 +284,64 @@ export default function NewBookPage() {
     <div className="min-h-screen bg-zinc-100">
       <NavHeader />
 
-      <main className="mx-auto max-w-6xl px-6 py-8">
-        {/* Back link */}
-        <Link
-          href="/dashboard"
-          className="mb-6 inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-900"
-        >
-          ← Back to dashboard
-        </Link>
-
-        {/* Page header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
-            Create a new book
-          </h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            Configure your Sudoku puzzle book. You&apos;ll be taken to checkout
-            after.
-          </p>
+      <main className="mx-auto max-w-6xl px-6 py-4">
+        {/* Compact header row: back link + title inline */}
+        <div className="mb-4 flex items-center gap-4">
+          <Link
+            href="/dashboard"
+            className="flex shrink-0 items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 shadow-sm transition-colors hover:border-zinc-300 hover:text-zinc-900"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 16 16" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 12L6 8l4-4" />
+            </svg>
+            Dashboard
+          </Link>
+          <div className="min-w-0">
+            <h1 className="text-lg font-bold tracking-tight text-zinc-900">
+              Create a new book
+            </h1>
+            <p className="text-xs text-zinc-500">
+              Configure your puzzle book — checkout happens at the end.
+            </p>
+          </div>
         </div>
 
-        {/* Step progress */}
-        <nav aria-label="Steps" className="mb-6 overflow-x-auto pb-1">
-          <ol className="flex min-w-max items-center">
+        {/* Step progress — slim pill bar */}
+        <div className="mb-4">
+          {/* Track */}
+          <div className="mb-2.5 flex items-center gap-1">
             {steps.map((step, i) => {
               const done = i < stepIdx;
               const active = step === currentStep;
               return (
-                <li key={step} className="flex items-center">
-                  <div className="flex items-center gap-2">
-                    {/* Circle */}
-                    <div
-                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all ${
-                        done
-                          ? "bg-indigo-600 text-white"
-                          : active
-                            ? "border-2 border-indigo-600 text-indigo-600"
-                            : "border-2 border-zinc-300 text-zinc-400"
-                      }`}
-                    >
-                      {done ? "✓" : i + 1}
-                    </div>
-                    {/* Label */}
-                    <span
-                      className={`whitespace-nowrap text-xs font-medium transition-colors ${
-                        active
-                          ? "text-zinc-900"
-                          : done
-                            ? "text-indigo-600"
-                            : "text-zinc-400"
-                      }`}
-                    >
-                      {STEP_LABELS[step]}
-                    </span>
-                  </div>
-                  {/* Connector line */}
-                  {i < steps.length - 1 && (
-                    <div
-                      className={`mx-3 h-px w-8 shrink-0 transition-colors ${
-                        done ? "bg-indigo-300" : "bg-zinc-200"
-                      }`}
-                    />
-                  )}
-                </li>
+                <div
+                  key={step}
+                  className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                    done
+                      ? "bg-indigo-500"
+                      : active
+                        ? "bg-indigo-300"
+                        : "bg-zinc-200"
+                  }`}
+                />
               );
             })}
-          </ol>
-        </nav>
+          </div>
+          {/* Step label row */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white">
+                {stepIdx + 1}
+              </span>
+              <span className="text-sm font-semibold text-zinc-900">
+                {STEP_LABELS[currentStep]}
+              </span>
+            </div>
+            <span className="text-xs text-zinc-400">
+              Step {stepIdx + 1} of {steps.length}
+            </span>
+          </div>
+        </div>
 
         {/* Step content card */}
         <div
@@ -402,7 +393,7 @@ export default function NewBookPage() {
 
         {/* Navigation */}
         {currentStep !== "review" && (
-          <div className="mt-6 flex items-center justify-between">
+          <div className="mt-4 flex items-center justify-between">
             <Button
               variant="secondary"
               onClick={goBack}
