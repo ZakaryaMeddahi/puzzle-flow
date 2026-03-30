@@ -8,6 +8,7 @@ import { BookStatus, Difficulty, UniquenessLevel } from '@kdp/shared';
 import type { Book, PuzzleReservation } from '@kdp/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { PuzzlesService } from '../puzzles/puzzles.service';
+import { QueuesService } from '../queues/queues.service';
 import type { CreateBookDto } from './dto/create-book.dto';
 
 interface CheckoutResponse {
@@ -26,6 +27,7 @@ export class BooksService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly puzzles: PuzzlesService,
+    private readonly queues: QueuesService,
     private readonly config: ConfigService,
   ) {}
 
@@ -66,7 +68,23 @@ export class BooksService {
       puzzleIds,
     );
 
-    const checkoutUrl = await this.createCheckout(book.id, userId);
+    const skipCheckout = this.config.get<string>('SKIP_CHECKOUT') === 'true';
+    let checkoutUrl: string;
+
+    if (skipCheckout) {
+      // Dev bypass: confirm puzzles and enqueue PDF generation immediately.
+      await this.puzzles.confirmPuzzles(book.id);
+      await this.prisma.db.book.update({
+        where: { id: book.id },
+        data: { status: BookStatus.PENDING },
+      });
+      await this.queues.enqueuePdfGeneration(book.id);
+      const clientUrl = this.config.get<string>('CLIENT_URL') ?? 'http://localhost:3000';
+      checkoutUrl = `${clientUrl}/dashboard?payment_success=1&book_id=${book.id}`;
+    } else {
+      checkoutUrl = await this.createCheckout(book.id, userId);
+    }
+
     return { book, checkoutUrl };
   }
 
