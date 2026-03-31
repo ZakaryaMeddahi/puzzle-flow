@@ -1,15 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { API_URL } from "../lib/api";
 import { Button, Input } from "../ui";
 
 export default function LoginPage() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [googleLoading, setGoogleLoading] = useState(false);
   const [magicLoading, setMagicLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [linkError, setLinkError] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("error") === "invalid_link") setLinkError(true);
+  }, [searchParams]);
 
   function handleGoogle() {
     setGoogleLoading(true);
@@ -77,6 +84,15 @@ export default function LoginPage() {
           <span className="text-xs font-medium text-zinc-400">or</span>
           <div className="h-px flex-1 bg-zinc-200" />
         </div>
+
+        {/* Invalid link error */}
+        {linkError && (
+          <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-center">
+            <p className="text-sm font-medium text-red-700">
+              This login link is invalid or has expired. Please request a new one.
+            </p>
+          </div>
+        )}
 
         {/* Magic link */}
         {sent ? (

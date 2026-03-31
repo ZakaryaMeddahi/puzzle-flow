@@ -129,7 +129,22 @@ function ReadyCard({ book, title }: { book: Book; title: string }) {
   );
 }
 
-function DraftCard() {
+function DraftCard({ bookId }: { bookId: string }) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleCompletePurchase() {
+    setLoading(true);
+    try {
+      const { checkoutUrl } = await apiFetch<{ checkoutUrl: string }>(
+        `/books/${bookId}/checkout`,
+        { method: "POST" },
+      );
+      window.location.href = checkoutUrl;
+    } catch {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-6">
       <div className="mb-4 flex items-center gap-3">
@@ -146,7 +161,7 @@ function DraftCard() {
       <p className="mb-4 text-sm leading-relaxed text-zinc-600">
         Your book configuration has been saved. Complete your purchase to start the generation process.
       </p>
-      <Button variant="primary" size="md" className="w-full justify-center">
+      <Button variant="primary" size="md" loading={loading} className="w-full justify-center" onClick={handleCompletePurchase}>
         Complete purchase
       </Button>
     </div>
@@ -342,7 +357,7 @@ export default function BookDetailPage() {
           <div className="space-y-4">
             {book.status === "pending" && <PendingCard />}
             {book.status === "ready"   && <ReadyCard book={book} title={title} />}
-            {book.status === "draft"   && <DraftCard />}
+            {book.status === "draft"   && <DraftCard bookId={book.id} />}
             {book.status === "expired" && <ExpiredCard />}
 
             {/* Danger zone */}

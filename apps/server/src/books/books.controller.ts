@@ -1,6 +1,9 @@
 import {
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Post,
   Param,
   Body,
@@ -43,6 +46,26 @@ export class BooksController {
   ): Promise<Record<string, unknown>> {
     const book = await this.books.findOneForUser(id, user.userId);
     return book as unknown as Record<string, unknown>;
+  }
+
+  /** POST /books/:id/checkout — (re)generate a LemonSqueezy checkout URL for a draft book. */
+  @Post(':id/checkout')
+  async checkout(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+  ): Promise<{ checkoutUrl: string }> {
+    const checkoutUrl = await this.books.getCheckoutUrl(id, user.userId);
+    return { checkoutUrl };
+  }
+
+  /** DELETE /books/:id — permanently delete a book and release its puzzle slots. */
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+  ): Promise<void> {
+    await this.books.deleteBook(id, user.userId);
   }
 
   /** GET /books/:id/download — stream the generated PDF. */

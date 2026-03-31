@@ -170,6 +170,43 @@ export class BooksService {
     return json.data.attributes.url;
   }
 
+  // ── Checkout recovery ─────────────────────────────────────────────────────
+
+  /** Return a (new) checkout URL for a draft book. */
+  async getCheckoutUrl(bookId: string, userId: string): Promise<string> {
+    const book = await this.findOneForUser(bookId, userId);
+
+    const skipCheckout = this.config.get<string>('SKIP_CHECKOUT') === 'true';
+    if (skipCheckout) {
+      await this.puzzles.confirmPuzzles(book.id);
+      await this.prisma.db.book.update({
+        where: { id: book.id },
+        data: { status: BookStatus.PENDING },
+      });
+      await this.queues.enqueuePdfGeneration(book.id);
+      const clientUrl = this.config.get<string>('CLIENT_URL') ?? 'http://localhost:3000';
+      return `${clientUrl}/dashboard?payment_success=1&book_id=${book.id}`;
+    }
+
+    return this.createCheckout(bookId, userId);
+  }
+
+  // ── Delete ─────────────────────────────────────────────────────────────────
+
+  async deleteBook(bookId: string, userId: string): Promise<void> {
+    await this.findOneForUser(bookId, userId); // ownership check
+
+    // Release any puzzle slots back to available.
+    await this.prisma.db.$executeRawUnsafe(
+      `UPDATE puzzle_registry
+          SET status = 'available', user_id = NULL, book_id = NULL, reserved_at = NULL
+        WHERE book_id = $1`,
+      bookId,
+    );
+
+    await this.prisma.db.book.delete({ where: { id: bookId } });
+  }
+
   // ── Query ──────────────────────────────────────────────────────────────────
 
   async findAllForUser(userId: string): Promise<Book[]> {
