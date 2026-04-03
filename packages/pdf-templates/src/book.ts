@@ -93,6 +93,7 @@ export async function generateBook(
   const gridStyle       = options.gridStyle       ?? "standard";
   const difficultyBadge = options.difficultyBadge ?? false;
   const clueBackground  = options.clueBackground  ?? false;
+  const watermark       = options.watermark       ?? false;
   const showPageNumbers = options.pageNumbers !== false; // default true
 
   // Track display page number — starts at 1 for the first puzzle page.
@@ -140,6 +141,7 @@ export async function generateBook(
           gridStyle,
           difficultyBadge,
           clueBackground,
+          watermark,
           pageNumber: showPageNumbers ? puzzleDisplayPage : undefined,
           pageTitle:  options.title || undefined,
         },

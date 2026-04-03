@@ -8,11 +8,24 @@ import { NavHeader } from "../components/nav-header";
 import { BookCard, type Book } from "../components/book-card";
 import { Button } from "../ui";
 
+interface UsageInfo {
+  plan: string;
+  booksThisMonth: number;
+  limit: number | null;
+  currentPeriodEnd: string | null;
+}
+
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return "";
+  return new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric" });
+}
+
 export default function DashboardPage() {
   const { user, loading: authLoading } = useRequireAuth();
   const [books, setBooks] = useState<Book[]>([]);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [usage, setUsage] = useState<UsageInfo | null>(null);
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadBooks = useCallback(async (isPolling = false) => {
@@ -32,7 +45,14 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (user) void loadBooks();
+    if (user) {
+      void loadBooks();
+      if (user.plan === "starter") {
+        apiFetch<UsageInfo>("/users/me/usage")
+          .then(setUsage)
+          .catch(() => {});
+      }
+    }
     return () => {
       if (pollRef.current) clearTimeout(pollRef.current);
     };
@@ -116,6 +136,52 @@ export default function DashboardPage() {
       <NavHeader />
       <main className="mx-auto max-w-6xl px-6 py-10">
 
+        {/* Starter usage banner */}
+        {usage && usage.limit !== null && (
+          <div
+            className={`mb-6 rounded-xl px-5 py-3.5 ${
+              usage.booksThisMonth >= usage.limit
+                ? "border border-red-200 bg-red-50"
+                : "border border-zinc-200 bg-white"
+            }`}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-zinc-900">
+                    {usage.booksThisMonth >= usage.limit
+                      ? "Monthly limit reached"
+                      : `${usage.booksThisMonth} of ${usage.limit} books used this month`}
+                  </p>
+                  {usage.currentPeriodEnd && (
+                    <p className="text-xs text-zinc-500">
+                      {usage.booksThisMonth >= usage.limit
+                        ? `Resets on ${formatDate(usage.currentPeriodEnd)} or upgrade to Pro for unlimited books.`
+                        : `Resets on ${formatDate(usage.currentPeriodEnd)}`}
+                    </p>
+                  )}
+                </div>
+              </div>
+              {usage.booksThisMonth >= usage.limit && (
+                <Link
+                  href="/dashboard/settings"
+                  className="shrink-0 rounded-lg bg-indigo-600 px-3.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-indigo-700"
+                >
+                  Upgrade to Pro →
+                </Link>
+              )}
+            </div>
+            {usage.limit !== null && usage.booksThisMonth < usage.limit && (
+              <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
+                <div
+                  className="h-full rounded-full bg-indigo-500 transition-all"
+                  style={{ width: `${(usage.booksThisMonth / usage.limit) * 100}%` }}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Page header */}
         <div className="mb-8 flex items-start justify-between gap-4">
           <div>
@@ -126,11 +192,17 @@ export default function DashboardPage() {
               Create and manage your puzzle books
             </p>
           </div>
-          <Link href="/dashboard/new">
-            <Button variant="primary" size="md">
+          {usage && usage.limit !== null && usage.booksThisMonth >= usage.limit ? (
+            <Button variant="primary" size="md" disabled>
               + Create New Book
             </Button>
-          </Link>
+          ) : (
+            <Link href="/dashboard/new">
+              <Button variant="primary" size="md">
+                + Create New Book
+              </Button>
+            </Link>
+          )}
         </div>
 
         {/* Empty state */}

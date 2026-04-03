@@ -7,7 +7,7 @@ const PLANS = [
   {
     id: "pay-per-book",
     name: "Pay per book",
-    price: "$4.99",
+    price: "$5.99",
     period: "per book",
     description:
       "Perfect for occasional publishers or trying before you subscribe.",
@@ -20,36 +20,36 @@ const PLANS = [
       { text: "All layouts (1, 2, 4/page)", included: true },
       { text: "Custom front matter", included: true },
       { text: "Book-level uniqueness", included: true },
-      { text: "7-day PDF access", included: true },
-      { text: "Priority support", included: false },
+      { text: "Permanent download", included: true },
+      { text: "Email support", included: false },
     ],
   },
   {
     id: "starter",
     name: "Starter",
-    price: "$9",
+    price: "$11.99",
     period: "per month",
-    description: "For publishers building a growing catalog of puzzle books.",
+    description: "For publishers building a growing catalog of puzzle books. Better value after just 2 books.",
     highlight: false,
     badge: null,
     cta: "Get started",
     features: [
-      { text: "5 books per month", included: true },
+      { text: "10 books per month", included: true },
       { text: "All trim sizes", included: true },
       { text: "All layouts (1, 2, 4/page)", included: true },
       { text: "Custom front matter", included: true },
       { text: "Book-level uniqueness", included: true },
-      { text: "30-day PDF access", included: true },
-      { text: "Priority support", included: false },
+      { text: "Permanent download", included: true },
+      { text: "Email support", included: true },
     ],
   },
   {
     id: "pro",
     name: "Pro",
-    price: "$29",
+    price: "$23.99",
     period: "per month",
     description:
-      "For serious KDP publishers who need scale and catalog-wide uniqueness.",
+      "For serious KDP publishers who need catalog-wide uniqueness and scale.",
     highlight: true,
     badge: "Best Value",
     cta: "Get started",
@@ -58,23 +58,24 @@ const PLANS = [
       { text: "All trim sizes", included: true },
       { text: "All layouts (1, 2, 4/page)", included: true },
       { text: "Custom front matter", included: true },
-      { text: "User-level uniqueness", included: true },
-      { text: "90-day PDF access", included: true },
+      { text: "Catalog-wide uniqueness", included: true },
+      { text: "Permanent download", included: true },
       { text: "Priority support", included: true },
     ],
   },
 ];
 
 const COMPARISON_ROWS: { label: string; values: [string, string, string] }[] = [
-  { label: "Books", values: ["1 book", "5 / month", "Unlimited"] },
-  { label: "Uniqueness", values: ["Book-level", "Book-level", "User-level"] },
-  { label: "PDF access", values: ["7 days", "30 days", "90 days"] },
+  { label: "Books", values: ["1 book", "10 / month", "Unlimited"] },
+  { label: "Uniqueness", values: ["Book-level", "Book-level", "Catalog-wide"] },
+  { label: "Download", values: ["Permanent", "Permanent", "Permanent"] },
   { label: "Trim sizes", values: ["All", "All", "All"] },
   {
     label: "Layouts",
     values: ["1, 2, 4/page", "1, 2, 4/page", "1, 2, 4/page"],
   },
   { label: "Custom front matter", values: ["✓", "✓", "✓"] },
+  { label: "Email support", values: ["—", "✓", "✓"] },
   { label: "Priority support", values: ["—", "—", "✓"] },
 ];
 
@@ -84,12 +85,12 @@ const FAQS = [
     a: "Yes. You can upgrade or downgrade at any time from your account settings. Changes take effect at the start of your next billing cycle.",
   },
   {
-    q: "What happens when my PDF expires?",
-    a: "The download link becomes inactive, but your book configuration is saved. You can re-generate a fresh PDF by creating a new book with the same settings — it takes under a minute.",
+    q: "What does uniqueness level mean?",
+    a: "Book-level guarantees no duplicate puzzles within a single book. Catalog-wide (Pro) goes further — no puzzle in your account will ever repeat across any of your books, ever.",
   },
   {
-    q: "What does uniqueness level mean?",
-    a: "Book-level guarantees no duplicate puzzles within a single book. User-level goes further — no puzzle in your Pro account will ever repeat across any of your books, ever.",
+    q: "Do my PDFs expire?",
+    a: "No. Every PDF you generate is yours to keep and download at any time. There are no expiry dates.",
   },
   {
     q: "Can I use the generated PDF directly on KDP?",
@@ -204,6 +205,33 @@ export default function PricingPage() {
             Start with a single book or subscribe for unlimited publishing. No
             hidden fees, no surprise charges.
           </p>
+        </div>
+      </section>
+
+      {/* ── Free trial banner ───────────────────────────────────────────── */}
+      <section className="bg-white pb-6 pt-0">
+        <div className="mx-auto max-w-3xl px-6">
+          <div className="flex items-center justify-between gap-6 rounded-2xl border border-indigo-100 bg-indigo-50 px-6 py-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-base">
+                🎁
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-zinc-900">
+                  Try PuzzleFlow free — no credit card required
+                </p>
+                <p className="text-xs text-zinc-500">
+                  Every new account gets one free 10-puzzle sample book, instantly. Watermarked. One-time offer.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/dashboard"
+              className="shrink-0 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
+            >
+              Try free →
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -380,7 +408,7 @@ export default function PricingPage() {
             href="/dashboard"
             className="inline-flex items-center gap-2.5 rounded-xl bg-white px-8 py-4 text-base font-bold text-indigo-700 shadow-lg transition-all hover:bg-indigo-50 hover:shadow-xl"
           >
-            Get started — it&apos;s free
+            Get started
             <svg
               className="h-4 w-4"
               fill="none"

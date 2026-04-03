@@ -79,12 +79,22 @@ export class StyleOptionsDto {
   @IsOptional()
   @IsBoolean()
   clueBackground?: boolean;
+
+  /** Stamp a free-trial watermark on every puzzle page. Set by server; ignored if sent by client. */
+  @IsOptional()
+  @IsBoolean()
+  watermark?: boolean;
 }
 
 export class CreateBookDto {
   @IsString()
   @MaxLength(120)
   title!: string;
+
+  /** Set to true to use the one-time free trial (max 10 puzzles, watermarked). */
+  @IsOptional()
+  @IsBoolean()
+  freeTrial?: boolean;
 
   @IsEnum(TrimSize)
   trimSize!: TrimSize;

@@ -36,4 +36,6 @@ export interface BookOptions {
   difficultyBadge?: boolean;
   /** Shade pre-filled clue cells with a light grey background. Default: false */
   clueBackground?: boolean;
+  /** Stamp a free-trial watermark footer on every puzzle page. Default: false */
+  watermark?: boolean;
 }

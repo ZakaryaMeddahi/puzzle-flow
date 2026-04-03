@@ -5,8 +5,8 @@ import Link from "next/link";
 
 const FEATURES = [
   {
-    title: "Global Uniqueness Engine",
-    desc: "Every puzzle is cryptographically hashed. No duplicate within your book, across your catalog, or across the entire platform — ever.",
+    title: "Uniqueness Engine",
+    desc: "Every puzzle is cryptographically hashed. No duplicate within your book, or across your entire catalog — ever.",
     icon: (
       <svg
         className="h-6 w-6"
@@ -106,7 +106,7 @@ const FEATURES = [
   },
   {
     title: "Instant Download",
-    desc: "Puzzles are pre-generated in the background. Your PDF is ready in seconds — not minutes. Publish more books, faster.",
+    desc: "Puzzles are pre-generated in the background. Your PDF is usually ready in under 60 seconds. Publish more books, faster.",
     icon: (
       <svg
         className="h-6 w-6"
@@ -261,7 +261,7 @@ export default function LandingPage() {
               </h1>
               <p className="mb-8 text-lg leading-relaxed text-zinc-500">
                 Generate unique, print-ready Sudoku puzzle books with custom
-                front matter, multiple layouts, and a global no-duplicate
+                front matter, multiple layouts, and a no-duplicate
                 guarantee. Upload straight to KDP and start selling.
               </p>
               <div className="flex flex-wrap items-center gap-3">
@@ -349,7 +349,7 @@ export default function LandingPage() {
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
             {[
               "KDP-compliant margins & trim sizes",
-              "Global no-duplicate guarantee",
+              "No-duplicate guarantee",
               "Instant PDF download",
               "Live page preview",
             ].map((item) => (
@@ -509,12 +509,12 @@ export default function LandingPage() {
             </h2>
             <p className="mx-auto max-w-xl text-base text-zinc-400">
               PuzzleFlow cryptographically hashes every generated puzzle and
-              checks it against three layers of protection before it enters your
+              checks it against two layers of protection before it enters your
               book.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:max-w-2xl sm:mx-auto">
             {[
               {
                 tier: "Book",
@@ -528,14 +528,7 @@ export default function LandingPage() {
                 color: "bg-indigo-400",
                 ring: "ring-indigo-400/30",
                 title: "No duplicates across your catalog",
-                desc: "Publish 10 books? Every puzzle is still unique across your entire catalog. Guaranteed.",
-              },
-              {
-                tier: "Global",
-                color: "bg-indigo-300",
-                ring: "ring-indigo-300/30",
-                title: "No duplicates across the platform",
-                desc: "Our global registry ensures no two publishers ever receive the same puzzle.",
+                desc: "Pro plan: publish 10 books and every puzzle is still unique across your entire catalog. Guaranteed.",
               },
             ].map((item) => (
               <div
@@ -573,7 +566,7 @@ export default function LandingPage() {
             href="/dashboard"
             className="inline-flex items-center gap-2.5 rounded-xl bg-white px-8 py-4 text-base font-bold text-indigo-700 shadow-lg transition-all hover:bg-indigo-50 hover:shadow-xl"
           >
-            Get started — it&apos;s free
+            Get started
             <svg
               className="h-4 w-4"
               fill="none"

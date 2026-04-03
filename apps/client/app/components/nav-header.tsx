@@ -28,7 +28,36 @@ export function NavHeader() {
 
         {user && (
           <div className="flex items-center gap-4">
+            <a
+              href="/support"
+              className="text-sm text-zinc-400 transition-colors hover:text-zinc-700"
+            >
+              Support
+            </a>
+            <a
+              href="/dashboard/settings"
+              className="text-sm text-zinc-400 transition-colors hover:text-zinc-700"
+            >
+              Settings
+            </a>
             <span className="text-sm text-zinc-500">{user.email}</span>
+            <span
+              className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                user.plan === "pro"
+                  ? "bg-indigo-100 text-indigo-700"
+                  : user.plan === "starter"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-zinc-100 text-zinc-500"
+              }`}
+            >
+              {user.plan === "pay_per_book"
+                ? "Pay per book"
+                : user.plan === "starter"
+                  ? "Starter"
+                  : user.plan === "pro"
+                    ? "Pro"
+                    : user.plan}
+            </span>
             <Button variant="secondary" size="sm" onClick={logout}>
               Sign out
             </Button>

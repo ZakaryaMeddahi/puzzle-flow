@@ -19,7 +19,6 @@ import { QUEUE_PDF_GENERATION, type PdfGenerationJobData } from "../queues";
 
 const PDF_OUTPUT_DIR = process.env["PDF_OUTPUT_DIR"] ?? join(process.cwd(), "pdfs");
 const UPLOAD_DIR     = process.env["UPLOAD_DIR"]     ?? join(process.cwd(), "uploads");
-const PDF_EXPIRY_DAYS = 7;
 
 // Page types that may contain image elements
 const FRONT_MATTER_PAGE_TYPES: PageType[] = [
@@ -36,6 +35,7 @@ interface StyleOptions {
   gridStyle?:       GridStyle;
   difficultyBadge?: boolean;
   clueBackground?:  boolean;
+  watermark?:       boolean;
 }
 
 /**
@@ -145,6 +145,7 @@ async function processPdfGenerationJob(
     gridStyle:       styleOptions.gridStyle       ?? "standard",
     difficultyBadge: styleOptions.difficultyBadge ?? false,
     clueBackground:  styleOptions.clueBackground  ?? false,
+    watermark:       styleOptions.watermark        ?? false,
   };
   await job.updateProgress(20);
   const imageBytes = fm ? await loadFrontMatterImages(fm) : {};
@@ -159,13 +160,10 @@ async function processPdfGenerationJob(
   const filePath = join(PDF_OUTPUT_DIR, `${bookId}.pdf`);
   await writeFile(filePath, pdfBytes);
 
-  // 8. Mark book as ready with expiry
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + PDF_EXPIRY_DAYS);
-
+  // 8. Mark book as ready
   await prisma.book.update({
     where: { id: bookId },
-    data: { status: BookStatus.READY, pdfPath: filePath, expiresAt },
+    data: { status: BookStatus.READY, pdfPath: filePath },
   });
 
   await job.updateProgress(100);

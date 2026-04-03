@@ -32,12 +32,25 @@ export enum TrimSize {
   EIGHT_HALF_BY_ELEVEN = "8.5x11",
 }
 
+export enum PlanType {
+  PAY_PER_BOOK = "pay_per_book",
+  STARTER      = "starter",
+  PRO          = "pro",
+}
+
+export enum SubscriptionStatus {
+  ACTIVE   = "active",
+  CANCELED = "canceled",
+  PAST_DUE = "past_due",
+  PAUSED   = "paused",
+}
+
 export const CONSTANTS = {
   PUZZLE_POOL_TARGET: 100_000,
   PUZZLE_POOL_REFILL_THRESHOLD: 20_000,
   PUZZLE_BATCH_SIZE: 5_000,
   RESERVATION_TTL_MINUTES: 30,
-  PDF_EXPIRY_DAYS: 7,
+  STARTER_MONTHLY_LIMIT: 10,
   CLUES_BY_DIFFICULTY: {
     [Difficulty.EASY]: { min: 36, max: 45 },
     [Difficulty.MEDIUM]: { min: 27, max: 35 },

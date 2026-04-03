@@ -10,10 +10,14 @@ import {
 import { clearTokens, getAccessToken, storeTokens } from "../lib/auth";
 import { apiFetch } from "../lib/api";
 
-interface AuthUser {
+export interface AuthUser {
   id: string;
   email: string;
   name: string | null;
+  plan: string;
+  subscriptionStatus: string | null;
+  currentPeriodEnd: string | null;
+  trialUsed: boolean;
 }
 
 interface AuthContextValue {
@@ -21,6 +25,7 @@ interface AuthContextValue {
   loading: boolean;
   login: (accessToken: string, refreshToken: string) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -64,7 +69,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, logout, refreshUser: fetchMe }}
+    >
       {children}
     </AuthContext.Provider>
   );

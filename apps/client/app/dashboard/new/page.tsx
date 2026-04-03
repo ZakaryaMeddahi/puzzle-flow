@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRequireAuth } from "../../hooks/use-require-auth";
 import { apiFetch } from "../../lib/api";
@@ -148,6 +148,14 @@ export default function NewBookPage() {
   const [currentStep, setCurrentStep] = useState<StepId>("setup");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [trialAvailable, setTrialAvailable] = useState(false);
+  const [freeTrial, setFreeTrial] = useState(false);
+
+  useEffect(() => {
+    apiFetch<{ trialUsed: boolean }>("/users/me")
+      .then((u) => { if (!u.trialUsed) setTrialAvailable(true); })
+      .catch(() => {});
+  }, []);
 
   if (authLoading) {
     return (
@@ -231,9 +239,10 @@ export default function NewBookPage() {
       title: setup.title.trim() || "Sudoku Puzzle Book",
       trimSize: setup.trimSize,
       difficulty: setup.difficulty,
-      pageCount: setup.pageCount,
+      pageCount: freeTrial ? Math.min(setup.pageCount, 10) : setup.pageCount,
       layout: setup.layout,
       uniquenessLevel: setup.uniquenessLevel,
+      ...(freeTrial ? { freeTrial: true } : {}),
       styleOptions: {
         font: bookStyle.font,
         pageNumbers: bookStyle.pageNumbers,
@@ -342,6 +351,35 @@ export default function NewBookPage() {
             </span>
           </div>
         </div>
+
+        {/* Free trial banner — shown only on setup step when trial is available */}
+        {currentStep === "setup" && trialAvailable && (
+          <div className={`mb-4 rounded-xl px-5 py-4 ${freeTrial ? "border border-indigo-200 bg-indigo-50" : "border border-zinc-200 bg-zinc-50"}`}>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-zinc-900">
+                  {freeTrial ? "✓ Free trial active" : "Try PuzzleFlow free"}
+                </p>
+                <p className="mt-0.5 text-xs text-zinc-500">
+                  {freeTrial
+                    ? "Your book will include 10 puzzles and a watermark. One-time offer."
+                    : "Generate a 10-puzzle sample book at no cost. Watermarked. One-time offer."}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFreeTrial((v) => !v)}
+                className={`shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                  freeTrial
+                    ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                    : "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100"
+                }`}
+              >
+                {freeTrial ? "Cancel trial" : "Use free trial"}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Step content card */}
         <div

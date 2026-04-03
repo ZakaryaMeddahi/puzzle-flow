@@ -26,7 +26,12 @@
       "Bash(mkdir -p /c/Users/LENOVO/puzzle-generator/apps/client/app/dashboard/new/components)",
       "Bash(mkdir -p /c/Users/LENOVO/puzzle-generator/apps/client/app/dashboard/new/steps)",
       "Read(//c/Users/LENOVO/puzzle-generator/**)",
-      "Bash(pnpm add:*)"
+      "Bash(pnpm add:*)",
+      "WebSearch",
+      "Bash(xargs grep:*)",
+      "Bash(find:*)",
+      "Bash(pnpm --filter @kdp/shared prisma migrate dev --name add_subscription_fields)",
+      "Bash(pnpm tsc:*)"
     ]
   }
 }

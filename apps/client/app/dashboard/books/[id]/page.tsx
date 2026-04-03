@@ -32,11 +32,6 @@ function formatDate(iso: string) {
   });
 }
 
-function daysUntil(iso: string) {
-  const diff = new Date(iso).getTime() - Date.now();
-  return Math.ceil(diff / (1000 * 60 * 60 * 24));
-}
-
 // ── Status card variants ──────────────────────────────────────────────────────
 
 function PendingCard() {
@@ -67,8 +62,6 @@ function PendingCard() {
 
 function ReadyCard({ book, title }: { book: Book; title: string }) {
   const [downloading, setDownloading] = useState(false);
-  const days = book.expiresAt ? daysUntil(book.expiresAt) : null;
-  const expiringSoon = days !== null && days <= 7;
 
   function handleDownload() {
     setDownloading(true);
@@ -99,13 +92,7 @@ function ReadyCard({ book, title }: { book: Book; title: string }) {
         </div>
         <div>
           <p className="text-sm font-semibold text-emerald-900">Ready to download</p>
-          {book.expiresAt && (
-            <p className={`text-xs ${expiringSoon ? "font-medium text-red-500" : "text-emerald-600"}`}>
-              {expiringSoon
-                ? `Expires in ${days} day${days === 1 ? "" : "s"} — download now`
-                : `Expires ${formatDate(book.expiresAt)}`}
-            </p>
-          )}
+          <p className="text-xs text-emerald-600">Your PDF is ready — download it any time</p>
         </div>
       </div>
 
@@ -168,32 +155,6 @@ function DraftCard({ bookId }: { bookId: string }) {
   );
 }
 
-function ExpiredCard() {
-  return (
-    <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
-      <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100">
-          <svg className="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-          </svg>
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-red-900">PDF expired</p>
-          <p className="text-xs text-red-500">This file is no longer available for download</p>
-        </div>
-      </div>
-      <p className="mb-4 text-sm leading-relaxed text-red-700">
-        PDFs are available for 30 days after generation. This one has passed its expiry date.
-        Create a new book to generate a fresh copy.
-      </p>
-      <Link href="/dashboard/new">
-        <Button variant="secondary" size="md" className="w-full justify-center">
-          Create new book
-        </Button>
-      </Link>
-    </div>
-  );
-}
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
@@ -287,9 +248,6 @@ export default function BookDetailPage() {
     ["Difficulty",  DIFFICULTY_LABEL[book.difficulty] ?? book.difficulty],
     ["Puzzles",     String(book.pageCount)],
     ["Created",     formatDate(book.createdAt)],
-    ...(book.expiresAt && book.status === "ready"
-      ? [["Expires", formatDate(book.expiresAt)] as [string, string]]
-      : []),
   ];
 
   return (
@@ -320,7 +278,6 @@ export default function BookDetailPage() {
           <div className={`rounded-full px-3 py-1 text-xs font-semibold ${
             book.status === "ready"   ? "bg-emerald-100 text-emerald-700" :
             book.status === "pending" ? "bg-amber-100 text-amber-700" :
-            book.status === "expired" ? "bg-red-100 text-red-600" :
             "bg-zinc-100 text-zinc-600"
           }`}>
             {book.status === "pending" && <span className="mr-1.5 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400 align-middle" />}
@@ -328,7 +285,6 @@ export default function BookDetailPage() {
               ready: "Ready",
               pending: "Generating",
               draft: "Draft",
-              expired: "Expired",
             }[book.status] ?? book.status}
           </div>
         </div>
@@ -358,7 +314,6 @@ export default function BookDetailPage() {
             {book.status === "pending" && <PendingCard />}
             {book.status === "ready"   && <ReadyCard book={book} title={title} />}
             {book.status === "draft"   && <DraftCard bookId={book.id} />}
-            {book.status === "expired" && <ExpiredCard />}
 
             {/* Danger zone */}
             <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">

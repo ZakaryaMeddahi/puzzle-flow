@@ -12,6 +12,7 @@ import { WebhooksModule } from './webhooks/webhooks.module';
 import { QueuesModule } from './queues/queues.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { PreviewModule } from './preview/preview.module';
+import { SupportModule } from './support/support.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 @Module({
@@ -26,6 +27,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     QueuesModule,
     UploadsModule,
     PreviewModule,
+    SupportModule,
   ],
   controllers: [AppController],
   providers: [
