@@ -140,7 +140,7 @@ export default function PricingPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
           <Link href="/" className="flex items-center gap-2.5">
             <Image
-              src="/puzzle-flow-logo.png"
+              src="/puzzle-flow-transparent.png"
               alt="PuzzleFlow"
               width={36}
               height={36}
@@ -404,7 +404,7 @@ export default function PricingPage() {
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
             <Link href="/" className="flex items-center gap-2.5">
               <Image
-                src="/puzzle-flow-logo.png"
+                src="/puzzle-flow-transparent.png"
                 alt="PuzzleFlow"
                 width={28}
                 height={28}

@@ -12,7 +12,7 @@ export function NavHeader() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-2">
         <div className="flex items-center gap-2.5">
           <Image
-            src="/puzzle-flow-logo.png"
+            src="/puzzle-flow-transparent.png"
             alt=""
             width={80}
             height={80}

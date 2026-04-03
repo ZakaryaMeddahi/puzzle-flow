@@ -4,10 +4,15 @@ import Link from "next/link";
 export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 px-6 text-center">
-
       {/* Logo */}
       <Link href="/" className="mb-10 flex items-center gap-2.5">
-        <Image src="/puzzle-flow-logo.png" alt="PuzzleFlow" width={36} height={36} className="h-9 w-auto" />
+        <Image
+          src="/puzzle-flow-transparent.png"
+          alt="PuzzleFlow"
+          width={36}
+          height={36}
+          className="h-9 w-auto"
+        />
         <span className="text-base font-bold">
           <span className="text-zinc-900">Puzzle</span>
           <span className="text-indigo-600">Flow</span>
@@ -18,9 +23,9 @@ export default function NotFound() {
       <div className="mb-8 select-none">
         <div className="inline-grid grid-cols-3 gap-1 rounded-2xl border-2 border-zinc-300 bg-zinc-200 p-1.5 shadow-inner">
           {[
-            ["4", "",  ""],
-            ["",  "0", ""],
-            ["",  "",  "4"],
+            ["4", "", ""],
+            ["", "0", ""],
+            ["", "", "4"],
           ].map((row, r) =>
             row.map((cell, c) => (
               <div
@@ -35,13 +40,15 @@ export default function NotFound() {
               >
                 {cell === "0" ? "?" : cell}
               </div>
-            ))
+            )),
           )}
         </div>
       </div>
 
       {/* Copy */}
-      <p className="mb-2 text-6xl font-black tracking-tight text-zinc-900">404</p>
+      <p className="mb-2 text-6xl font-black tracking-tight text-zinc-900">
+        404
+      </p>
       <h1 className="mb-3 text-xl font-semibold text-zinc-800">
         This page is missing a clue
       </h1>
@@ -65,7 +72,6 @@ export default function NotFound() {
           Go to dashboard
         </Link>
       </div>
-
     </div>
   );
 }
