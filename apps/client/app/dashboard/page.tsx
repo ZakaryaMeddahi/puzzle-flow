@@ -17,7 +17,10 @@ interface UsageInfo {
 
 function formatDate(iso: string | null | undefined): string {
   if (!iso) return "";
-  return new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric" });
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+  });
 }
 
 export default function DashboardPage() {
@@ -62,10 +65,10 @@ export default function DashboardPage() {
     setBooks((prev) => prev.filter((b) => b.id !== id));
   }
 
-  const readyCount   = books.filter((b) => b.status === "ready").length;
+  const readyCount = books.filter((b) => b.status === "ready").length;
   const pendingCount = books.filter((b) => b.status === "pending").length;
 
-  // ── Loading skeleton ──────────────────────────────────────────────────────
+  // Loading skeleton
   if (authLoading || (fetching && books.length === 0)) {
     return (
       <div className="min-h-screen bg-zinc-100">
@@ -108,7 +111,7 @@ export default function DashboardPage() {
     );
   }
 
-  // ── Error ─────────────────────────────────────────────────────────────────
+  // Error
   if (error) {
     return (
       <div className="min-h-screen bg-zinc-100">
@@ -116,13 +119,29 @@ export default function DashboardPage() {
         <main className="mx-auto max-w-6xl px-6 py-10">
           <div className="rounded-2xl border border-red-200 bg-white p-8 text-center shadow-sm">
             <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-red-50">
-              <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0zm-8-5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5A.75.75 0 0 1 10 5zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" clipRule="evenodd" />
+              <svg
+                className="h-5 w-5 text-red-500"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0zm-8-5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5A.75.75 0 0 1 10 5zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"
+                  clipRule="evenodd"
+                />
               </svg>
             </div>
-            <p className="text-sm font-semibold text-zinc-900">Could not load your books</p>
+            <p className="text-sm font-semibold text-zinc-900">
+              Could not load your books
+            </p>
             <p className="mt-1 text-xs text-zinc-500">{error}</p>
-            <Button variant="secondary" size="sm" className="mt-4" onClick={() => void loadBooks()}>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="mt-4"
+              onClick={() => void loadBooks()}
+            >
               Try again
             </Button>
           </div>
@@ -135,7 +154,6 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-zinc-100">
       <NavHeader />
       <main className="mx-auto max-w-6xl px-6 py-10">
-
         {/* Starter usage banner */}
         {usage && usage.limit !== null && (
           <div
@@ -175,7 +193,9 @@ export default function DashboardPage() {
               <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
                 <div
                   className="h-full rounded-full bg-indigo-500 transition-all"
-                  style={{ width: `${(usage.booksThisMonth / usage.limit) * 100}%` }}
+                  style={{
+                    width: `${(usage.booksThisMonth / usage.limit) * 100}%`,
+                  }}
                 />
               </div>
             )}
@@ -192,7 +212,9 @@ export default function DashboardPage() {
               Create and manage your puzzle books
             </p>
           </div>
-          {usage && usage.limit !== null && usage.booksThisMonth >= usage.limit ? (
+          {usage &&
+          usage.limit !== null &&
+          usage.booksThisMonth >= usage.limit ? (
             <Button variant="primary" size="md" disabled>
               + Create New Book
             </Button>
@@ -243,18 +265,26 @@ export default function DashboardPage() {
             {/* Stats row */}
             <div className="mb-5 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
               <span className="text-zinc-500">
-                <span className="font-semibold text-zinc-900">{books.length}</span>{" "}
+                <span className="font-semibold text-zinc-900">
+                  {books.length}
+                </span>{" "}
                 {books.length === 1 ? "book" : "books"}
               </span>
               {readyCount > 0 && (
                 <span className="text-zinc-500">
-                  <span className="font-semibold text-emerald-600">{readyCount}</span> ready
+                  <span className="font-semibold text-emerald-600">
+                    {readyCount}
+                  </span>{" "}
+                  ready
                 </span>
               )}
               {pendingCount > 0 && (
                 <span className="flex items-center gap-1.5 text-zinc-500">
                   <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400" />
-                  <span className="font-semibold text-amber-600">{pendingCount}</span> generating
+                  <span className="font-semibold text-amber-600">
+                    {pendingCount}
+                  </span>{" "}
+                  generating
                 </span>
               )}
             </div>

@@ -41,7 +41,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-100 px-4">
-      <div className="w-full max-w-[400px] rounded-2xl bg-white px-8 py-10 shadow-md shadow-zinc-200/80 ring-1 ring-zinc-100">
+      <div className="w-full max-w-100 rounded-2xl bg-white px-8 py-10 shadow-md shadow-zinc-200/80 ring-1 ring-zinc-100">
         {/* Header */}
         <div className="mb-8 text-center">
           <div className="mb-5 flex flex-col items-center gap-0.5">
@@ -89,7 +89,8 @@ export default function LoginPage() {
         {linkError && (
           <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-center">
             <p className="text-sm font-medium text-red-700">
-              This login link is invalid or has expired. Please request a new one.
+              This login link is invalid or has expired. Please request a new
+              one.
             </p>
           </div>
         )}

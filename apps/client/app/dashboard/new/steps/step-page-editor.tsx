@@ -89,7 +89,7 @@ export function StepPageEditor({
 
   return (
     <div className="grid min-h-0 grid-cols-1 lg:grid-cols-[460px_1fr]">
-      {/* ── Left: form inputs ─────────────────────────────────────────────── */}
+      {/* Left: form inputs */}
       <div className="space-y-6 bg-white p-8 lg:border-r lg:border-zinc-100">
         {/* Section header */}
         <div className="border-b border-zinc-100 pb-5">
@@ -184,7 +184,7 @@ export function StepPageEditor({
         })}
       </div>
 
-      {/* ── Right: live preview panel ──────────────────────────────────────── */}
+      {/* Right: live preview panel */}
       <div className="bg-zinc-900">
         <div className="p-8 lg:sticky lg:top-6">
           {/* Panel header */}

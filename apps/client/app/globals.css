@@ -17,38 +17,55 @@ body {
   color: #171717;
 }
 
-/* ── Book generation progress bar ───────────────────────────────────────── */
+/* Book generation progress bar */
 @keyframes progress {
-  0%   { width: 15%; }
-  50%  { width: 75%; }
-  100% { width: 15%; }
+  0% {
+    width: 15%;
+  }
+  50% {
+    width: 75%;
+  }
+  100% {
+    width: 15%;
+  }
 }
 
-/* ── Hero page stack animations ─────────────────────────────────────────── */
+/* Hero page stack animations */
 @keyframes page-enter {
-  from { opacity: 0; transform: translateY(36px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(36px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes page-float {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-14px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
 }
 
 .hero-page-back {
   animation:
     page-enter 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both,
-    page-float  7s ease-in-out               0.8s infinite;
+    page-float 7s ease-in-out 0.8s infinite;
 }
 
 .hero-page-mid {
   animation:
     page-enter 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both,
-    page-float  5.5s ease-in-out             1.3s infinite;
+    page-float 5.5s ease-in-out 1.3s infinite;
 }
 
 .hero-page-front {
   animation:
     page-enter 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both,
-    page-float  4.5s ease-in-out             2.1s infinite;
+    page-float 4.5s ease-in-out 2.1s infinite;
 }

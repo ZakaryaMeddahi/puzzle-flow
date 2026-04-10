@@ -91,7 +91,9 @@ export default function SettingsPage() {
       await apiFetch("/users/me/subscription", { method: "DELETE" });
       await refreshUser();
       setConfirmCancel(false);
-      setSuccessMsg("Subscription canceled. You'll retain access until the end of your billing period.");
+      setSuccessMsg(
+        "Subscription canceled. You'll retain access until the end of your billing period.",
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -103,7 +105,9 @@ export default function SettingsPage() {
     setActionLoading(true);
     setError(null);
     try {
-      const { url } = await apiFetch<{ url: string }>("/users/me/billing-portal");
+      const { url } = await apiFetch<{ url: string }>(
+        "/users/me/billing-portal",
+      );
       window.open(url, "_blank");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -121,13 +125,25 @@ export default function SettingsPage() {
           href="/dashboard"
           className="mb-6 inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-900"
         >
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 16 16" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10 12L6 8l4-4" />
+          <svg
+            className="h-3.5 w-3.5"
+            fill="none"
+            viewBox="0 0 16 16"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M10 12L6 8l4-4"
+            />
           </svg>
           Back to dashboard
         </Link>
 
-        <h1 className="mb-6 text-xl font-bold text-zinc-900">Account settings</h1>
+        <h1 className="mb-6 text-xl font-bold text-zinc-900">
+          Account settings
+        </h1>
 
         {successMsg && (
           <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
@@ -140,10 +156,12 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* ── Plan card ── */}
+        {/* Plan card */}
         <div className="mb-4 rounded-2xl border border-zinc-200 bg-white p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-zinc-900">Current plan</h2>
+            <h2 className="text-sm font-semibold text-zinc-900">
+              Current plan
+            </h2>
             <span
               className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${PLAN_COLORS[plan] ?? "bg-zinc-100 text-zinc-600"}`}
             >
@@ -164,11 +182,7 @@ export default function SettingsPage() {
                         : "text-emerald-600"
                   }`}
                 >
-                  {isCanceled
-                    ? "Canceled"
-                    : isPaused
-                      ? "Paused"
-                      : "Active"}
+                  {isCanceled ? "Canceled" : isPaused ? "Paused" : "Active"}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -180,7 +194,7 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {/* Usage meter — Starter only */}
+          {/* Usage meter (Starter only) */}
           {plan === "starter" && usage && (
             <div className="mt-4 border-t border-zinc-100 pt-4">
               <div className="mb-1.5 flex items-center justify-between text-xs text-zinc-500">
@@ -197,7 +211,7 @@ export default function SettingsPage() {
                       : "bg-indigo-500"
                   }`}
                   style={{
-                    width: `${Math.min(100, ((usage.booksThisMonth / (usage.limit ?? 10)) * 100))}%`,
+                    width: `${Math.min(100, (usage.booksThisMonth / (usage.limit ?? 10)) * 100)}%`,
                   }}
                 />
               </div>
@@ -210,7 +224,7 @@ export default function SettingsPage() {
           )}
         </div>
 
-        {/* ── Actions ── */}
+        {/* Actions */}
         <div className="space-y-3">
           {/* Pay-per-book: show upgrade options */}
           {plan === "pay_per_book" && (
@@ -222,10 +236,16 @@ export default function SettingsPage() {
                 className="flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white px-5 py-3.5 text-left shadow-sm transition-colors hover:bg-zinc-50 disabled:opacity-50"
               >
                 <div>
-                  <p className="text-sm font-semibold text-zinc-900">Upgrade to Starter</p>
-                  <p className="text-xs text-zinc-500">10 books per month · $11.99/mo</p>
+                  <p className="text-sm font-semibold text-zinc-900">
+                    Upgrade to Starter
+                  </p>
+                  <p className="text-xs text-zinc-500">
+                    10 books per month · $11.99/mo
+                  </p>
                 </div>
-                <span className="text-xs font-semibold text-indigo-600">Upgrade →</span>
+                <span className="text-xs font-semibold text-indigo-600">
+                  Upgrade →
+                </span>
               </button>
               <button
                 type="button"
@@ -234,10 +254,16 @@ export default function SettingsPage() {
                 className="flex w-full items-center justify-between rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-3.5 text-left shadow-sm transition-colors hover:bg-indigo-100 disabled:opacity-50"
               >
                 <div>
-                  <p className="text-sm font-semibold text-zinc-900">Upgrade to Pro</p>
-                  <p className="text-xs text-zinc-500">Unlimited books · Catalog-wide uniqueness · $23.99/mo</p>
+                  <p className="text-sm font-semibold text-zinc-900">
+                    Upgrade to Pro
+                  </p>
+                  <p className="text-xs text-zinc-500">
+                    Unlimited books · Catalog-wide uniqueness · $23.99/mo
+                  </p>
                 </div>
-                <span className="text-xs font-semibold text-indigo-600">Upgrade →</span>
+                <span className="text-xs font-semibold text-indigo-600">
+                  Upgrade →
+                </span>
               </button>
             </>
           )}
@@ -251,19 +277,28 @@ export default function SettingsPage() {
               className="flex w-full items-center justify-between rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-3.5 text-left shadow-sm transition-colors hover:bg-indigo-100 disabled:opacity-50"
             >
               <div>
-                <p className="text-sm font-semibold text-zinc-900">Upgrade to Pro</p>
-                <p className="text-xs text-zinc-500">Unlimited books · Catalog-wide uniqueness · $23.99/mo</p>
+                <p className="text-sm font-semibold text-zinc-900">
+                  Upgrade to Pro
+                </p>
+                <p className="text-xs text-zinc-500">
+                  Unlimited books · Catalog-wide uniqueness · $23.99/mo
+                </p>
               </div>
-              <span className="text-xs font-semibold text-indigo-600">Upgrade →</span>
+              <span className="text-xs font-semibold text-indigo-600">
+                Upgrade →
+              </span>
             </button>
           )}
 
           {/* Canceled subscription: reactivate */}
           {isCanceled && (
             <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-3.5">
-              <p className="mb-1 text-sm font-semibold text-zinc-900">Subscription canceled</p>
+              <p className="mb-1 text-sm font-semibold text-zinc-900">
+                Subscription canceled
+              </p>
               <p className="mb-3 text-xs text-zinc-500">
-                Your access continues until {formatDate(user.currentPeriodEnd)}. Reactivate to keep publishing.
+                Your access continues until {formatDate(user.currentPeriodEnd)}.
+                Reactivate to keep publishing.
               </p>
               <button
                 type="button"

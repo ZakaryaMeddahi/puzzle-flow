@@ -56,7 +56,9 @@ export class WebhooksController {
     @Headers('x-signature') signature: string | undefined,
   ): Promise<{ received: boolean }> {
     // ── 1. Verify HMAC-SHA256 signature ────────────────────────────────────
-    const secret = this.config.getOrThrow<string>('LEMONSQUEEZY_WEBHOOK_SECRET');
+    const secret = this.config.getOrThrow<string>(
+      'LEMONSQUEEZY_WEBHOOK_SECRET',
+    );
     const rawBody = req.rawBody;
 
     if (!rawBody || !signature) {
@@ -150,9 +152,7 @@ export class WebhooksController {
       planPeriodStart: new Date(),
     });
 
-    this.logger.log(
-      `subscription_created: user ${userId} upgraded to ${plan}`,
-    );
+    this.logger.log(`subscription_created: user ${userId} upgraded to ${plan}`);
   }
 
   private async handleSubscriptionRenewed(

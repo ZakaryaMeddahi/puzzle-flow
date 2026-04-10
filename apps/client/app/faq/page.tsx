@@ -1,8 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 
-// ── Data ──────────────────────────────────────────────────────────────────────
-
 const CATEGORIES = [
   {
     title: "Getting started",
@@ -111,12 +109,10 @@ const CATEGORIES = [
   },
 ];
 
-// ── Page ──────────────────────────────────────────────────────────────────────
-
 export default function FaqPage() {
   return (
     <div className="min-h-screen bg-white text-zinc-900 antialiased">
-      {/* ── Nav ─────────────────────────────────────────────────────────── */}
+      {/* Nav */}
       <header className="sticky top-0 z-50 border-b border-zinc-100 bg-white/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
           <Link href="/" className="flex items-center gap-2.5">
@@ -164,15 +160,28 @@ export default function FaqPage() {
             </Link>
             <Link
               href="/dashboard"
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
+              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
             >
-              Get started →
+              Get started
+              <svg
+                className="h-3 w-3"
+                fill="none"
+                viewBox="0 0 16 16"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 8h10M9 4l4 4-4 4"
+                />
+              </svg>
             </Link>
           </div>
         </div>
       </header>
 
-      {/* ── Header ──────────────────────────────────────────────────────── */}
+      {/* Header */}
       <section className="bg-white pb-12 pt-20 text-center">
         <div className="mx-auto max-w-2xl px-6">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3.5 py-1.5">
@@ -191,7 +200,7 @@ export default function FaqPage() {
         </div>
       </section>
 
-      {/* ── FAQ content ─────────────────────────────────────────────────── */}
+      {/* FAQ content */}
       <section className="bg-zinc-50 py-16">
         <div className="mx-auto max-w-3xl px-6">
           <div className="space-y-12">
@@ -243,16 +252,30 @@ export default function FaqPage() {
               </Link>
               <Link
                 href="/dashboard"
-                className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
+                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
               >
-                Get started →
+                Get started
+                <svg
+                  className="h-3 w-3"
+                  fill="none"
+                  viewBox="0 0 16 16"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 8h10M9 4l4 4-4 4"
+                  />
+                </svg>
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Footer ──────────────────────────────────────────────────────── */}
+      {/* Footer */}
+      {/* TODO: make the footer look more professional */}
       <footer className="bg-zinc-950 py-12 text-zinc-500">
         <div className="mx-auto max-w-6xl px-6">
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">

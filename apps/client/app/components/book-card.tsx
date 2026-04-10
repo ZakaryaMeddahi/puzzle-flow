@@ -18,25 +18,25 @@ export interface Book {
   createdAt: string;
 }
 
-// Colored top bar — instant visual status without reading the badge
+// Colored top bar (instant visual status without reading the badge)
 const STATUS_BAR: Record<string, string> = {
-  draft:   "bg-zinc-300",
+  draft: "bg-zinc-300",
   pending: "bg-amber-400",
-  ready:   "bg-emerald-500",
+  ready: "bg-emerald-500",
   expired: "bg-red-400",
 };
 
 const STATUS_LABEL: Record<string, string> = {
-  draft:   "Draft",
+  draft: "Draft",
   pending: "Generating",
-  ready:   "Ready",
+  ready: "Ready",
   expired: "Expired",
 };
 
 const STATUS_LABEL_COLOR: Record<string, string> = {
-  draft:   "text-zinc-500",
+  draft: "text-zinc-500",
   pending: "text-amber-600",
-  ready:   "text-emerald-600",
+  ready: "text-emerald-600",
   expired: "text-red-500",
 };
 
@@ -126,24 +126,27 @@ export function BookCard({
       onDelete(book.id);
     } catch (err) {
       setDeleting(false);
-      window.alert(err instanceof Error ? err.message : "Failed to delete book");
+      window.alert(
+        err instanceof Error ? err.message : "Failed to delete book",
+      );
     }
   }
 
-  const statusBar   = STATUS_BAR[book.status]        ?? STATUS_BAR["draft"];
-  const statusLabel = STATUS_LABEL[book.status]       ?? book.status;
+  const statusBar = STATUS_BAR[book.status] ?? STATUS_BAR["draft"];
+  const statusLabel = STATUS_LABEL[book.status] ?? book.status;
   const statusColor = STATUS_LABEL_COLOR[book.status] ?? "text-zinc-500";
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition-shadow hover:shadow-md">
-
       {/* Status accent bar */}
       <div className={`h-1 w-full ${statusBar}`} />
 
       <div className="flex flex-1 flex-col p-5">
-
         {/* Title */}
-        <Link href={`/dashboard/books/${book.id}`} className="mb-1 block truncate text-base font-semibold text-zinc-900 hover:text-indigo-600 transition-colors">
+        <Link
+          href={`/dashboard/books/${book.id}`}
+          className="mb-1 block truncate text-base font-semibold text-zinc-900 hover:text-indigo-600 transition-colors"
+        >
           {title}
         </Link>
 
@@ -157,13 +160,14 @@ export function BookCard({
           <DifficultyBadge difficulty={book.difficulty} />
         </div>
 
-        {/* Footer — separated by a subtle top border */}
+        {/* Footer (separated by a subtle top border) */}
         <div className="mt-auto border-t border-zinc-100 pt-4">
           <div className="flex items-center justify-between gap-2">
-
             {/* Status label + date */}
             <div className="min-w-0">
-              <p className={`text-xs font-medium ${statusColor} flex items-center gap-1.5`}>
+              <p
+                className={`text-xs font-medium ${statusColor} flex items-center gap-1.5`}
+              >
                 {book.status === "pending" && (
                   <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400" />
                 )}
@@ -198,7 +202,6 @@ export function BookCard({
                 className="text-zinc-300 hover:text-red-500"
               />
             </div>
-
           </div>
         </div>
       </div>

@@ -19,7 +19,7 @@ export function ImageUploader({
 }: ImageUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [error, setError]         = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleFile(file: File) {
     setError(null);
@@ -37,7 +37,7 @@ export function ImageUploader({
         method: "POST",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
-        // Do NOT set Content-Type — browser sets it with the multipart boundary
+        // Do NOT set Content-Type (browser sets it with the multipart boundary)
       });
 
       if (!res.ok) throw new Error(`Upload failed (${res.status})`);
@@ -53,12 +53,14 @@ export function ImageUploader({
 
   return (
     <div>
-      <label className="mb-1.5 block text-sm font-medium text-zinc-700">{label}</label>
+      <label className="mb-1.5 block text-sm font-medium text-zinc-700">
+        {label}
+      </label>
 
       <div
         role="button"
         tabIndex={0}
-        className={`relative flex min-h-[5rem] cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-4 text-center transition-colors ${
+        className={`relative flex min-h-20 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-4 text-center transition-colors ${
           uploading
             ? "border-zinc-300 bg-zinc-50"
             : "border-zinc-300 hover:border-zinc-400"

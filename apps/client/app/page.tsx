@@ -1,8 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 
-// ── Feature cards ─────────────────────────────────────────────────────────────
-
 const FEATURES = [
   {
     title: "Uniqueness Engine",
@@ -172,12 +170,10 @@ const SAMPLE_PAGES = [
   },
 ];
 
-// ── Page ──────────────────────────────────────────────────────────────────────
-
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white text-zinc-900 antialiased">
-      {/* ── Nav ───────────────────────────────────────────────────────────── */}
+      {/* Nav */}
       <header className="sticky top-0 z-50 border-b border-zinc-100 bg-white/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
           <Link href="/" className="flex items-center gap-2.5">
@@ -234,15 +230,28 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/dashboard"
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
+              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
             >
-              Get started →
+              Get started
+              <svg
+                className="h-3 w-3"
+                fill="none"
+                viewBox="0 0 16 16"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 8h10M9 4l4 4-4 4"
+                />
+              </svg>
             </Link>
           </div>
         </div>
       </header>
 
-      {/* ── Hero ──────────────────────────────────────────────────────────── */}
+      {/* Hero */}
       <section className="overflow-hidden bg-white pb-20 pt-16 lg:pb-28 lg:pt-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
@@ -261,8 +270,8 @@ export default function LandingPage() {
               </h1>
               <p className="mb-8 text-lg leading-relaxed text-zinc-500">
                 Generate unique, print-ready Sudoku puzzle books with custom
-                front matter, multiple layouts, and a no-duplicate
-                guarantee. Upload straight to KDP and start selling.
+                front matter, multiple layouts, and a no-duplicate guarantee.
+                Upload straight to KDP and start selling.
               </p>
               <div className="flex flex-wrap items-center gap-3">
                 <Link
@@ -343,7 +352,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Trust strip ───────────────────────────────────────────────────── */}
+      {/* Trust strip */}
       <div className="border-y border-zinc-100 bg-zinc-50">
         <div className="mx-auto max-w-6xl px-6 py-5">
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
@@ -376,7 +385,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* ── How it works ──────────────────────────────────────────────────── */}
+      {/* How it works */}
       <section id="how-it-works" className="bg-white py-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-14 text-center">
@@ -424,7 +433,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Sample output ─────────────────────────────────────────────────── */}
+      {/* Sample output */}
       <section id="sample" className="bg-zinc-50 py-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-14 text-center">
@@ -432,7 +441,7 @@ export default function LandingPage() {
               Real output
             </p>
             <h2 className="mb-4 text-4xl font-bold tracking-tight text-zinc-900">
-              This is exactly what you&apos;ll publish
+              This is exactly what you'll publish
             </h2>
             <p className="mx-auto max-w-xl text-base text-zinc-500">
               Every page is generated fresh and rendered as a true PDF — not a
@@ -464,7 +473,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Features ──────────────────────────────────────────────────────── */}
+      {/* Features */}
       <section id="features" className="bg-white py-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-14 text-center">
@@ -497,7 +506,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Uniqueness engine ─────────────────────────────────────────────── */}
+      {/* Uniqueness engine */}
       <section className="bg-zinc-950 py-24 text-white">
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-14 text-center">
@@ -552,7 +561,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Final CTA ─────────────────────────────────────────────────────── */}
+      {/* Final CTA */}
       <section className="bg-indigo-600 py-20">
         <div className="mx-auto max-w-3xl px-6 text-center">
           <h2 className="mb-4 text-4xl font-bold tracking-tight text-white">
@@ -584,7 +593,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Footer ────────────────────────────────────────────────────────── */}
+      {/* Footer */}
+      {/* TODO: make the footer look more professional */}
       <footer className="bg-zinc-950 py-12 text-zinc-500">
         <div className="mx-auto max-w-6xl px-6">
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">

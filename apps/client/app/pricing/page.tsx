@@ -1,8 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 
-// ── Data ──────────────────────────────────────────────────────────────────────
-
 const PLANS = [
   {
     id: "pay-per-book",
@@ -29,7 +27,7 @@ const PLANS = [
     name: "Starter",
     price: "$11.99",
     period: "per month",
-    description: "For publishers building a growing catalog of puzzle books. Better value after just 2 books.",
+    description: "For publishers building a growing catalog of puzzle books.",
     highlight: false,
     badge: null,
     cta: "Get started",
@@ -98,8 +96,6 @@ const FAQS = [
   },
 ];
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
 function CheckIcon({ included }: { included: boolean }) {
   if (included) {
     return (
@@ -131,12 +127,10 @@ function CheckIcon({ included }: { included: boolean }) {
   );
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
-
 export default function PricingPage() {
   return (
     <div className="min-h-screen bg-white text-zinc-900 antialiased">
-      {/* ── Nav ─────────────────────────────────────────────────────────── */}
+      {/* Nav */}
       <header className="sticky top-0 z-50 border-b border-zinc-100 bg-white/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
           <Link href="/" className="flex items-center gap-2.5">
@@ -181,15 +175,28 @@ export default function PricingPage() {
             </Link>
             <Link
               href="/dashboard"
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
+              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
             >
-              Get started →
+              Get started
+              <svg
+                className="h-3 w-3"
+                fill="none"
+                viewBox="0 0 16 16"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 8h10M9 4l4 4-4 4"
+                />
+              </svg>
             </Link>
           </div>
         </div>
       </header>
 
-      {/* ── Header ──────────────────────────────────────────────────────── */}
+      {/* Header */}
       <section className="bg-white pb-16 pt-20 text-center">
         <div className="mx-auto max-w-3xl px-6">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3.5 py-1.5">
@@ -208,7 +215,7 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* ── Free trial banner ───────────────────────────────────────────── */}
+      {/* Free trial banner */}
       <section className="bg-white pb-6 pt-0">
         <div className="mx-auto max-w-3xl px-6">
           <div className="flex items-center justify-between gap-6 rounded-2xl border border-indigo-100 bg-indigo-50 px-6 py-4">
@@ -221,7 +228,8 @@ export default function PricingPage() {
                   Try PuzzleFlow free — no credit card required
                 </p>
                 <p className="text-xs text-zinc-500">
-                  Every new account gets one free 10-puzzle sample book, instantly. Watermarked. One-time offer.
+                  Every new account gets one free 10-puzzle sample book,
+                  instantly. Watermarked. One-time offer.
                 </p>
               </div>
             </div>
@@ -235,7 +243,7 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* ── Pricing cards ───────────────────────────────────────────────── */}
+      {/* Pricing cards */}
       <section className="bg-zinc-50 px-6 pb-24 pt-2">
         <div className="mx-auto max-w-5xl">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -310,7 +318,7 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* ── Comparison table (desktop only) ─────────────────────────────── */}
+      {/* Comparison table (desktop only) */}
       <section className="hidden bg-white py-24 md:block">
         <div className="mx-auto max-w-5xl px-6">
           <h2 className="mb-10 text-center text-2xl font-bold text-zinc-900">
@@ -373,7 +381,7 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* ── FAQ ─────────────────────────────────────────────────────────── */}
+      {/* FAQ */}
       <section className="bg-zinc-50 py-24">
         <div className="mx-auto max-w-2xl px-6">
           <h2 className="mb-10 text-center text-2xl font-bold text-zinc-900">
@@ -395,7 +403,7 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* ── Final CTA ───────────────────────────────────────────────────── */}
+      {/* Final CTA */}
       <section className="bg-indigo-600 py-20">
         <div className="mx-auto max-w-3xl px-6 text-center">
           <h2 className="mb-4 text-4xl font-bold tracking-tight text-white">
@@ -426,7 +434,8 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* ── Footer ──────────────────────────────────────────────────────── */}
+      {/* Footer */}
+      {/* TODO: make the footer look more professional */}
       <footer className="bg-zinc-950 py-12 text-zinc-500">
         <div className="mx-auto max-w-6xl px-6">
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">

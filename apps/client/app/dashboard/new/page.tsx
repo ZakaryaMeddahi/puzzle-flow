@@ -23,8 +23,6 @@ import { StepBookSetup } from "./steps/step-book-setup";
 import { StepPageEditor } from "./steps/step-page-editor";
 import { StepReview } from "./steps/step-review";
 
-// ── Exported types (consumed by step components) ──────────────────────────────
-
 export interface BookSetupState {
   title: string;
   trimSize: string;
@@ -50,8 +48,6 @@ export type FmEnabled = {
   introduction: boolean;
   answerPages: boolean;
 };
-
-// ── Step definitions ──────────────────────────────────────────────────────────
 
 type FmPageKey = "titlePage" | "copyrightPage" | "howToPlay" | "introduction";
 type StepId = "setup" | FmPageKey | "review";
@@ -80,8 +76,6 @@ const STEP_LABELS: Record<StepId, string> = {
   introduction: "Introduction",
   review: "Review",
 };
-
-// ── Component ─────────────────────────────────────────────────────────────────
 
 interface CreateBookResponse {
   book: { id: string };
@@ -153,7 +147,9 @@ export default function NewBookPage() {
 
   useEffect(() => {
     apiFetch<{ trialUsed: boolean }>("/users/me")
-      .then((u) => { if (!u.trialUsed) setTrialAvailable(true); })
+      .then((u) => {
+        if (!u.trialUsed) setTrialAvailable(true);
+      })
       .catch(() => {});
   }, []);
 
@@ -167,8 +163,6 @@ export default function NewBookPage() {
       </div>
     );
   }
-
-  // ── Handlers ──────────────────────────────────────────────────────────────
 
   function handleSetupChange<K extends keyof BookSetupState>(
     key: K,
@@ -294,14 +288,23 @@ export default function NewBookPage() {
       <NavHeader />
 
       <main className="mx-auto max-w-6xl px-6 py-4">
-        {/* Compact header row: back link + title inline */}
         <div className="mb-4 flex items-center gap-4">
           <Link
             href="/dashboard"
             className="flex shrink-0 items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 shadow-sm transition-colors hover:border-zinc-300 hover:text-zinc-900"
           >
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 16 16" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10 12L6 8l4-4" />
+            <svg
+              className="h-3.5 w-3.5"
+              fill="none"
+              viewBox="0 0 16 16"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M10 12L6 8l4-4"
+              />
             </svg>
             Dashboard
           </Link>
@@ -315,7 +318,7 @@ export default function NewBookPage() {
           </div>
         </div>
 
-        {/* Step progress — slim pill bar */}
+        {/* Step progress */}
         <div className="mb-4">
           {/* Track */}
           <div className="mb-2.5 flex items-center gap-1">
@@ -352,9 +355,11 @@ export default function NewBookPage() {
           </div>
         </div>
 
-        {/* Free trial banner — shown only on setup step when trial is available */}
+        {/* Free trial banner (shown only on setup step when trial is available) */}
         {currentStep === "setup" && trialAvailable && (
-          <div className={`mb-4 rounded-xl px-5 py-4 ${freeTrial ? "border border-indigo-200 bg-indigo-50" : "border border-zinc-200 bg-zinc-50"}`}>
+          <div
+            className={`mb-4 rounded-xl px-5 py-4 ${freeTrial ? "border border-indigo-200 bg-indigo-50" : "border border-zinc-200 bg-zinc-50"}`}
+          >
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold text-zinc-900">
