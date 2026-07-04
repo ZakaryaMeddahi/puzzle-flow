@@ -12,10 +12,14 @@ const base =
   "disabled:cursor-not-allowed disabled:opacity-50";
 
 const variants: Record<Variant, string> = {
-  primary:   "rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 focus-visible:ring-indigo-500",
-  secondary: "rounded-lg border border-zinc-200 bg-white text-zinc-700 shadow-sm hover:bg-zinc-50 focus-visible:ring-zinc-400",
-  ghost:     "rounded-lg text-zinc-600 hover:bg-zinc-100 focus-visible:ring-zinc-400",
-  danger:    "rounded-lg bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500",
+  primary:
+    "rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 focus-visible:ring-indigo-500",
+  secondary:
+    "rounded-lg border border-zinc-200 bg-white text-zinc-700 shadow-sm hover:bg-zinc-50 focus-visible:ring-zinc-400",
+  ghost:
+    "rounded-lg text-zinc-600 hover:bg-zinc-100 focus-visible:ring-zinc-400",
+  danger:
+    "rounded-lg bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500",
 };
 
 const sizes: Record<Size, string> = {
@@ -58,11 +62,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={`${base} ${variants[variant]} ${sizes[size]} ${className}`}
         {...props}
       >
-        {loading ? (
-          <Spinner className={spinnerColor} />
-        ) : icon ? (
-          icon
-        ) : null}
+        {loading ? <Spinner className={spinnerColor} /> : icon ? icon : null}
         {children}
       </button>
     );

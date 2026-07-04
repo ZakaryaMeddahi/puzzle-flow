@@ -10,7 +10,8 @@ const geist = Geist({
 
 export const metadata: Metadata = {
   title: "PuzzleFlow",
-  description: "Create and publish unique Sudoku puzzle books on KDP in minutes",
+  description:
+    "Create and publish unique Sudoku puzzle books on KDP in minutes",
 };
 
 export default function RootLayout({
