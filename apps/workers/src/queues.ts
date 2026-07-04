@@ -2,13 +2,13 @@ import { Queue } from "bullmq";
 import type { Difficulty } from "@kdp/puzzle-core";
 import { getRedisOptions } from "./redis";
 
-// ── Queue names ───────────────────────────────────────────────────────────────
+// Queue names
 
 export const QUEUE_PUZZLE_GENERATION = "puzzle-generation";
 export const QUEUE_PDF_GENERATION = "pdf-generation";
 export const QUEUE_CLEANUP = "cleanup";
 
-// ── Job data shapes ───────────────────────────────────────────────────────────
+// Job data shapes
 
 export interface PuzzleGenerationJobData {
   difficulty: Difficulty;
@@ -23,7 +23,7 @@ export interface CleanupJobData {
   ttlMinutes: number;
 }
 
-// ── Queue singletons ──────────────────────────────────────────────────────────
+// Queue singletons
 
 export const puzzleGenerationQueue = new Queue<PuzzleGenerationJobData>(
   QUEUE_PUZZLE_GENERATION,

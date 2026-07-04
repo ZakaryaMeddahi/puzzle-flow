@@ -4,12 +4,20 @@ import type { KdpTrimSize } from "../types";
 import { usableArea, type PageSide } from "../layout";
 
 const BLACK = rgb(0, 0, 0);
-const GREY  = rgb(0.35, 0.35, 0.35);
+const GREY = rgb(0.35, 0.35, 0.35);
 
-function wordWrap(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
+function wordWrap(
+  text: string,
+  font: PDFFont,
+  size: number,
+  maxWidth: number,
+): string[] {
   const lines: string[] = [];
   for (const para of text.split("\n")) {
-    if (para.trim() === "") { lines.push(""); continue; }
+    if (para.trim() === "") {
+      lines.push("");
+      continue;
+    }
     const words = para.split(" ");
     let current = "";
     for (const word of words) {
@@ -56,7 +64,13 @@ export function drawIntroPage(
   for (const line of wrappedLines) {
     if (y < area.y) break;
     if (line !== "") {
-      page.drawText(line, { x: area.x, y, size: bodySize, font: bodyFont, color: GREY });
+      page.drawText(line, {
+        x: area.x,
+        y,
+        size: bodySize,
+        font: bodyFont,
+        color: GREY,
+      });
     }
     y -= lineHeight;
   }

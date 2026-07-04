@@ -10,7 +10,7 @@ describe("createPrng", () => {
     }
   });
 
-  it("is deterministic — same seed produces same sequence", () => {
+  it("is deterministic - same seed produces same sequence", () => {
     const a = createPrng(12345n);
     const b = createPrng(12345n);
     for (let i = 0; i < 50; i++) {
@@ -36,7 +36,7 @@ describe("createPrng", () => {
   });
 
   it("handles zero-like state by falling back to a non-zero seed", () => {
-    // seed that maps lo^hi*const to 0 — just verify it runs without hanging
+    // seed that maps lo^hi*const to 0 - just verify it runs without hanging
     const next = createPrng(0n);
     expect(() => next()).not.toThrow();
   });
@@ -57,7 +57,7 @@ describe("shuffle", () => {
     expect(arr.sort((a, b) => a - b)).toEqual(original);
   });
 
-  it("is deterministic — same PRNG state produces same shuffle", () => {
+  it("is deterministic - same PRNG state produces same shuffle", () => {
     const arr1 = [0, 1, 2, 3, 4, 5, 6, 7, 8];
     const arr2 = [...arr1];
     shuffle(arr1, createPrng(7n));

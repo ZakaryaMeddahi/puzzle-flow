@@ -55,7 +55,7 @@ export class WebhooksController {
     @Req() req: RawBodyRequest<Request>,
     @Headers('x-signature') signature: string | undefined,
   ): Promise<{ received: boolean }> {
-    // ── 1. Verify HMAC-SHA256 signature ────────────────────────────────────
+    // 1- Verify HMAC-SHA256 signature
     const secret = this.config.getOrThrow<string>(
       'LEMONSQUEEZY_WEBHOOK_SECRET',
     );
@@ -76,7 +76,7 @@ export class WebhooksController {
       throw new BadRequestException('Invalid webhook signature');
     }
 
-    // ── 2. Parse and route event ───────────────────────────────────────────
+    // 2- Parse and route event
     const event = JSON.parse(
       rawBody.toString('utf-8'),
     ) as LemonSqueezyOrderEvent;
@@ -101,8 +101,6 @@ export class WebhooksController {
     return { received: true };
   }
 
-  // ── Order handler ──────────────────────────────────────────────────────────
-
   private async handleOrderCreated(
     customData: LemonSqueezyOrderEvent['meta']['custom_data'],
   ): Promise<void> {
@@ -125,8 +123,6 @@ export class WebhooksController {
       `order_created: confirmed puzzles and queued PDF for book ${bookId}`,
     );
   }
-
-  // ── Subscription handlers ──────────────────────────────────────────────────
 
   private async handleSubscriptionCreated(
     event: LemonSqueezyOrderEvent,

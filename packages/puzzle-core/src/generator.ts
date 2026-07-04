@@ -13,11 +13,11 @@ export function generatePuzzle(
 ): PuzzleResult {
   const next = createPrng(seed);
 
-  // ── 1. create a complete valid solution ──────────────────────────────────
+  // 1. create a complete valid solution
   const solution = new Array<number>(81).fill(0);
   solveFill(solution, next); // always succeeds for an empty grid
 
-  // ── 2. remove cells to reach the target clue count ───────────────────────
+  // 2. remove cells to reach the target clue count
   const { min, max } = CLUES_BY_DIFFICULTY[difficulty];
   const targetClues = min + Math.floor(next() * (max - min + 1));
 
@@ -47,11 +47,11 @@ export function generatePuzzle(
         cluesLeft--;
         removedThisPass++;
       } else {
-        puzzle[pos] = saved; // removal creates ambiguity — keep the clue
+        puzzle[pos] = saved; // removal creates ambiguity - keep the clue
       }
     }
 
-    if (removedThisPass === 0) break; // stuck — no more removals possible
+    if (removedThisPass === 0) break; // stuck - no more removals possible
   }
 
   return {

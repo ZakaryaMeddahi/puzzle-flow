@@ -1,5 +1,5 @@
 /**
- * Browser-safe barrel — no Prisma, no pg, no Node.js built-ins.
+ * Browser-safe barrel - no Prisma, no pg, no Node.js built-ins.
  * Import from "@kdp/shared/browser" in client-side (Next.js) code.
  */
 export * from "./enums";

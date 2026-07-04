@@ -16,11 +16,14 @@ function fontDir(): string {
   return join(dirname(pkgJson), 'fonts');
 }
 
-function getFontFiles(font?: string): { boldFile: string; regularFile: string } {
+function getFontFiles(font?: string): {
+  boldFile: string;
+  regularFile: string;
+} {
   switch (font) {
     case 'merriweather':
       return {
-        boldFile:    'Merriweather_24pt-Bold.ttf',
+        boldFile: 'Merriweather_24pt-Bold.ttf',
         regularFile: 'Merriweather_24pt-Regular.ttf',
       };
     case 'lato':
@@ -44,14 +47,18 @@ export class PreviewService {
     const { boldFile, regularFile } = getFontFiles(dto.font);
     const dir = fontDir();
     const titleFont = await doc.embedFont(readFileSync(join(dir, boldFile)));
-    const bodyFont  = await doc.embedFont(readFileSync(join(dir, regularFile)));
+    const bodyFont = await doc.embedFont(readFileSync(join(dir, regularFile)));
 
     const page = doc.addPage([width, height]);
 
     // Load any uploaded images referenced in values (keys look like "userId/uuid.ext")
     const images: Record<string, import('pdf-lib').PDFImage> = {};
     for (const [elId, val] of Object.entries(dto.values ?? {})) {
-      if (typeof val === 'string' && val.includes('/') && !val.startsWith('http')) {
+      if (
+        typeof val === 'string' &&
+        val.includes('/') &&
+        !val.startsWith('http')
+      ) {
         try {
           const bytes = await this.uploads.read(val);
           try {
@@ -65,7 +72,7 @@ export class PreviewService {
       }
     }
 
-    const def    = getPageDefinition(dto.pageType as PageType);
+    const def = getPageDefinition(dto.pageType as PageType);
     const values = resolveValues(def, dto.values ?? {});
 
     const styleOverrides: Record<string, { alignment: Alignment }> = {};
@@ -74,9 +81,13 @@ export class PreviewService {
     }
 
     renderPageFromSchema(
-      page, def, values,
-      titleFont, bodyFont,
-      trimSize, 'recto',
+      page,
+      def,
+      values,
+      titleFont,
+      bodyFont,
+      trimSize,
+      'recto',
       images,
       styleOverrides,
     );

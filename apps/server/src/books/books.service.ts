@@ -39,13 +39,13 @@ export class BooksService {
     private readonly config: ConfigService,
   ) {}
 
-  // ── Create ─────────────────────────────────────────────────────────────────
+  // Create
 
   async createBook(
     userId: string,
     dto: CreateBookDto,
   ): Promise<{ book: Book; checkoutUrl: string }> {
-    // ── Plan enforcement ─────────────────────────────────────────────────────
+    // Plan enforcement
     const user = await this.prisma.db.user.findUniqueOrThrow({
       where: { id: userId },
     });
@@ -87,9 +87,11 @@ export class BooksService {
       }
     }
 
-    // ── Free trial handling ──────────────────────────────────────────────────
+    // Free trial handling
     if (dto.freeTrial) {
-      const user = await this.prisma.db.user.findUniqueOrThrow({ where: { id: userId } });
+      const user = await this.prisma.db.user.findUniqueOrThrow({
+        where: { id: userId },
+      });
       if (user.trialUsed) {
         throw new BadRequestException('Free trial has already been used');
       }
@@ -99,7 +101,7 @@ export class BooksService {
       dto = { ...dto, styleOptions: { ...dto.styleOptions, watermark: true } };
     }
 
-    // Reserve puzzles — progressive splits across all 4 difficulties in order.
+    // Reserve puzzles - progressive splits across all 4 difficulties in order.
     const reserved = await this.reservePuzzles(userId, dto);
 
     // Persist draft book
@@ -112,13 +114,13 @@ export class BooksService {
     const book = await this.prisma.db.book.create({
       data: {
         userId,
-        title:       dto.title,
-        trimSize:    dto.trimSize,
-        difficulty:  dto.difficulty,
-        pageCount:   dto.pageCount,
-        layout:      dto.layout,
+        title: dto.title,
+        trimSize: dto.trimSize,
+        difficulty: dto.difficulty,
+        pageCount: dto.pageCount,
+        layout: dto.layout,
         frontMatter: JSON.parse(JSON.stringify(frontMatterPayload)),
-        status:      BookStatus.DRAFT,
+        status: BookStatus.DRAFT,
       },
     });
 
@@ -147,7 +149,8 @@ export class BooksService {
         data: { status: BookStatus.PENDING },
       });
       await this.queues.enqueuePdfGeneration(book.id);
-      const clientUrl = this.config.get<string>('CLIENT_URL') ?? 'http://localhost:3000';
+      const clientUrl =
+        this.config.get<string>('CLIENT_URL') ?? 'http://localhost:3000';
       checkoutUrl = `${clientUrl}/dashboard?payment_success=1&book_id=${book.id}`;
     } else {
       checkoutUrl = await this.createCheckout(book.id, userId);
@@ -163,7 +166,7 @@ export class BooksService {
     return { book, checkoutUrl };
   }
 
-  // ── Puzzle reservation ─────────────────────────────────────────────────────
+  // Puzzle reservation
 
   private async reservePuzzles(
     userId: string,
@@ -180,12 +183,12 @@ export class BooksService {
 
     // Progressive: divide puzzles evenly across 4 difficulties.
     // Each difficulty gets floor(pageCount/4); any remainder goes to the last.
-    const base  = Math.floor(dto.pageCount / 4);
+    const base = Math.floor(dto.pageCount / 4);
     const extra = dto.pageCount - base * 4;
     const results: PuzzleReservation[][] = [];
 
     for (let i = 0; i < PROGRESSIVE_ORDER.length; i++) {
-      const count  = i === PROGRESSIVE_ORDER.length - 1 ? base + extra : base;
+      const count = i === PROGRESSIVE_ORDER.length - 1 ? base + extra : base;
       const result = await this.puzzles.reservePuzzles(
         PROGRESSIVE_ORDER[i]!,
         count,
@@ -199,13 +202,17 @@ export class BooksService {
     return results.flat();
   }
 
-  // ── LemonSqueezy checkout ──────────────────────────────────────────────────
+  // LemonSqueezy checkout
 
-  private async createCheckout(bookId: string, userId: string): Promise<string> {
-    const apiKey    = this.config.getOrThrow<string>('LEMONSQUEEZY_API_KEY');
-    const storeId   = this.config.getOrThrow<string>('LEMONSQUEEZY_STORE_ID');
+  private async createCheckout(
+    bookId: string,
+    userId: string,
+  ): Promise<string> {
+    const apiKey = this.config.getOrThrow<string>('LEMONSQUEEZY_API_KEY');
+    const storeId = this.config.getOrThrow<string>('LEMONSQUEEZY_STORE_ID');
     const variantId = this.config.getOrThrow<string>('LEMONSQUEEZY_VARIANT_ID');
-    const clientUrl = this.config.get<string>('CLIENT_URL') ?? 'http://localhost:3000';
+    const clientUrl =
+      this.config.get<string>('CLIENT_URL') ?? 'http://localhost:3000';
 
     const body = {
       data: {
@@ -220,7 +227,7 @@ export class BooksService {
           },
         },
         relationships: {
-          store:   { data: { type: 'stores',   id: storeId } },
+          store: { data: { type: 'stores', id: storeId } },
           variant: { data: { type: 'variants', id: variantId } },
         },
       },
@@ -245,7 +252,7 @@ export class BooksService {
     return json.data.attributes.url;
   }
 
-  // ── Checkout recovery ─────────────────────────────────────────────────────
+  // Checkout recovery
 
   /** Return a (new) checkout URL for a draft book. */
   async getCheckoutUrl(bookId: string, userId: string): Promise<string> {
@@ -259,14 +266,15 @@ export class BooksService {
         data: { status: BookStatus.PENDING },
       });
       await this.queues.enqueuePdfGeneration(book.id);
-      const clientUrl = this.config.get<string>('CLIENT_URL') ?? 'http://localhost:3000';
+      const clientUrl =
+        this.config.get<string>('CLIENT_URL') ?? 'http://localhost:3000';
       return `${clientUrl}/dashboard?payment_success=1&book_id=${book.id}`;
     }
 
     return this.createCheckout(bookId, userId);
   }
 
-  // ── Delete ─────────────────────────────────────────────────────────────────
+  // Delete
 
   async deleteBook(bookId: string, userId: string): Promise<void> {
     await this.findOneForUser(bookId, userId); // ownership check
@@ -282,7 +290,7 @@ export class BooksService {
     await this.prisma.db.book.delete({ where: { id: bookId } });
   }
 
-  // ── Query ──────────────────────────────────────────────────────────────────
+  // Query
 
   async findAllForUser(userId: string): Promise<Book[]> {
     return this.prisma.db.book.findMany({
@@ -292,7 +300,9 @@ export class BooksService {
   }
 
   async findOneForUser(bookId: string, userId: string): Promise<Book> {
-    const book = await this.prisma.db.book.findUnique({ where: { id: bookId } });
+    const book = await this.prisma.db.book.findUnique({
+      where: { id: bookId },
+    });
     if (!book) throw new NotFoundException('Book not found');
     if (book.userId !== userId) throw new ForbiddenException();
     return book;

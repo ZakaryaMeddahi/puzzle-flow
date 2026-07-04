@@ -27,7 +27,7 @@ export class UsersService {
     private readonly config: ConfigService,
   ) {}
 
-  // ── Basic queries ──────────────────────────────────────────────────────────
+  // Basic queries
 
   async findById(id: string): Promise<User | null> {
     return this.prisma.db.user.findUnique({ where: { id } });
@@ -45,7 +45,7 @@ export class UsersService {
     return this.prisma.db.user.findFirst({ where: { subscriptionId } });
   }
 
-  // ── Subscription management ────────────────────────────────────────────────
+  // Subscription management
 
   async updateSubscription(
     userId: string,
@@ -87,7 +87,7 @@ export class UsersService {
           },
         },
         relationships: {
-          store:   { data: { type: 'stores',   id: storeId } },
+          store: { data: { type: 'stores', id: storeId } },
           variant: { data: { type: 'variants', id: variantId } },
         },
       },
@@ -141,9 +141,7 @@ export class UsersService {
 
     if (!res.ok && res.status !== 404) {
       const text = await res.text();
-      throw new Error(
-        `LemonSqueezy cancel failed (${res.status}): ${text}`,
-      );
+      throw new Error(`LemonSqueezy cancel failed (${res.status}): ${text}`);
     }
 
     await this.updateSubscription(userId, {
@@ -151,7 +149,7 @@ export class UsersService {
     });
   }
 
-  // ── Usage ──────────────────────────────────────────────────────────────────
+  // Usage
 
   async getUsage(userId: string): Promise<UsageInfo> {
     const user = await this.prisma.db.user.findUniqueOrThrow({
@@ -182,7 +180,7 @@ export class UsersService {
     };
   }
 
-  // ── Billing portal ─────────────────────────────────────────────────────────
+  // Billing portal
 
   async getBillingPortalUrl(userId: string): Promise<string> {
     const user = await this.prisma.db.user.findUniqueOrThrow({

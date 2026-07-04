@@ -3,7 +3,7 @@ import { prisma, CONSTANTS } from "@kdp/shared";
 import { getRedisOptions } from "../redis";
 import { QUEUE_CLEANUP, type CleanupJobData } from "../queues";
 
-// ── Processor ─────────────────────────────────────────────────────────────────
+// Processor
 
 async function processCleanupJob(job: Job<CleanupJobData>): Promise<void> {
   const { ttlMinutes } = job.data;
@@ -21,17 +21,17 @@ async function processCleanupJob(job: Job<CleanupJobData>): Promise<void> {
     String(ttlMinutes),
   );
 
-  console.log(`[cleanup] Released ${result} stale reservations (TTL=${ttlMinutes}m)`);
+  console.log(
+    `[cleanup] Released ${result} stale reservations (TTL=${ttlMinutes}m)`,
+  );
 }
 
-// ── Export factory ────────────────────────────────────────────────────────────
+// Export factory
 
 export function startCleanupWorker(): Worker<CleanupJobData> {
-  const worker = new Worker<CleanupJobData>(
-    QUEUE_CLEANUP,
-    processCleanupJob,
-    { connection: getRedisOptions() },
-  );
+  const worker = new Worker<CleanupJobData>(QUEUE_CLEANUP, processCleanupJob, {
+    connection: getRedisOptions(),
+  });
 
   worker.on("completed", (job) => {
     console.log(`[cleanup] Job ${job.id} completed`);

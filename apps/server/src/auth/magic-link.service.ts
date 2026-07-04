@@ -17,7 +17,8 @@ export class MagicLinkService implements OnModuleDestroy {
   private readonly fromEmail: string;
 
   constructor(private readonly config: ConfigService) {
-    const redisUrl = this.config.get<string>('REDIS_URL') ?? 'redis://localhost:6379';
+    const redisUrl =
+      this.config.get<string>('REDIS_URL') ?? 'redis://localhost:6379';
     const url = new URL(redisUrl);
 
     this.redis = new Redis({
@@ -28,9 +29,11 @@ export class MagicLinkService implements OnModuleDestroy {
     });
 
     this.resend = new Resend(this.config.getOrThrow<string>('RESEND_API_KEY'));
-    this.apiUrl    = this.config.get<string>('API_URL')    ?? 'http://localhost:5000';
-    this.clientUrl = this.config.get<string>('CLIENT_URL') ?? 'http://localhost:3000';
-    this.fromEmail = this.config.get<string>('EMAIL_FROM') ?? 'noreply@puzzleflow.app';
+    this.apiUrl = this.config.get<string>('API_URL') ?? 'http://localhost:5000';
+    this.clientUrl =
+      this.config.get<string>('CLIENT_URL') ?? 'http://localhost:3000';
+    this.fromEmail =
+      this.config.get<string>('EMAIL_FROM') ?? 'noreply@puzzleflow.app';
   }
 
   /** Generate a token, store it in Redis, and email the magic link. */
@@ -63,7 +66,7 @@ export class MagicLinkService implements OnModuleDestroy {
       });
     } catch (err) {
       this.logger.error('Failed to send magic link email', err);
-      // Don't throw — caller always responds 200 to avoid user enumeration.
+      // Don't throw - caller always responds 200 to avoid user enumeration.
     }
   }
 

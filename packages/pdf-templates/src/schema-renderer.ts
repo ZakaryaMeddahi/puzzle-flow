@@ -7,17 +7,13 @@ import type {
   ImageElement,
   Alignment,
 } from "@kdp/shared";
-import {
-  ZONE_TOP_FRAC,
-  ZONE_HEIGHT_FRAC,
-  TEXT_SIZE_PT,
-} from "@kdp/shared";
+import { ZONE_TOP_FRAC, ZONE_HEIGHT_FRAC, TEXT_SIZE_PT } from "@kdp/shared";
 import { usableArea, type PageSide } from "./layout";
 import type { KdpTrimSize } from "./types";
 
 const HEADING = rgb(0.08, 0.08, 0.08);
-const BODY    = rgb(0.35, 0.35, 0.35);
-const SUBTLE  = rgb(0.65, 0.65, 0.65);
+const BODY = rgb(0.35, 0.35, 0.35);
+const SUBTLE = rgb(0.65, 0.65, 0.65);
 
 function wordWrap(
   text: string,
@@ -76,7 +72,15 @@ export function renderPageFromSchema(
 
   // Title page gets a hand-crafted layout for professional typography.
   if (definition.pageType === "titlePage") {
-    renderTitlePageLayout(page, values, titleFont, bodyFont, area, images, styleOverrides);
+    renderTitlePageLayout(
+      page,
+      values,
+      titleFont,
+      bodyFont,
+      area,
+      images,
+      styleOverrides,
+    );
     return;
   }
 
@@ -84,23 +88,34 @@ export function renderPageFromSchema(
     const value = values[element.id] ?? "";
 
     // Zone coordinates in pdf-lib space (Y increases upward from bottom).
-    const zoneTopY    = area.y + area.height - ZONE_TOP_FRAC[element.zone]    * area.height;
-    const zoneHeight  = ZONE_HEIGHT_FRAC[element.zone] * area.height;
+    const zoneTopY =
+      area.y + area.height - ZONE_TOP_FRAC[element.zone] * area.height;
+    const zoneHeight = ZONE_HEIGHT_FRAC[element.zone] * area.height;
     const zoneBottomY = zoneTopY - zoneHeight;
-    const zoneMidY    = (zoneTopY + zoneBottomY) / 2;
+    const zoneMidY = (zoneTopY + zoneBottomY) / 2;
 
     if (element.type === "text") {
       renderTextElement(
-        page, element, value,
-        titleFont, bodyFont,
+        page,
+        element,
+        value,
+        titleFont,
+        bodyFont,
         { x: area.x, y: area.y, width: area.width },
-        zoneTopY, zoneHeight, zoneMidY,
+        zoneTopY,
+        zoneHeight,
+        zoneMidY,
         styleOverrides,
       );
     } else if (element.type === "image") {
       renderImageElement(
-        page, element, images[element.id],
-        area, zoneTopY, zoneHeight, zoneMidY,
+        page,
+        element,
+        images[element.id],
+        area,
+        zoneTopY,
+        zoneHeight,
+        zoneMidY,
       );
     }
   }
@@ -120,14 +135,14 @@ function renderTextElement(
 ): void {
   if (!value) return;
 
-  const size             = TEXT_SIZE_PT[element.size];
-  const font             = element.weight === "bold" ? titleFont : bodyFont;
-  const color            = element.weight === "bold" ? HEADING : BODY;
-  const alignment        = styleOverrides[element.id]?.alignment ?? element.alignment;
-  const isMultilineEl    = element.multiline || value.includes("\n");
-  const verticalAlignment = element.defaultVerticalAlignment
-    ?? (isMultilineEl ? "top" : "middle");
-  const zoneBottomY      = zoneTopY - zoneHeight;
+  const size = TEXT_SIZE_PT[element.size];
+  const font = element.weight === "bold" ? titleFont : bodyFont;
+  const color = element.weight === "bold" ? HEADING : BODY;
+  const alignment = styleOverrides[element.id]?.alignment ?? element.alignment;
+  const isMultilineEl = element.multiline || value.includes("\n");
+  const verticalAlignment =
+    element.defaultVerticalAlignment ?? (isMultilineEl ? "top" : "middle");
+  const zoneBottomY = zoneTopY - zoneHeight;
 
   if (element.multiline || value.includes("\n")) {
     // Multiline: flow downward from computed start, stopping at the page margin.
@@ -143,7 +158,7 @@ function renderTextElement(
         break;
       case "middle":
         // Lines are symmetrically centred around zoneMidY.
-        startY = zoneMidY + (lines.length - 1) * lineHeight / 2;
+        startY = zoneMidY + ((lines.length - 1) * lineHeight) / 2;
         break;
       default: // "top"
         startY = zoneTopY - font.heightAtSize(size);
@@ -151,7 +166,7 @@ function renderTextElement(
 
     let y = startY;
     for (const line of lines) {
-      if (y < area.y) break;  // stop at the bottom page margin
+      if (y < area.y) break; // stop at the bottom page margin
       if (line !== "") {
         const x = textX(alignment, area, font.widthOfTextAtSize(line, size));
         page.drawText(line, { x, y, size, font, color });
@@ -162,9 +177,14 @@ function renderTextElement(
     // Single line: position vertically within the zone
     let y: number;
     switch (verticalAlignment) {
-      case "top":    y = zoneTopY - font.heightAtSize(size); break;
-      case "bottom": y = zoneBottomY; break;
-      default:       y = zoneMidY - size / 2; // "middle"
+      case "top":
+        y = zoneTopY - font.heightAtSize(size);
+        break;
+      case "bottom":
+        y = zoneBottomY;
+        break;
+      default:
+        y = zoneMidY - size / 2; // "middle"
     }
     const x = textX(alignment, area, font.widthOfTextAtSize(value, size));
     page.drawText(value, { x, y, size, font, color });
@@ -182,12 +202,12 @@ function renderImageElement(
 ): void {
   if (!image) return;
 
-  const maxW = area.width  * element.maxWidthFrac;
-  const maxH = zoneHeight  * element.maxHeightFrac;
+  const maxW = area.width * element.maxWidthFrac;
+  const maxH = zoneHeight * element.maxHeightFrac;
   const { width: iw, height: ih } = image.size();
-  const scale  = Math.min(maxW / iw, maxH / ih, 1);
-  const drawW  = iw * scale;
-  const drawH  = ih * scale;
+  const scale = Math.min(maxW / iw, maxH / ih, 1);
+  const drawW = iw * scale;
+  const drawH = ih * scale;
 
   // Center horizontally in the usable area, center vertically in the zone
   const x = area.x + (area.width - drawW) / 2;
@@ -201,9 +221,12 @@ function textX(
   textWidth: number,
 ): number {
   switch (alignment) {
-    case "center": return area.x + (area.width - textWidth) / 2;
-    case "right":  return area.x + area.width - textWidth;
-    default:       return area.x;
+    case "center":
+      return area.x + (area.width - textWidth) / 2;
+    case "right":
+      return area.x + area.width - textWidth;
+    default:
+      return area.x;
   }
 }
 
@@ -223,17 +246,17 @@ export function renderTitlePageLayout(
 ): void {
   const pageH = area.height;
 
-  // ── Logo (header zone, centered) ──────────────────────────────────────────
+  // Logo (header zone, centered)
   const logoImage = images["logo"];
   if (logoImage) {
-    const maxW  = area.width  * 0.45;
-    const maxH  = pageH       * 0.10;
+    const maxW = area.width * 0.45;
+    const maxH = pageH * 0.1;
     const { width: iw, height: ih } = logoImage.size();
     const scale = Math.min(maxW / iw, maxH / ih, 1);
     const dw = iw * scale;
     const dh = ih * scale;
-    const logoTopFrac  = 0.04;
-    const logoCenterY  = area.y + pageH * (1 - logoTopFrac - 0.05);
+    const logoTopFrac = 0.04;
+    const logoCenterY = area.y + pageH * (1 - logoTopFrac - 0.05);
     page.drawImage(logoImage, {
       x: area.x + (area.width - dw) / 2,
       y: logoCenterY - dh / 2,
@@ -242,13 +265,13 @@ export function renderTitlePageLayout(
     });
   }
 
-  const titleText    = values["title"]    ?? "";
+  const titleText = values["title"] ?? "";
   const subtitleText = values["subtitle"] ?? "";
-  const authorText   = values["author"]   ?? "";
+  const authorText = values["author"] ?? "";
 
-  const titleAlignment    = styleOverrides["title"]?.alignment    ?? "center";
+  const titleAlignment = styleOverrides["title"]?.alignment ?? "center";
   const subtitleAlignment = styleOverrides["subtitle"]?.alignment ?? "center";
-  const authorAlignment   = styleOverrides["author"]?.alignment   ?? "center";
+  const authorAlignment = styleOverrides["author"]?.alignment ?? "center";
 
   function drawCentered(
     text: string,
@@ -264,24 +287,49 @@ export function renderTitlePageLayout(
     page.drawText(text, { x, y, size, font, color });
   }
 
-  // Title — bold, ~30% from top
-  drawCentered(titleText, titleFont, TEXT_SIZE_PT["2xl"], 0.30, titleAlignment, HEADING);
+  // Title - bold, ~30% from top
+  drawCentered(
+    titleText,
+    titleFont,
+    TEXT_SIZE_PT["2xl"],
+    0.3,
+    titleAlignment,
+    HEADING,
+  );
 
-  // Subtitle — regular, ~46% from top
-  drawCentered(subtitleText, bodyFont, TEXT_SIZE_PT["lg"], 0.46, subtitleAlignment, BODY);
+  // Subtitle - regular, ~46% from top
+  drawCentered(
+    subtitleText,
+    bodyFont,
+    TEXT_SIZE_PT["lg"],
+    0.46,
+    subtitleAlignment,
+    BODY,
+  );
 
-  // Decorative rule — drawn only when there's a subtitle, just below it
+  // Decorative rule - drawn only when there's a subtitle, just below it
   if (subtitleText) {
     const ruleW = area.width * 0.38;
-    const ruleY = area.y + pageH * (1 - 0.46) - bodyFont.heightAtSize(TEXT_SIZE_PT["lg"]) - 14;
+    const ruleY =
+      area.y +
+      pageH * (1 - 0.46) -
+      bodyFont.heightAtSize(TEXT_SIZE_PT["lg"]) -
+      14;
     page.drawLine({
       start: { x: area.x + (area.width - ruleW) / 2, y: ruleY },
-      end:   { x: area.x + (area.width + ruleW) / 2, y: ruleY },
+      end: { x: area.x + (area.width + ruleW) / 2, y: ruleY },
       thickness: 0.5,
       color: SUBTLE,
     });
   }
 
-  // Author — lighter, ~72% from top
-  drawCentered(authorText, bodyFont, TEXT_SIZE_PT["md"], 0.72, authorAlignment, SUBTLE);
+  // Author - lighter, ~72% from top
+  drawCentered(
+    authorText,
+    bodyFont,
+    TEXT_SIZE_PT["md"],
+    0.72,
+    authorAlignment,
+    SUBTLE,
+  );
 }

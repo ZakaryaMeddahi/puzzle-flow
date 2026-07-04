@@ -45,7 +45,7 @@ describe("hashPuzzle", () => {
     expect(/^[0-9a-f]{64}$/.test(h)).toBe(true);
   });
 
-  it("is deterministic — same input always produces same hash", () => {
+  it("is deterministic - same input always produces same hash", () => {
     expect(hashPuzzle(ZEROS)).toBe(hashPuzzle(ZEROS));
   });
 

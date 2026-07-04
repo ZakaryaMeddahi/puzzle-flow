@@ -38,7 +38,7 @@ export class AuthController {
   @Public()
   @UseGuards(AuthGuard('google'))
   googleAuth(): void {
-    // Passport handles the redirect — this method body is never reached.
+    // Passport handles the redirect - this method body is never reached.
   }
 
   /**
@@ -57,7 +57,10 @@ export class AuthController {
       user.email,
     );
 
-    const clientUrl = this.config.get<string>('CLIENT_URL', 'http://localhost:3000');
+    const clientUrl = this.config.get<string>(
+      'CLIENT_URL',
+      'http://localhost:3000',
+    );
     const params = new URLSearchParams({ accessToken, refreshToken });
     res.redirect(`${clientUrl}/auth/callback?${params.toString()}`);
   }
@@ -110,7 +113,10 @@ export class AuthController {
     }
 
     const user = await this.users.findOrCreate(email);
-    const { accessToken, refreshToken } = this.authService.generateTokens(user.id, user.email);
+    const { accessToken, refreshToken } = this.authService.generateTokens(
+      user.id,
+      user.email,
+    );
     const params = new URLSearchParams({ accessToken, refreshToken });
     res.redirect(`${clientUrl}/auth/callback?${params.toString()}`);
   }

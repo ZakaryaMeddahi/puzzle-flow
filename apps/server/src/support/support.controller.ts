@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { SupportService } from './support.service';
 import { ContactDto } from './dto/contact.dto';
 import { Public } from '../auth/decorators/public.decorator';

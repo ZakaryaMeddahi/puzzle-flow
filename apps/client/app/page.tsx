@@ -4,7 +4,7 @@ import Link from "next/link";
 const FEATURES = [
   {
     title: "Uniqueness Engine",
-    desc: "Every puzzle is cryptographically hashed. No duplicate within your book, or across your entire catalog — ever.",
+    desc: "Every puzzle is cryptographically hashed. No duplicate within your book, or across your entire catalog - ever.",
     icon: (
       <svg
         className="h-6 w-6"
@@ -80,7 +80,7 @@ const FEATURES = [
   },
   {
     title: "Live PDF Preview",
-    desc: "See the exact PDF output as you type — fonts, alignment, logo placement. What you see is exactly what KDP will print.",
+    desc: "See the exact PDF output as you type - fonts, alignment, logo placement. What you see is exactly what KDP will print.",
     icon: (
       <svg
         className="h-6 w-6"
@@ -134,7 +134,7 @@ const STEPS = [
   {
     number: "02",
     title: "Customize front matter",
-    desc: "Design your title page, add copyright text, and preview every page exactly as it will appear in the final PDF — live, in real time.",
+    desc: "Design your title page, add copyright text, and preview every page exactly as it will appear in the final PDF - live, in real time.",
     img: "/title-step-page.png",
     alt: "Title page editor with live PDF preview",
   },
@@ -304,7 +304,7 @@ export default function LandingPage() {
 
             {/* Right: stacked PDF pages */}
             <div className="relative mx-auto h-[460px] w-full max-w-[380px]">
-              {/* Back page — slowest float, widest offset */}
+              {/* Back page - slowest float, widest offset */}
               <div className="hero-page-back absolute inset-0">
                 <div
                   className="absolute inset-0 overflow-hidden rounded-xl shadow-lg"
@@ -320,7 +320,7 @@ export default function LandingPage() {
                   />
                 </div>
               </div>
-              {/* Middle page — medium float */}
+              {/* Middle page - medium float */}
               <div className="hero-page-mid absolute inset-0">
                 <div
                   className="absolute inset-0 overflow-hidden rounded-xl shadow-xl"
@@ -336,7 +336,7 @@ export default function LandingPage() {
                   />
                 </div>
               </div>
-              {/* Front page — fastest float */}
+              {/* Front page - fastest float */}
               <div className="hero-page-front absolute inset-0">
                 <div className="absolute inset-0 overflow-hidden rounded-xl shadow-2xl">
                   <Image
@@ -444,7 +444,7 @@ export default function LandingPage() {
               This is exactly what you'll publish
             </h2>
             <p className="mx-auto max-w-xl text-base text-zinc-500">
-              Every page is generated fresh and rendered as a true PDF — not a
+              Every page is generated fresh and rendered as a true PDF - not a
               template screenshot. What you see here is what KDP will print.
             </p>
           </div>
@@ -514,7 +514,7 @@ export default function LandingPage() {
               Uniqueness engine
             </p>
             <h2 className="mb-4 text-4xl font-bold tracking-tight">
-              No puzzle will ever repeat — guaranteed
+              No puzzle will ever repeat - guaranteed
             </h2>
             <p className="mx-auto max-w-xl text-base text-zinc-400">
               PuzzleFlow cryptographically hashes every generated puzzle and

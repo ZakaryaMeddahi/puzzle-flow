@@ -1,8 +1,8 @@
-# KDP Puzzle Platform — Claude Code Reference
+# KDP Puzzle Platform - Claude Code Reference
 
 > **This README is written for Claude Code.**
 > Read this entire file before touching any code. Do not make assumptions
-> about structure, patterns, or conventions — everything is specified here.
+> about structure, patterns, or conventions - everything is specified here.
 
 ---
 
@@ -10,7 +10,7 @@
 
 A SaaS platform that lets KDP (Kindle Direct Publishing) publishers generate
 unique, print-ready Sudoku puzzle books as PDFs. The core value proposition
-is a **uniqueness engine** that guarantees no two puzzles are the same —
+is a **uniqueness engine** that guarantees no two puzzles are the same -
 within a book, across a user's books, or across the entire platform.
 
 Publishers upload nothing. They configure a book (difficulty, page count,
@@ -19,7 +19,7 @@ trim size), pay, and download a KDP-ready PDF with an answer key.
 ---
 
 **Rule:** Never put business logic in `apps/`. Logic lives in `packages/`.
-Apps only wire things together — routes, controllers, UI components.
+Apps only wire things together - routes, controllers, UI components.
 
 ---
 
@@ -71,10 +71,10 @@ no side effects. Pure functions only.
 **Exports:**
 
 - `generatePuzzle(seed: bigint, difficulty: Difficulty): PuzzleResult`
-- `normalizePuzzle(puzzle: string): string` — produces canonical 81-char string
-- `hashPuzzle(normalized: string): string` — SHA-256 hex digest
-- `validatePuzzle(puzzle: string): boolean` — confirms unique solution exists
-- `seedToMetadata(seed: bigint): SeedMetadata` — decodes difficulty + sequence from seed
+- `normalizePuzzle(puzzle: string): string` - produces canonical 81-char string
+- `hashPuzzle(normalized: string): string` - SHA-256 hex digest
+- `validatePuzzle(puzzle: string): boolean` - confirms unique solution exists
+- `seedToMetadata(seed: bigint): SeedMetadata` - decodes difficulty + sequence from seed
 
 **Key rule:** This package has zero external dependencies except the Node.js
 built-ins (`crypto` for SHA-256). No Prisma, no Redis, no HTTP clients.
@@ -88,7 +88,7 @@ metadata and returns a `Uint8Array` PDF buffer.
 **Exports:**
 
 - `generateBookPdf(book: BookPdfInput): Promise<Uint8Array>`
-- `generatePreviewPdf(puzzles: PuzzleResult[]): Promise<Uint8Array>` — low-res, watermarked
+- `generatePreviewPdf(puzzles: PuzzleResult[]): Promise<Uint8Array>` - low-res, watermarked
 
 **KDP requirements this package must enforce:**
 
@@ -212,7 +212,7 @@ Workers continuously pre-generate puzzles into the pool.
 
 ---
 
-## API Structure (NestJS — `apps/server`)
+## API Structure (NestJS - `apps/server`)
 
 ```
 src/
@@ -245,7 +245,7 @@ GET    /puzzles/history          → User's puzzle history (hashes)
 
 ---
 
-## Worker Structure (BullMQ — `apps/workers`)
+## Worker Structure (BullMQ - `apps/workers`)
 
 ```
 src/
@@ -286,7 +286,7 @@ interface PdfGenerationJob {
 
 ---
 
-## Frontend Structure (Next.js — `apps/client`)
+## Frontend Structure (Next.js - `apps/client`)
 
 ```
 src/
@@ -408,7 +408,7 @@ export const CONSTANTS = {
 ### TypeScript
 
 - Strict mode enabled everywhere (`"strict": true` in all tsconfigs)
-- No `any` types — use `unknown` and narrow properly
+- No `any` types - use `unknown` and narrow properly
 - All async functions return typed Promises
 - DTOs use `class-validator` decorators in NestJS
 - Interfaces for data shapes, types for unions/intersections
@@ -424,10 +424,10 @@ export const CONSTANTS = {
 
 ### React / Next.js
 
-- Server Components by default — only use `'use client'` when necessary
+- Server Components by default - only use `'use client'` when necessary
 - Fetch data in Server Components, pass to Client Components as props
-- No `useEffect` for data fetching — use Server Components or SWR
-- Tailwind for all styling — no CSS modules, no inline styles
+- No `useEffect` for data fetching - use Server Components or SWR
+- Tailwind for all styling - no CSS modules, no inline styles
 - Component files named with PascalCase, utility files with camelCase
 
 ### Error Handling
@@ -438,7 +438,7 @@ export const CONSTANTS = {
 
 ### Testing
 
-- `packages/puzzle-core`: 100% unit test coverage required — it's pure functions
+- `packages/puzzle-core`: 100% unit test coverage required - it's pure functions
 - `apps/server`: integration tests for all endpoints using `supertest`
 - `apps/workers`: unit tests for job processors using mocked Prisma + Redis
 
@@ -446,14 +446,14 @@ export const CONSTANTS = {
 
 ## What NOT To Do
 
-- **Never** import from `apps/*` into `packages/*` — packages must not depend on apps
-- **Never** call the database directly from `packages/puzzle-core` — pure functions only
-- **Never** hardcode difficulty strings — use the `Difficulty` enum from `@kdp/shared`
-- **Never** generate a puzzle without registering its hash — uniqueness breaks silently
-- **Never** skip the `FOR UPDATE SKIP LOCKED` on reservation queries — race conditions
-- **Never** store the full puzzle solution in the PDF — only in the answer key section
-- **Never** commit `.env` files — they are gitignored
-- **Never** create a second `prisma/schema.prisma` — only one exists in `packages/shared`
+- **Never** import from `apps/*` into `packages/*` - packages must not depend on apps
+- **Never** call the database directly from `packages/puzzle-core` - pure functions only
+- **Never** hardcode difficulty strings - use the `Difficulty` enum from `@kdp/shared`
+- **Never** generate a puzzle without registering its hash - uniqueness breaks silently
+- **Never** skip the `FOR UPDATE SKIP LOCKED` on reservation queries - race conditions
+- **Never** store the full puzzle solution in the PDF - only in the answer key section
+- **Never** commit `.env` files - they are gitignored
+- **Never** create a second `prisma/schema.prisma` - only one exists in `packages/shared`
 
 ---
 
@@ -489,16 +489,16 @@ pnpm db:studio
 
 Follow this order strictly. Each step depends on the previous.
 
-1. `packages/shared` — finalize all types, enums, constants, Prisma client export
-2. `packages/puzzle-core` — Sudoku generator, hash normalization, tests
-3. `apps/server` — Auth module (JWT + Google OAuth)
-4. `apps/server` — Puzzle reservation service (with SKIP LOCKED)
-5. `apps/workers` — BullMQ setup + puzzle pre-generation worker
-6. `apps/workers` — Cleanup worker (stale reservations)
-7. `packages/pdf-templates` — KDP PDF layout + answer key
-8. `apps/workers` — PDF generation worker
-9. `apps/server` — Books module + LemonSqueezy payment webhook
-10. `apps/client` — Auth pages (login, Google callback)
-11. `apps/client` — Dashboard (book history, download links)
-12. `apps/client` — Book builder (multi-step form + low-res preview)
+1. `packages/shared` - finalize all types, enums, constants, Prisma client export
+2. `packages/puzzle-core` - Sudoku generator, hash normalization, tests
+3. `apps/server` - Auth module (JWT + Google OAuth)
+4. `apps/server` - Puzzle reservation service (with SKIP LOCKED)
+5. `apps/workers` - BullMQ setup + puzzle pre-generation worker
+6. `apps/workers` - Cleanup worker (stale reservations)
+7. `packages/pdf-templates` - KDP PDF layout + answer key
+8. `apps/workers` - PDF generation worker
+9. `apps/server` - Books module + LemonSqueezy payment webhook
+10. `apps/client` - Auth pages (login, Google callback)
+11. `apps/client` - Dashboard (book history, download links)
+12. `apps/client` - Book builder (multi-step form + low-res preview)
 ```

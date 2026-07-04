@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "node16",
+    "moduleResolution": "node16",
     "esModuleInterop": true,
     "isolatedModules": true,
     "declaration": true,
@@ -9,10 +9,11 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "ES2023",
+    "target": "ES2022",
+    "strict": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
+    // "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,

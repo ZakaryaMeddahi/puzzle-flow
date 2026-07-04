@@ -12,7 +12,7 @@ export interface PuzzleEntry {
   puzzle: string;
   /** 81-char string; all digits 1-9, no blanks */
   solution: string;
-  /** Difficulty level — used for the difficulty badge feature */
+  /** Difficulty level -- used for the difficulty badge feature */
   difficulty?: string;
 }
 
@@ -28,7 +28,7 @@ export interface BookOptions {
   font?: BookFont;
   /** Show page numbers on puzzle and answer pages. Default: true */
   pageNumbers?: boolean;
-  /** Puzzle label format on puzzle pages. Default: "puzzle-n" → "Puzzle 1" */
+  /** Puzzle label format on puzzle pages. Default: "puzzle-n" -> "Puzzle 1" */
   labelFormat?: PuzzleLabelFormat;
   /** Grid line visual style. Default: "standard" */
   gridStyle?: GridStyle;

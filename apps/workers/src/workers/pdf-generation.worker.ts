@@ -17,8 +17,9 @@ import type { FrontMatterConfig, PageType } from "@kdp/shared";
 import { getRedisOptions } from "../redis";
 import { QUEUE_PDF_GENERATION, type PdfGenerationJobData } from "../queues";
 
-const PDF_OUTPUT_DIR = process.env["PDF_OUTPUT_DIR"] ?? join(process.cwd(), "pdfs");
-const UPLOAD_DIR     = process.env["UPLOAD_DIR"]     ?? join(process.cwd(), "uploads");
+const PDF_OUTPUT_DIR =
+  process.env["PDF_OUTPUT_DIR"] ?? join(process.cwd(), "pdfs");
+const UPLOAD_DIR = process.env["UPLOAD_DIR"] ?? join(process.cwd(), "uploads");
 
 // Page types that may contain image elements
 const FRONT_MATTER_PAGE_TYPES: PageType[] = [
@@ -29,13 +30,13 @@ const FRONT_MATTER_PAGE_TYPES: PageType[] = [
 ];
 
 interface StyleOptions {
-  font?:            BookFont;
-  pageNumbers?:     boolean;
-  labelFormat?:     PuzzleLabelFormat;
-  gridStyle?:       GridStyle;
+  font?: BookFont;
+  pageNumbers?: boolean;
+  labelFormat?: PuzzleLabelFormat;
+  gridStyle?: GridStyle;
   difficultyBadge?: boolean;
-  clueBackground?:  boolean;
-  watermark?:       boolean;
+  clueBackground?: boolean;
+  watermark?: boolean;
 }
 
 /**
@@ -70,7 +71,7 @@ async function loadFrontMatterImages(
   return imageBytes;
 }
 
-// ── Processor ─────────────────────────────────────────────────────────────────
+// Processor
 
 async function processPdfGenerationJob(
   job: Job<PdfGenerationJobData>,
@@ -82,9 +83,11 @@ async function processPdfGenerationJob(
   // 1. Load the book
   const book = await prisma.book.findUniqueOrThrow({ where: { id: bookId } });
 
-  // 2. Load confirmed puzzle seeds — order by difficulty category then id so
+  // 2. Load confirmed puzzle seeds - order by difficulty category then id so
   //    progressive books appear easy → medium → hard → expert.
-  const rows = await prisma.$queryRawUnsafe<Array<{ seed: string | bigint; difficulty: string }>>(
+  const rows = await prisma.$queryRawUnsafe<
+    Array<{ seed: string | bigint; difficulty: string }>
+  >(
     `
     SELECT seed, difficulty
     FROM puzzle_registry
@@ -107,7 +110,7 @@ async function processPdfGenerationJob(
     throw new Error(`No confirmed puzzles found for book ${bookId}`);
   }
 
-  // 3. Reconstruct puzzles from seeds (deterministic — no extra DB storage needed)
+  // 3. Reconstruct puzzles from seeds (deterministic - no extra DB storage needed)
   await job.updateProgress(5);
 
   const puzzleEntries: PuzzleEntry[] = rows.map((row, idx) => {
@@ -119,7 +122,9 @@ async function processPdfGenerationJob(
 
   // 4. Build BookOptions
   const validLayouts: PuzzlesPerPage[] = [1, 2, 4];
-  const puzzlesPerPage: PuzzlesPerPage = validLayouts.includes(book.layout as PuzzlesPerPage)
+  const puzzlesPerPage: PuzzlesPerPage = validLayouts.includes(
+    book.layout as PuzzlesPerPage,
+  )
     ? (book.layout as PuzzlesPerPage)
     : 1;
 
@@ -130,22 +135,22 @@ async function processPdfGenerationJob(
   const styleOptions: StyleOptions = storedFm?._style ?? {};
   // Strip _style before passing frontMatter to the PDF renderer
   const fm: FrontMatterConfig | null = storedFm
-    ? (({ _style: _removed, ...rest }) => rest)(storedFm) as FrontMatterConfig
+    ? ((({ _style: _removed, ...rest }) => rest)(storedFm) as FrontMatterConfig)
     : null;
 
   const options: BookOptions = {
-    title:           book.title ?? "Sudoku Puzzle Book",
-    difficulty:      book.difficulty,
-    trimSize:        book.trimSize as BookOptions["trimSize"],
-    puzzles:         puzzleEntries,
+    title: book.title ?? "Sudoku Puzzle Book",
+    difficulty: book.difficulty,
+    trimSize: book.trimSize as BookOptions["trimSize"],
+    puzzles: puzzleEntries,
     puzzlesPerPage,
-    font:            styleOptions.font            ?? "roboto",
-    pageNumbers:     styleOptions.pageNumbers     ?? true,
-    labelFormat:     styleOptions.labelFormat     ?? "puzzle-n",
-    gridStyle:       styleOptions.gridStyle       ?? "standard",
+    font: styleOptions.font ?? "roboto",
+    pageNumbers: styleOptions.pageNumbers ?? true,
+    labelFormat: styleOptions.labelFormat ?? "puzzle-n",
+    gridStyle: styleOptions.gridStyle ?? "standard",
     difficultyBadge: styleOptions.difficultyBadge ?? false,
-    clueBackground:  styleOptions.clueBackground  ?? false,
-    watermark:       styleOptions.watermark        ?? false,
+    clueBackground: styleOptions.clueBackground ?? false,
+    watermark: styleOptions.watermark ?? false,
   };
   await job.updateProgress(20);
   const imageBytes = fm ? await loadFrontMatterImages(fm) : {};
@@ -170,7 +175,7 @@ async function processPdfGenerationJob(
   console.log(`[pdf-generation] Done: bookId=${bookId} puzzles=${rows.length}`);
 }
 
-// ── Export factory ────────────────────────────────────────────────────────────
+// Export factory
 
 export function startPdfGenerationWorker(): Worker<PdfGenerationJobData> {
   const worker = new Worker<PdfGenerationJobData>(

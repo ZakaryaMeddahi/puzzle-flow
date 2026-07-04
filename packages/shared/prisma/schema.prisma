@@ -8,19 +8,19 @@ datasource db {
 }
 
 model User {
-  id              String           @id @default(uuid())
-  email           String           @unique
-  name            String?
-  trialUsed              Boolean   @default(false)  @map("trial_used")
-  plan                   String    @default("pay_per_book") @map("plan")
-  planPeriodStart        DateTime? @map("plan_period_start")
-  subscriptionId         String?   @map("subscription_id")
-  lemonSqueezyCustomerId String?   @map("lemonsqueezy_customer_id")
-  currentPeriodEnd       DateTime? @map("current_period_end")
-  subscriptionStatus     String?   @map("subscription_status")
-  createdAt              DateTime  @default(now()) @map("created_at")
-  books           Book[]
-  puzzles         PuzzleRegistry[]
+  id                     String           @id @default(uuid())
+  email                  String           @unique
+  name                   String?
+  trialUsed              Boolean          @default(false) @map("trial_used")
+  plan                   String           @default("pay_per_book") @map("plan")
+  planPeriodStart        DateTime?        @map("plan_period_start")
+  subscriptionId         String?          @map("subscription_id")
+  lemonSqueezyCustomerId String?          @map("lemonsqueezy_customer_id")
+  currentPeriodEnd       DateTime?        @map("current_period_end")
+  subscriptionStatus     String?          @map("subscription_status")
+  createdAt              DateTime         @default(now()) @map("created_at")
+  books                  Book[]
+  puzzles                PuzzleRegistry[]
 
   @@map("users")
 }
@@ -49,20 +49,20 @@ model PuzzleRegistry {
 }
 
 model Book {
-  id         String           @id @default(uuid())
-  userId     String           @map("user_id")
-  title      String?
-  trimSize   String           @map("trim_size")
-  difficulty String
+  id          String           @id @default(uuid())
+  userId      String           @map("user_id")
+  title       String?
+  trimSize    String           @map("trim_size")
+  difficulty  String
   pageCount   Int              @map("page_count")
   layout      Int              @default(1)
-  frontMatter Json?   @map("front_matter")
-  status      String  @default("draft")
-  pdfPath    String?          @map("pdf_path")
-  expiresAt  DateTime?        @map("expires_at")
-  createdAt  DateTime         @default(now()) @map("created_at")
-  user       User             @relation(fields: [userId], references: [id])
-  puzzles    PuzzleRegistry[]
+  frontMatter Json?            @map("front_matter")
+  status      String           @default("draft")
+  pdfPath     String?          @map("pdf_path")
+  expiresAt   DateTime?        @map("expires_at") // TODO: remove this field when we implement a subscription system
+  createdAt   DateTime         @default(now()) @map("created_at")
+  user        User             @relation(fields: [userId], references: [id])
+  puzzles     PuzzleRegistry[]
 
   @@map("books")
 }

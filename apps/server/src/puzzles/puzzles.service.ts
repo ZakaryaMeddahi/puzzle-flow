@@ -25,7 +25,7 @@ export interface PuzzleHistoryItem {
 export class PuzzlesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  // ── reservation ───────────────────────────────────────────────────────────
+  // reservation
 
   /**
    * atomically reserve `count` available puzzles for a user.
@@ -46,7 +46,7 @@ export class PuzzlesService {
     userId: string,
   ): Promise<PuzzleReservation[]> {
     const reserved = await this.prisma.db.$transaction(async (tx) => {
-      // ── build parameterized SELECT query ────────────────────────────────
+      // build parameterized SELECT query
       const params: Array<string | number> = [];
 
       let sql =
@@ -75,7 +75,7 @@ export class PuzzlesService {
         );
       }
 
-      // ── update status to 'pending' ───────────────────────────────────────
+      // update status to 'pending' ───────────────────────────────────────
       const ids = rows.map((r) => r.id);
 
       await tx.$executeRawUnsafe(
@@ -97,7 +97,7 @@ export class PuzzlesService {
     }));
   }
 
-  // ── lifecycle helpers (called by BooksService) ────────────────────────────
+  // lifecycle helpers (called by BooksService)
 
   /**
    * mark all pending puzzles for a book as confirmed (after successful payment).
@@ -125,7 +125,7 @@ export class PuzzlesService {
     });
   }
 
-  // ── query ─────────────────────────────────────────────────────────────────
+  // query
 
   /** return all confirmed/pending puzzle hashes for the authenticated user. */
   async getHistory(userId: string): Promise<PuzzleHistoryItem[]> {

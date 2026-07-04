@@ -26,12 +26,12 @@ async function main(): Promise<void> {
   await registerRepeatableJobs();
 
   const puzzleWorker = startPuzzleGenerationWorker();
-  const pdfWorker    = startPdfGenerationWorker();
+  const pdfWorker = startPdfGenerationWorker();
   const cleanupWorker = startCleanupWorker();
-  const monitorTimer  = startPoolMonitor();
+  const monitorTimer = startPoolMonitor();
 
   const shutdown = async (signal: string): Promise<void> => {
-    console.log(`[workers] ${signal} received — shutting down gracefully`);
+    console.log(`[workers] ${signal} received - shutting down gracefully`);
     clearInterval(monitorTimer);
     await Promise.all([
       puzzleWorker.close(),
@@ -42,7 +42,7 @@ async function main(): Promise<void> {
   };
 
   process.on("SIGTERM", () => void shutdown("SIGTERM"));
-  process.on("SIGINT",  () => void shutdown("SIGINT"));
+  process.on("SIGINT", () => void shutdown("SIGINT"));
 
   console.log("[workers] All workers running. Waiting for jobs…");
 }

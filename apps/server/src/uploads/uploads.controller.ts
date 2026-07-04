@@ -24,7 +24,9 @@ export class UploadsController {
    * The key is stored in frontMatter.pageType.values[elementId] in the DB.
    */
   @Post()
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_FILE_SIZE } }))
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: MAX_FILE_SIZE } }),
+  )
   async upload(
     @CurrentUser() user: AuthenticatedUser,
     @UploadedFile() file: Express.Multer.File,

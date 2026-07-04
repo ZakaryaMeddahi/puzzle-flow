@@ -27,7 +27,7 @@ const PLAN_COLORS: Record<string, string> = {
 };
 
 function formatDate(iso: string | null | undefined): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return new Date(iso).toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",

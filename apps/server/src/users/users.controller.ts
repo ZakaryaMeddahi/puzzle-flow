@@ -22,13 +22,13 @@ export class UsersController {
     return this.users.findById(user.userId);
   }
 
-  /** GET /users/me/usage — returns plan, books used this period, and limit */
+  /** GET /users/me/usage - returns plan, books used this period, and limit */
   @Get('me/usage')
   async usage(@CurrentUser() user: AuthenticatedUser) {
     return this.users.getUsage(user.userId);
   }
 
-  /** POST /users/me/subscription — create a subscription checkout URL */
+  /** POST /users/me/subscription - create a subscription checkout URL */
   @Post('me/subscription')
   async subscribe(
     @CurrentUser() user: AuthenticatedUser,
@@ -41,14 +41,14 @@ export class UsersController {
     return { checkoutUrl };
   }
 
-  /** DELETE /users/me/subscription — cancel active subscription */
+  /** DELETE /users/me/subscription - cancel active subscription */
   @Delete('me/subscription')
   @HttpCode(HttpStatus.NO_CONTENT)
   async cancel(@CurrentUser() user: AuthenticatedUser): Promise<void> {
     await this.users.cancelSubscription(user.userId);
   }
 
-  /** GET /users/me/billing-portal — LemonSqueezy customer portal URL */
+  /** GET /users/me/billing-portal - LemonSqueezy customer portal URL */
   @Get('me/billing-portal')
   async billingPortal(@CurrentUser() user: AuthenticatedUser) {
     const url = await this.users.getBillingPortalUrl(user.userId);

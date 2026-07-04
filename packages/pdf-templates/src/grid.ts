@@ -2,8 +2,8 @@ import type { PDFPage, PDFFont } from "pdf-lib";
 import { rgb } from "pdf-lib";
 
 const BLACK = rgb(0, 0, 0);
-const THIN  = 0.5; // pt — cell border thickness
-const THICK = 2;   // pt — 3×3 box border thickness
+const THIN = 0.5; // pt -- cell border thickness
+const THICK = 2; // pt -- 3×3 box border thickness
 
 /**
  * Draw a Sudoku grid onto `page`.
@@ -33,11 +33,11 @@ export function drawGrid(
 ): void {
   const cell = size / 9;
 
-  const boxColor  = gridStyle === "minimal" ? rgb(0.55, 0.55, 0.55) : BLACK;
+  const boxColor = gridStyle === "minimal" ? rgb(0.55, 0.55, 0.55) : BLACK;
   const cellColor = gridStyle === "minimal" ? rgb(0.78, 0.78, 0.78) : BLACK;
-  const boxThick  = gridStyle === "minimal" ? 1.5 : THICK;
+  const boxThick = gridStyle === "minimal" ? 1.5 : THICK;
 
-  // ── clue cell backgrounds (drawn first so grid lines appear on top) ─────────
+  // clue cell backgrounds (drawn first so grid lines appear on top)
   if (clueBackground) {
     const bgColor = rgb(0.88, 0.88, 0.88);
     const mask = clueMask ?? grid;
@@ -47,40 +47,40 @@ export function drawGrid(
       const col = i % 9;
       const row = (i / 9) | 0;
       page.drawRectangle({
-        x:      startX + col * cell,
-        y:      startY + (8 - row) * cell,
-        width:  cell,
+        x: startX + col * cell,
+        y: startY + (8 - row) * cell,
+        width: cell,
         height: cell,
-        color:  bgColor,
+        color: bgColor,
       });
     }
   }
 
-  // ── horizontal lines ───────────────────────────────────────────────────────
+  // horizontal lines
   for (let r = 0; r <= 9; r++) {
-    const y     = startY + r * cell;
+    const y = startY + r * cell;
     const isBox = r % 3 === 0;
     page.drawLine({
-      start: { x: startX,        y },
-      end:   { x: startX + size, y },
+      start: { x: startX, y },
+      end: { x: startX + size, y },
       thickness: isBox ? boxThick : THIN,
-      color:     isBox ? boxColor : cellColor,
+      color: isBox ? boxColor : cellColor,
     });
   }
 
-  // ── vertical lines ─────────────────────────────────────────────────────────
+  // vertical lines
   for (let c = 0; c <= 9; c++) {
-    const x     = startX + c * cell;
+    const x = startX + c * cell;
     const isBox = c % 3 === 0;
     page.drawLine({
       start: { x, y: startY },
-      end:   { x, y: startY + size },
+      end: { x, y: startY + size },
       thickness: isBox ? boxThick : THIN,
-      color:     isBox ? boxColor : cellColor,
+      color: isBox ? boxColor : cellColor,
     });
   }
 
-  // ── clue digits ────────────────────────────────────────────────────────────
+  // clue digits
   for (let i = 0; i < 81; i++) {
     const ch = grid[i]!;
     if (ch === "0" || ch === ".") continue;
@@ -91,10 +91,10 @@ export function drawGrid(
     // In pdf-lib, y=0 is the bottom of the page, so row 0 maps to the top
     // of the grid (highest y). We subtract (row+1)*cell and add half a cell
     // for vertical centering.
-    const charWidth  = font.widthOfTextAtSize(ch, fontSize);
+    const charWidth = font.widthOfTextAtSize(ch, fontSize);
     const charHeight = font.heightAtSize(fontSize) * 0.6; // optical centre
 
-    const x = startX + col * cell + (cell - charWidth)  / 2;
+    const x = startX + col * cell + (cell - charWidth) / 2;
     const y = startY + (8 - row) * cell + (cell - charHeight) / 2;
 
     page.drawText(ch, { x, y, size: fontSize, font, color: BLACK });

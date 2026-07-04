@@ -23,7 +23,7 @@ describe("generatePuzzle", () => {
     expect(/^[1-9]{81}$/.test(result.solution)).toBe(true);
   });
 
-  it("is deterministic — same seed gives same puzzle", () => {
+  it("is deterministic - same seed gives same puzzle", () => {
     const seed = encodeSeed("medium", 0, 7n);
     const a = generatePuzzle(seed, "medium");
     const b = generatePuzzle(seed, "medium");

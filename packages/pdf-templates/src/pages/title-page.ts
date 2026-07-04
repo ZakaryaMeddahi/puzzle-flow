@@ -4,13 +4,13 @@ import type { BookOptions } from "../types";
 import { usableArea, type PageSide } from "../layout";
 
 const BLACK = rgb(0, 0, 0);
-const GREY  = rgb(0.45, 0.45, 0.45);
+const GREY = rgb(0.45, 0.45, 0.45);
 
 const DIFFICULTY_LABEL: Record<string, string> = {
-  easy:        "Easy",
-  medium:      "Medium",
-  hard:        "Hard",
-  expert:      "Expert",
+  easy: "Easy",
+  medium: "Medium",
+  hard: "Hard",
+  expert: "Expert",
   progressive: "Progressive",
 };
 
@@ -30,7 +30,7 @@ export function drawTitlePage(
   const midX = area.x + area.width / 2;
   const midY = area.y + area.height / 2;
 
-  // ── Title ──────────────────────────────────────────────────────────────────
+  // Title
   const titleSize = 36;
   const titleWidth = titleFont.widthOfTextAtSize(title, titleSize);
   page.drawText(title, {
@@ -41,7 +41,7 @@ export function drawTitlePage(
     color: BLACK,
   });
 
-  // ── Difficulty ─────────────────────────────────────────────────────────────
+  // Difficulty
   const diffLabel = `${DIFFICULTY_LABEL[difficulty] ?? difficulty} Puzzles`;
   const diffSize = 20;
   const diffWidth = titleFont.widthOfTextAtSize(diffLabel, diffSize);
@@ -53,7 +53,7 @@ export function drawTitlePage(
     color: GREY,
   });
 
-  // ── Puzzle count ───────────────────────────────────────────────────────────
+  // Puzzle count
   const countLabel = `${puzzles.length} puzzles`;
   const countSize = 14;
   const countWidth = bodyFont.widthOfTextAtSize(countLabel, countSize);

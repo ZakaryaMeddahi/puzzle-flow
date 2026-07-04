@@ -7,7 +7,7 @@ const CATEGORIES = [
     faqs: [
       {
         q: "What is PuzzleFlow?",
-        a: "PuzzleFlow is a web-based tool for KDP (Kindle Direct Publishing) publishers. It generates unique, print-ready Sudoku puzzle books as KDP-compliant PDFs — complete with custom front matter, multiple layouts, difficulty levels, and a no-duplicate guarantee.",
+        a: "PuzzleFlow is a web-based tool for KDP (Kindle Direct Publishing) publishers. It generates unique, print-ready Sudoku puzzle books as KDP-compliant PDFs - complete with custom front matter, multiple layouts, difficulty levels, and a no-duplicate guarantee.",
       },
       {
         q: "Do I need any design or technical skills?",
@@ -28,7 +28,7 @@ const CATEGORIES = [
       },
       {
         q: "Which trim sizes do you support?",
-        a: "We support the three most popular KDP puzzle book sizes: 6″×9″ (most popular KDP size), 8″×10″ (large print friendly), and 8.5″×11″ (recommended for puzzle books — most readable grid size).",
+        a: "We support the three most popular KDP puzzle book sizes: 6″×9″ (most popular KDP size), 8″×10″ (large print friendly), and 8.5″×11″ (recommended for puzzle books - most readable grid size).",
       },
       {
         q: "What file format is the download?",
@@ -40,7 +40,7 @@ const CATEGORIES = [
       },
       {
         q: "Can I use the PDF on other platforms besides KDP?",
-        a: "Yes. The PDF is a standard print-ready file and works with any print-on-demand platform that accepts PDF interiors — including IngramSpark and Lulu.",
+        a: "Yes. The PDF is a standard print-ready file and works with any print-on-demand platform that accepts PDF interiors - including IngramSpark and Lulu.",
       },
     ],
   },
@@ -53,15 +53,15 @@ const CATEGORIES = [
       },
       {
         q: "What difficulty levels are available?",
-        a: "Easy (36–45 clues), Medium (27–35 clues), Hard (22–26 clues), Expert (17–21 clues), and Progressive — which automatically mixes Easy through Expert in order. Progressive is recommended for general-audience puzzle books.",
+        a: "Easy (36–45 clues), Medium (27–35 clues), Hard (22–26 clues), Expert (17–21 clues), and Progressive - which automatically mixes Easy through Expert in order. Progressive is recommended for general-audience puzzle books.",
       },
       {
         q: "How many puzzles can I put in one book?",
-        a: "Between 10 and 300 puzzles per book. Most KDP puzzle books fall in the 80–150 range — enough content to justify a price point without making the book physically too thick.",
+        a: "Between 10 and 300 puzzles per book. Most KDP puzzle books fall in the 80–150 range - enough content to justify a price point without making the book physically too thick.",
       },
       {
         q: "What layouts are available?",
-        a: "1 puzzle per page (large print, best for older audiences), 2 per page (standard — best balance of readability and page count), and 4 per page (compact — maximizes puzzle count).",
+        a: "1 puzzle per page (large print, best for older audiences), 2 per page (standard - best balance of readability and page count), and 4 per page (compact - maximizes puzzle count).",
       },
     ],
   },
@@ -78,11 +78,11 @@ const CATEGORIES = [
       },
       {
         q: "Can I customize fonts and grid styles?",
-        a: "Yes. You can choose from several fonts (Roboto, Merriweather, Lato) and two grid styles — Standard (solid black lines) and Minimal (soft grey lines). You can also toggle page numbers, difficulty star indicators, and clue cell shading.",
+        a: "Yes. You can choose from several fonts (Roboto, Merriweather, Lato) and two grid styles - Standard (solid black lines) and Minimal (soft grey lines). You can also toggle page numbers, difficulty star indicators, and clue cell shading.",
       },
       {
         q: "Is there a live preview?",
-        a: "Yes. When editing front matter pages, the right panel shows an exact PDF rendering of the page as you type — same font, same layout, same margins as the final download.",
+        a: "Yes. When editing front matter pages, the right panel shows an exact PDF rendering of the page as you type - same font, same layout, same margins as the final download.",
       },
     ],
   },
@@ -91,7 +91,7 @@ const CATEGORIES = [
     faqs: [
       {
         q: "What's the difference between the plans?",
-        a: "Pay per book ($5.99) is a single purchase with no subscription — ideal for occasional publishers. Starter ($11.99/mo) gives you 10 books per month. Pro ($23.99/mo) gives you unlimited books and catalog-wide uniqueness, meaning no puzzle ever repeats across your entire catalog.",
+        a: "Pay per book ($5.99) is a single purchase with no subscription - ideal for occasional publishers. Starter ($11.99/mo) gives you 10 books per month. Pro ($23.99/mo) gives you unlimited books and catalog-wide uniqueness, meaning no puzzle ever repeats across your entire catalog.",
       },
       {
         q: "Can I switch plans?",
@@ -99,11 +99,11 @@ const CATEGORIES = [
       },
       {
         q: "Do my PDFs expire?",
-        a: "No. Every PDF you generate is yours to keep. There are no download limits or expiry dates — download your files whenever you need them.",
+        a: "No. Every PDF you generate is yours to keep. There are no download limits or expiry dates - download your files whenever you need them.",
       },
       {
         q: "Is there a free trial?",
-        a: "Yes. Every new account gets one free trial book — up to 10 puzzles, generated instantly. Trial books include a small watermark on each page. No credit card required. You'll find the option when you click 'Create New Book'.",
+        a: "Yes. Every new account gets one free trial book - up to 10 puzzles, generated instantly. Trial books include a small watermark on each page. No credit card required. You'll find the option when you click 'Create New Book'.",
       },
     ],
   },

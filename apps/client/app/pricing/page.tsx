@@ -73,8 +73,8 @@ const COMPARISON_ROWS: { label: string; values: [string, string, string] }[] = [
     values: ["1, 2, 4/page", "1, 2, 4/page", "1, 2, 4/page"],
   },
   { label: "Custom front matter", values: ["✓", "✓", "✓"] },
-  { label: "Email support", values: ["—", "✓", "✓"] },
-  { label: "Priority support", values: ["—", "—", "✓"] },
+  { label: "Email support", values: ["-", "✓", "✓"] },
+  { label: "Priority support", values: ["-", "-", "✓"] },
 ];
 
 const FAQS = [
@@ -84,7 +84,7 @@ const FAQS = [
   },
   {
     q: "What does uniqueness level mean?",
-    a: "Book-level guarantees no duplicate puzzles within a single book. Catalog-wide (Pro) goes further — no puzzle in your account will ever repeat across any of your books, ever.",
+    a: "Book-level guarantees no duplicate puzzles within a single book. Catalog-wide (Pro) goes further - no puzzle in your account will ever repeat across any of your books, ever.",
   },
   {
     q: "Do my PDFs expire?",
@@ -92,7 +92,7 @@ const FAQS = [
   },
   {
     q: "Can I use the generated PDF directly on KDP?",
-    a: "Yes. Every PDF is generated to KDP's interior file specification — correct trim size, bleed, and margins. Just upload it as the interior file in KDP's book creation flow.",
+    a: "Yes. Every PDF is generated to KDP's interior file specification - correct trim size, bleed, and margins. Just upload it as the interior file in KDP's book creation flow.",
   },
 ];
 
@@ -225,7 +225,7 @@ export default function PricingPage() {
               </span>
               <div>
                 <p className="text-sm font-semibold text-zinc-900">
-                  Try PuzzleFlow free — no credit card required
+                  Try PuzzleFlow free - no credit card required
                 </p>
                 <p className="text-xs text-zinc-500">
                   Every new account gets one free 10-puzzle sample book,
@@ -350,7 +350,7 @@ export default function PricingPage() {
                     {row.values.map((val, i) => (
                       <td
                         key={i}
-                        className={`px-6 py-4 text-center ${val === "✓" ? "text-indigo-500 font-bold" : val === "—" ? "text-zinc-300" : "text-zinc-600"}`}
+                        className={`px-6 py-4 text-center ${val === "✓" ? "text-indigo-500 font-bold" : val === "-" ? "text-zinc-300" : "text-zinc-600"}`}
                       >
                         {val}
                       </td>

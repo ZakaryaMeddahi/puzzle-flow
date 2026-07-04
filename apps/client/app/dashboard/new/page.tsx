@@ -313,7 +313,7 @@ export default function NewBookPage() {
               Create a new book
             </h1>
             <p className="text-xs text-zinc-500">
-              Configure your puzzle book — checkout happens at the end.
+              Configure your puzzle book - checkout happens at the end.
             </p>
           </div>
         </div>

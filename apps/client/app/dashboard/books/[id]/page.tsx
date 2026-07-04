@@ -120,7 +120,7 @@ function ReadyCard({ book, title }: { book: Book; title: string }) {
             Ready to download
           </p>
           <p className="text-xs text-emerald-600">
-            Your PDF is ready — download it any time
+            Your PDF is ready - download it any time
           </p>
         </div>
       </div>
@@ -149,7 +149,7 @@ function ReadyCard({ book, title }: { book: Book; title: string }) {
       </Button>
 
       <p className="mt-3 text-center text-xs text-emerald-700">
-        KDP-ready interior file — upload directly to Kindle Direct Publishing
+        KDP-ready interior file - upload directly to Kindle Direct Publishing
       </p>
     </div>
   );

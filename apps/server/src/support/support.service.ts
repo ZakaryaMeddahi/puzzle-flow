@@ -8,8 +8,10 @@ export class SupportService {
 
   async sendContactEmail(dto: ContactDto): Promise<void> {
     const apiKey = this.config.getOrThrow<string>('RESEND_API_KEY');
-    const supportEmail = this.config.get<string>('SUPPORT_EMAIL') ?? 'support@puzzleflow.app';
-    const from = this.config.get<string>('EMAIL_FROM') ?? 'onboarding@resend.dev';
+    const supportEmail =
+      this.config.get<string>('SUPPORT_EMAIL') ?? 'support@puzzleflow.app';
+    const from =
+      this.config.get<string>('EMAIL_FROM') ?? 'onboarding@resend.dev';
 
     const body = {
       from,

@@ -184,7 +184,7 @@ export const HOW_TO_PLAY_DEFINITION: PageDefinition = {
       label: "Instructions",
       zone: "upper",
       defaultValue:
-        "Fill in the 9×9 grid so that every row, every column, and every 3×3 box contains the digits 1 through 9.\n\nEach digit may appear only once in each row, column, and box.\n\nNo math required — only logic and patience. Start with rows, columns, or boxes that have the most digits already filled in.\n\nGood luck!",
+        "Fill in the 9×9 grid so that every row, every column, and every 3×3 box contains the digits 1 through 9.\n\nEach digit may appear only once in each row, column, and box.\n\nNo math required - only logic and patience. Start with rows, columns, or boxes that have the most digits already filled in.\n\nGood luck!",
       size: "md",
       weight: "regular",
       alignment: "left",

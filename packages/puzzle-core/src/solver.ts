@@ -7,7 +7,7 @@
  * Bit k in a mask means digit (k+1) is already used.
  */
 
-// ── helpers ──────────────────────────────────────────────────────────────────
+// helpers
 
 /** number of set bits in x (for values 0-511). */
 function popcount(x: number): number {
@@ -27,7 +27,7 @@ const COL_OF = (i: number) => i % 9;
 const BOX_OF = (i: number) =>
   ((((i / 9) | 0) / 3) | 0) * 3 + (((i % 9) / 3) | 0);
 
-// ── constraint initialisation ─────────────────────────────────────────────────
+// constraint initialization
 
 interface Masks {
   rows: number[];
@@ -60,7 +60,7 @@ function buildMasks(grid: number[]): Masks | null {
   return { rows, cols, boxes };
 }
 
-// ── solution counter ──────────────────────────────────────────────────────────
+// solution counter
 
 /**
  * count solutions in `grid`, stopping early once `max` is reached.
@@ -123,7 +123,7 @@ export function countSolutions(grid: number[], max = 2): number {
   return solve();
 }
 
-// ── random fill ───────────────────────────────────────────────────────────────
+// random fill
 
 /**
  * fill all empty cells to produce a complete valid solution.

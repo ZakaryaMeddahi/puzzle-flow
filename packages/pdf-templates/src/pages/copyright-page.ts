@@ -4,7 +4,7 @@ import type { KdpTrimSize } from "../types";
 import { usableArea, type PageSide } from "../layout";
 
 const BLACK = rgb(0, 0, 0);
-const GREY  = rgb(0.5, 0.5, 0.5);
+const GREY = rgb(0.5, 0.5, 0.5);
 
 export function drawCopyrightPage(
   page: PDFPage,

@@ -1,17 +1,17 @@
 import { countSolutions, solveFill } from "../solver";
 import { createPrng } from "../prng";
 
-// A known-valid complete solution (band-shifting pattern — every row, col, box has 1-9)
+// A known-valid complete solution (band-shifting pattern - every row, col, box has 1-9)
 const SOLUTION = "123456789456789123789123456234567891567891234891234567345678912678912345912345678";
 const FULL_GRID = SOLUTION.split("").map(Number);
 
-// One empty cell — exactly one solution
+// One empty cell - exactly one solution
 const UNIQUE_PUZZLE = ("0" + SOLUTION.slice(1)).split("").map(Number);
 
-// All zeros — many solutions
+// All zeros - many solutions
 const AMBIGUOUS_PUZZLE = new Array<number>(81).fill(0);
 
-// Two 8s in the same row — impossible grid
+// Two 8s in the same row - impossible grid
 function makeConflicting(): number[] {
   const grid = new Array<number>(81).fill(0);
   grid[0] = 8;
@@ -44,7 +44,7 @@ describe("countSolutions", () => {
   });
 
   it("respects the max parameter and stops early", () => {
-    // All-empty grid has many solutions — should cap at max=1
+    // All-empty grid has many solutions - should cap at max=1
     expect(countSolutions([...AMBIGUOUS_PUZZLE], 1)).toBe(1);
   });
 });
@@ -67,7 +67,7 @@ describe("solveFill", () => {
     }
   });
 
-  it("is deterministic — same seed produces same filled grid", () => {
+  it("is deterministic - same seed produces same filled grid", () => {
     const a = new Array<number>(81).fill(0);
     const b = new Array<number>(81).fill(0);
     solveFill(a, createPrng(42n));

@@ -10,7 +10,7 @@ const DIFFICULTIES = [
 
 const CHECK_INTERVAL_MS = 60_000; // check every minute
 
-// ── Pool size query ───────────────────────────────────────────────────────────
+// Pool size query
 
 async function getAvailableCounts(): Promise<Record<string, number>> {
   const rows = await prisma.puzzleRegistry.groupBy({
@@ -32,7 +32,7 @@ const TOTAL_SLOTS = Math.ceil(
   CONSTANTS.PUZZLE_POOL_TARGET / CONSTANTS.PUZZLE_BATCH_SIZE,
 );
 
-// ── Refill logic ──────────────────────────────────────────────────────────────
+// Refill logic
 
 async function checkAndRefill(): Promise<void> {
   const counts = await getAvailableCounts();
@@ -45,7 +45,8 @@ async function checkAndRefill(): Promise<void> {
       // whose ID already exists in waiting/active state, so this is safe to
       // call every minute without compounding the queue.
       const needed = Math.ceil(
-        (CONSTANTS.PUZZLE_POOL_TARGET - available) / CONSTANTS.PUZZLE_BATCH_SIZE,
+        (CONSTANTS.PUZZLE_POOL_TARGET - available) /
+          CONSTANTS.PUZZLE_BATCH_SIZE,
       );
       const slots = Math.min(needed, TOTAL_SLOTS);
 
@@ -61,7 +62,11 @@ async function checkAndRefill(): Promise<void> {
         const existing = await puzzleGenerationQueue.getJob(jobId);
         if (existing) {
           const state = await existing.getState();
-          if (state === "waiting" || state === "active" || state === "delayed") {
+          if (
+            state === "waiting" ||
+            state === "active" ||
+            state === "delayed"
+          ) {
             continue;
           }
         }
@@ -82,13 +87,11 @@ async function checkAndRefill(): Promise<void> {
   }
 }
 
-// ── Start ─────────────────────────────────────────────────────────────────────
+// Start
 
 export function startPoolMonitor(): NodeJS.Timeout {
   // Run immediately on startup, then on the interval
-  checkAndRefill().catch((err) =>
-    console.error("[pool-monitor] Error:", err),
-  );
+  checkAndRefill().catch((err) => console.error("[pool-monitor] Error:", err));
 
   return setInterval(() => {
     checkAndRefill().catch((err) =>

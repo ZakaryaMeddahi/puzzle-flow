@@ -21,7 +21,7 @@ import type { AuthenticatedUser } from '../auth/decorators/current-user.decorato
 export class BooksController {
   constructor(private readonly books: BooksService) {}
 
-  /** POST /books — create a new book and return LemonSqueezy checkout URL. */
+  /** POST /books - create a new book and return LemonSqueezy checkout URL. */
   @Post()
   async create(
     @CurrentUser() user: AuthenticatedUser,
@@ -31,14 +31,16 @@ export class BooksController {
     return { book: book as unknown as Record<string, unknown>, checkoutUrl };
   }
 
-  /** GET /books — list all books belonging to the authenticated user. */
+  /** GET /books - list all books belonging to the authenticated user. */
   @Get()
-  async findAll(@CurrentUser() user: AuthenticatedUser): Promise<Record<string, unknown>[]> {
+  async findAll(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<Record<string, unknown>[]> {
     const books = await this.books.findAllForUser(user.userId);
     return books as unknown as Record<string, unknown>[];
   }
 
-  /** GET /books/:id — get a single book (must belong to the user). */
+  /** GET /books/:id - get a single book (must belong to the user). */
   @Get(':id')
   async findOne(
     @CurrentUser() user: AuthenticatedUser,
@@ -48,7 +50,7 @@ export class BooksController {
     return book as unknown as Record<string, unknown>;
   }
 
-  /** POST /books/:id/checkout — (re)generate a LemonSqueezy checkout URL for a draft book. */
+  /** POST /books/:id/checkout - (re)generate a LemonSqueezy checkout URL for a draft book. */
   @Post(':id/checkout')
   async checkout(
     @CurrentUser() user: AuthenticatedUser,
@@ -58,7 +60,7 @@ export class BooksController {
     return { checkoutUrl };
   }
 
-  /** DELETE /books/:id — permanently delete a book and release its puzzle slots. */
+  /** DELETE /books/:id - permanently delete a book and release its puzzle slots. */
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(
@@ -68,7 +70,7 @@ export class BooksController {
     await this.books.deleteBook(id, user.userId);
   }
 
-  /** GET /books/:id/download — stream the generated PDF. */
+  /** GET /books/:id/download - stream the generated PDF. */
   @Get(':id/download')
   async download(
     @CurrentUser() user: AuthenticatedUser,

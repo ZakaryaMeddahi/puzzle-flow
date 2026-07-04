@@ -13,7 +13,8 @@ export class QueuesService implements OnModuleDestroy {
   private readonly pdfQueue: Queue<PdfGenerationJobData>;
 
   constructor(private readonly config: ConfigService) {
-    const redisUrl = this.config.get<string>('REDIS_URL') ?? 'redis://localhost:6379';
+    const redisUrl =
+      this.config.get<string>('REDIS_URL') ?? 'redis://localhost:6379';
     const url = new URL(redisUrl);
 
     const connection = {

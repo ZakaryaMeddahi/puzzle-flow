@@ -1,16 +1,24 @@
 import { Worker, type Job } from "bullmq";
-import { generatePuzzle, encodeSeed, normalizePuzzle, hashPuzzle } from "@kdp/puzzle-core";
+import {
+  generatePuzzle,
+  encodeSeed,
+  normalizePuzzle,
+  hashPuzzle,
+} from "@kdp/puzzle-core";
 import type { Difficulty } from "@kdp/puzzle-core";
 import { prisma, PuzzleStatus } from "@kdp/shared";
 import { getRedisOptions } from "../redis";
-import { QUEUE_PUZZLE_GENERATION, type PuzzleGenerationJobData } from "../queues";
+import {
+  QUEUE_PUZZLE_GENERATION,
+  type PuzzleGenerationJobData,
+} from "../queues";
 
 const INSERT_CHUNK_SIZE = 500; // rows per DB round-trip
 
 // PostgreSQL BIGINT is signed (max 2^63-1). Seeds for hard/expert use bits 63-62
 // = 10/11, which exceed the signed range. Convert to two's complement for storage.
-const MAX_SIGNED_64  = (1n << 63n) - 1n;  // 9223372036854775807
-const TWO_64         = 1n << 64n;          // 18446744073709551616
+const MAX_SIGNED_64 = (1n << 63n) - 1n; // 9223372036854775807
+const TWO_64 = 1n << 64n; // 18446744073709551616
 
 function toSignedBigInt(n: bigint): bigint {
   return n > MAX_SIGNED_64 ? n - TWO_64 : n;
@@ -20,7 +28,7 @@ export function toUnsignedBigInt(n: bigint): bigint {
   return n < 0n ? n + TWO_64 : n;
 }
 
-// ── Seed reservation ──────────────────────────────────────────────────────────
+// Seed reservation
 
 /**
  * Atomically claim `count` sequence numbers for `difficulty`.
@@ -31,7 +39,9 @@ async function claimSequenceRange(
   difficulty: Difficulty,
   count: number,
 ): Promise<bigint> {
-  const rows = await prisma.$queryRawUnsafe<Array<{ next_seed: string | bigint }>>(
+  const rows = await prisma.$queryRawUnsafe<
+    Array<{ next_seed: string | bigint }>
+  >(
     `
     INSERT INTO seed_counters (difficulty, next_seed)
     VALUES ($1, $2)
@@ -49,7 +59,7 @@ async function claimSequenceRange(
   return nextSeed - BigInt(count); // first sequence in our range
 }
 
-// ── Worker processor ──────────────────────────────────────────────────────────
+// Worker processor
 
 async function processPuzzleGenerationJob(
   job: Job<PuzzleGenerationJobData>,
@@ -97,7 +107,7 @@ async function processPuzzleGenerationJob(
     const chunk = rows.slice(offset, offset + INSERT_CHUNK_SIZE);
     const result = await prisma.puzzleRegistry.createMany({
       data: chunk,
-      skipDuplicates: true, // idempotent — skip if seed/hash already exists
+      skipDuplicates: true, // idempotent - skip if seed/hash already exists
     });
     inserted += result.count;
   }
@@ -107,7 +117,7 @@ async function processPuzzleGenerationJob(
   );
 }
 
-// ── Export factory ────────────────────────────────────────────────────────────
+// Export factory
 
 export function startPuzzleGenerationWorker(): Worker<PuzzleGenerationJobData> {
   const worker = new Worker<PuzzleGenerationJobData>(

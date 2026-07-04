@@ -12,9 +12,9 @@ export type PageSlotKind =
 
 export interface PageSlot {
   kind: PageSlotKind;
-  /** 0-based index within the PDF document — determines recto/verso. */
+  /** 0-based index within the PDF document - determines recto/verso. */
   pageIndex: number;
-  /** Only set for puzzle slots — the puzzles to render on this page. */
+  /** Only set for puzzle slots - the puzzles to render on this page. */
   puzzles?: PuzzleEntry[];
 }
 
@@ -42,20 +42,23 @@ export function buildPagePlan(
   frontMatter?: FrontMatterConfig | null,
 ): PagePlan {
   const fm = frontMatter ?? {
-    titlePage:     { enabled: true,  values: {} },
-    copyrightPage: { enabled: true,  values: {} },
-    howToPlay:     { enabled: true,  values: {} },
-    introduction:  { enabled: false, values: {} },
-    answerPages:   true,
+    titlePage: { enabled: true, values: {} },
+    copyrightPage: { enabled: true, values: {} },
+    howToPlay: { enabled: true, values: {} },
+    introduction: { enabled: false, values: {} },
+    answerPages: true,
   };
 
   const slots: PageSlot[] = [];
   let idx = 0;
 
-  if (fm.titlePage?.enabled)     slots.push({ kind: "title",        pageIndex: idx++ });
-  if (fm.copyrightPage?.enabled) slots.push({ kind: "copyright",    pageIndex: idx++ });
-  if (fm.howToPlay?.enabled)     slots.push({ kind: "how-to-play",  pageIndex: idx++ });
-  if (fm.introduction?.enabled)  slots.push({ kind: "introduction", pageIndex: idx++ });
+  if (fm.titlePage?.enabled) slots.push({ kind: "title", pageIndex: idx++ });
+  if (fm.copyrightPage?.enabled)
+    slots.push({ kind: "copyright", pageIndex: idx++ });
+  if (fm.howToPlay?.enabled)
+    slots.push({ kind: "how-to-play", pageIndex: idx++ });
+  if (fm.introduction?.enabled)
+    slots.push({ kind: "introduction", pageIndex: idx++ });
 
   // Ensure puzzles start on recto (even pageIndex).
   if (idx % 2 !== 0) slots.push({ kind: "blank", pageIndex: idx++ });
