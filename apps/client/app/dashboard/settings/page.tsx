@@ -274,7 +274,7 @@ export default function SettingsPage() {
               type="button"
               onClick={() => handleUpgrade("pro")}
               disabled={actionLoading}
-              className="flex w-full items-center justify-between rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-3.5 text-left shadow-sm transition-colors hover:bg-indigo-100 disabled:opacity-50"
+              className="flex w-full cursor-pointer items-center justify-between rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-3.5 text-left shadow-sm transition-colors hover:bg-indigo-100 disabled:opacity-50"
             >
               <div>
                 <p className="text-sm font-semibold text-zinc-900">
@@ -304,7 +304,7 @@ export default function SettingsPage() {
                 type="button"
                 onClick={() => handleUpgrade(plan as "starter" | "pro")}
                 disabled={actionLoading}
-                className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
+                className="cursor-pointer rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
               >
                 Reactivate {PLAN_LABELS[plan]}
               </button>

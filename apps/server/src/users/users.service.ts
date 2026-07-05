@@ -182,21 +182,20 @@ export class UsersService {
 
   // Billing portal
 
-  // TODO: fix subscription management to use LemonSqueezy's new API for billing portal, as the current endpoint is deprecated
   async getBillingPortalUrl(userId: string): Promise<string> {
     const user = await this.prisma.db.user.findUniqueOrThrow({
       where: { id: userId },
     });
 
-    if (!user.lemonSqueezyCustomerId) {
-      throw new NotFoundException('No billing account found');
+    if (!user.subscriptionId) {
+      throw new NotFoundException('No active subscription found');
     }
 
     const apiKey = this.config.getOrThrow<string>('LEMONSQUEEZY_API_KEY');
 
     // TODO: add lemonsqueezy base url to .env
     const res = await fetch(
-      `https://api.lemonsqueezy.com/v1/customers/${user.lemonSqueezyCustomerId}/portal`,
+      `https://api.lemonsqueezy.com/v1/subscriptions/${user.subscriptionId}`,
       {
         headers: {
           Authorization: `Bearer ${apiKey}`,
@@ -207,12 +206,21 @@ export class UsersService {
 
     if (!res.ok) {
       const text = await res.text();
-      throw new Error(`LemonSqueezy portal failed (${res.status}): ${text}`);
+      throw new Error(
+        `Failed to retrieve subscription (${res.status}): ${text}`,
+      );
     }
 
     const json = (await res.json()) as {
-      data: { attributes: { url: string } };
+      data: {
+        attributes: {
+          urls: {
+            customer_portal: string;
+          };
+        };
+      };
     };
-    return json.data.attributes.url;
+
+    return json.data.attributes.urls.customer_portal;
   }
 }
