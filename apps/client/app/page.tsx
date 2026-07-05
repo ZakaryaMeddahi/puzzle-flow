@@ -1,5 +1,10 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "./providers/auth-provider";
 
 const FEATURES = [
   {
@@ -171,6 +176,19 @@ const SAMPLE_PAGES = [
 ];
 
 export default function LandingPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace("/dashboard");
+    }
+  }, [user, loading, router]);
+
+  if (loading || user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-white text-zinc-900 antialiased">
       {/* Nav */}
@@ -611,7 +629,7 @@ export default function LandingPage() {
                 <span className="text-indigo-400">Flow</span>
               </span>
             </Link>
-            <div className="flex items-center gap-6 text-xs">
+            {/* <div className="flex items-center gap-6 text-xs">
               <Link
                 href="/login"
                 className="transition-colors hover:text-zinc-300"
@@ -642,7 +660,7 @@ export default function LandingPage() {
               >
                 FAQ
               </Link>
-            </div>
+            </div> */}
             <p className="text-xs">
               © {new Date().getFullYear()} PuzzleFlow. All rights reserved.
             </p>

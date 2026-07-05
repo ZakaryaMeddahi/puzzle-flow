@@ -233,7 +233,7 @@ export default function SettingsPage() {
                 type="button"
                 onClick={() => handleUpgrade("starter")}
                 disabled={actionLoading}
-                className="flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white px-5 py-3.5 text-left shadow-sm transition-colors hover:bg-zinc-50 disabled:opacity-50"
+                className="flex w-full cursor-pointer items-center justify-between rounded-xl border border-zinc-200 bg-white px-5 py-3.5 text-left shadow-sm transition-colors hover:bg-zinc-50 disabled:opacity-50"
               >
                 <div>
                   <p className="text-sm font-semibold text-zinc-900">
@@ -251,7 +251,7 @@ export default function SettingsPage() {
                 type="button"
                 onClick={() => handleUpgrade("pro")}
                 disabled={actionLoading}
-                className="flex w-full items-center justify-between rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-3.5 text-left shadow-sm transition-colors hover:bg-indigo-100 disabled:opacity-50"
+                className="flex w-full cursor-pointer items-center justify-between rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-3.5 text-left shadow-sm transition-colors hover:bg-indigo-100 disabled:opacity-50"
               >
                 <div>
                   <p className="text-sm font-semibold text-zinc-900">
@@ -319,7 +319,7 @@ export default function SettingsPage() {
                   type="button"
                   onClick={handleBillingPortal}
                   disabled={actionLoading}
-                  className="text-sm font-medium text-zinc-600 underline-offset-2 hover:text-zinc-900 disabled:opacity-50"
+                  className="cursor-pointer text-sm font-medium text-zinc-600 underline-offset-2 hover:text-zinc-900 disabled:opacity-50"
                 >
                   Manage billing & invoices ↗
                 </button>
@@ -327,7 +327,7 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={() => setConfirmCancel(true)}
-                    className="text-xs text-zinc-400 hover:text-red-600"
+                    className="cursor-pointer text-xs text-zinc-400 hover:text-red-600"
                   >
                     Cancel subscription
                   </button>
@@ -338,14 +338,14 @@ export default function SettingsPage() {
                       type="button"
                       onClick={handleCancel}
                       disabled={actionLoading}
-                      className="text-xs font-semibold text-red-600 hover:text-red-700 disabled:opacity-50"
+                      className="cursor-pointer text-xs font-semibold text-red-600 hover:text-red-700 disabled:opacity-50"
                     >
                       Yes, cancel
                     </button>
                     <button
                       type="button"
                       onClick={() => setConfirmCancel(false)}
-                      className="text-xs text-zinc-400 hover:text-zinc-700"
+                      className="cursor-pointer text-xs text-zinc-400 hover:text-zinc-700"
                     >
                       Keep it
                     </button>

@@ -182,6 +182,7 @@ export class UsersService {
 
   // Billing portal
 
+  // TODO: fix subscription management to use LemonSqueezy's new API for billing portal, as the current endpoint is deprecated
   async getBillingPortalUrl(userId: string): Promise<string> {
     const user = await this.prisma.db.user.findUniqueOrThrow({
       where: { id: userId },
@@ -193,6 +194,7 @@ export class UsersService {
 
     const apiKey = this.config.getOrThrow<string>('LEMONSQUEEZY_API_KEY');
 
+    // TODO: add lemonsqueezy base url to .env
     const res = await fetch(
       `https://api.lemonsqueezy.com/v1/customers/${user.lemonSqueezyCustomerId}/portal`,
       {

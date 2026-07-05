@@ -292,7 +292,7 @@ export default function FaqPage() {
                 <span className="text-indigo-400">Flow</span>
               </span>
             </Link>
-            <div className="flex items-center gap-6 text-xs">
+            {/* <div className="flex items-center gap-6 text-xs">
               <Link
                 href="/login"
                 className="transition-colors hover:text-zinc-300"
@@ -317,7 +317,7 @@ export default function FaqPage() {
               >
                 FAQ
               </Link>
-            </div>
+            </div> */}
             <p className="text-xs">
               © {new Date().getFullYear()} PuzzleFlow. All rights reserved.
             </p>

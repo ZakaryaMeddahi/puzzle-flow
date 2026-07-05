@@ -4,8 +4,10 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { apiFetch } from "../lib/api";
+import { useAuth } from "../providers/auth-provider";
 
 export default function SupportPage() {
+  const { user, loading } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -54,31 +56,55 @@ export default function SupportPage() {
             </span>
           </Link>
           <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900"
-            >
-              Sign in
-            </Link>
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
-            >
-              Get started
-              <svg
-                className="h-3 w-3"
-                fill="none"
-                viewBox="0 0 16 16"
-                stroke="currentColor"
-                strokeWidth={2.5}
+            {!loading && user ? (
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 8h10M9 4l4 4-4 4"
-                />
-              </svg>
-            </Link>
+                Open dashboard
+                <svg
+                  className="h-3 w-3"
+                  fill="none"
+                  viewBox="0 0 16 16"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 8h10M9 4l4 4-4 4"
+                  />
+                </svg>
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
+                >
+                  Get started
+                  <svg
+                    className="h-3 w-3"
+                    fill="none"
+                    viewBox="0 0 16 16"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3 8h10M9 4l4 4-4 4"
+                    />
+                  </svg>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -191,7 +217,7 @@ export default function SupportPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:opacity-60"
+                className="w-full cursor-pointer rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:opacity-60"
               >
                 {submitting ? "Sending…" : "Send message"}
               </button>

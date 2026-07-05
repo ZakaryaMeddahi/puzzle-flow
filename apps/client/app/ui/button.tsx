@@ -7,7 +7,7 @@ type Variant = "primary" | "secondary" | "ghost" | "danger";
 type Size = "sm" | "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center font-medium transition-colors " +
+  "cursor-pointer inline-flex items-center justify-center font-medium transition-colors " +
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 " +
   "disabled:cursor-not-allowed disabled:opacity-50";
 

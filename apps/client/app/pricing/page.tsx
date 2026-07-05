@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useAuth } from "../providers/auth-provider";
 
 const PLANS = [
   {
@@ -128,6 +131,8 @@ function CheckIcon({ included }: { included: boolean }) {
 }
 
 export default function PricingPage() {
+  const { user, loading } = useAuth();
+
   return (
     <div className="min-h-screen bg-white text-zinc-900 antialiased">
       {/* Nav */}
@@ -146,52 +151,78 @@ export default function PricingPage() {
               <span className="text-indigo-600">Flow</span>
             </span>
           </Link>
-          <nav className="hidden items-center gap-6 md:flex">
-            <Link
-              href="/#how-it-works"
-              className="text-sm text-zinc-500 transition-colors hover:text-zinc-900"
-            >
-              How it works
-            </Link>
-            <Link
-              href="/#features"
-              className="text-sm text-zinc-500 transition-colors hover:text-zinc-900"
-            >
-              Features
-            </Link>
-            <Link
-              href="/pricing"
-              className="text-sm font-semibold text-zinc-900"
-            >
-              Pricing
-            </Link>
-          </nav>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900"
-            >
-              Sign in
-            </Link>
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
-            >
-              Get started
-              <svg
-                className="h-3 w-3"
-                fill="none"
-                viewBox="0 0 16 16"
-                stroke="currentColor"
-                strokeWidth={2.5}
+          {!user && (
+            <nav className="hidden items-center gap-6 md:flex">
+              <Link
+                href="/#how-it-works"
+                className="text-sm text-zinc-500 transition-colors hover:text-zinc-900"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 8h10M9 4l4 4-4 4"
-                />
-              </svg>
-            </Link>
+                How it works
+              </Link>
+              <Link
+                href="/#features"
+                className="text-sm text-zinc-500 transition-colors hover:text-zinc-900"
+              >
+                Features
+              </Link>
+              <Link
+                href="/pricing"
+                className="text-sm font-semibold text-zinc-900"
+              >
+                Pricing
+              </Link>
+            </nav>
+          )}
+          <div className="flex items-center gap-3">
+            {!loading && user ? (
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
+              >
+                Open dashboard
+                <svg
+                  className="h-3 w-3"
+                  fill="none"
+                  viewBox="0 0 16 16"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 8h10M9 4l4 4-4 4"
+                  />
+                </svg>
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
+                >
+                  Get started
+                  <svg
+                    className="h-3 w-3"
+                    fill="none"
+                    viewBox="0 0 16 16"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3 8h10M9 4l4 4-4 4"
+                    />
+                  </svg>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -416,7 +447,7 @@ export default function PricingPage() {
             href="/dashboard"
             className="inline-flex items-center gap-2.5 rounded-xl bg-white px-8 py-4 text-base font-bold text-indigo-700 shadow-lg transition-all hover:bg-indigo-50 hover:shadow-xl"
           >
-            Get started
+            {!loading && user ? "Open dashboard" : "Get started"}
             <svg
               className="h-4 w-4"
               fill="none"
@@ -452,7 +483,7 @@ export default function PricingPage() {
                 <span className="text-indigo-400">Flow</span>
               </span>
             </Link>
-            <div className="flex items-center gap-6 text-xs">
+            {/* <div className="flex items-center gap-6 text-xs">
               <Link
                 href="/login"
                 className="transition-colors hover:text-zinc-300"
@@ -471,7 +502,7 @@ export default function PricingPage() {
               >
                 Pricing
               </Link>
-            </div>
+            </div> */}
             <p className="text-xs">
               © {new Date().getFullYear()} PuzzleFlow. All rights reserved.
             </p>

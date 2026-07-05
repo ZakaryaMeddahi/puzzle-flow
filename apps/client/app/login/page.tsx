@@ -1,18 +1,27 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import { useAuth } from "../providers/auth-provider";
 import { API_URL } from "../lib/api";
 import { Button, Input } from "../ui";
 
 export default function LoginPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [googleLoading, setGoogleLoading] = useState(false);
   const [magicLoading, setMagicLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [linkError, setLinkError] = useState(false);
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace("/dashboard");
+    }
+  }, [user, loading, router]);
 
   useEffect(() => {
     if (searchParams.get("error") === "invalid_link") setLinkError(true);
@@ -37,6 +46,10 @@ export default function LoginPage() {
     } finally {
       setMagicLoading(false);
     }
+  }
+
+  if (loading || user) {
+    return null;
   }
 
   return (

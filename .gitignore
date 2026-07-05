@@ -1,44 +1,89 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# See https://help.github.com/articles/ignoring-files/
 
-# dependencies
-node_modules
+# =========================
+# Dependencies
+# =========================
+
+node_modules/
 .pnp
-.pnp.js
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# local env files
+# =========================
+# Environment files
+# =========================
+
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
 
-# testing
-coverage
+# =========================
+# Testing
+# =========================
 
-# turbo
-.turbo
+coverage/
 
-# vercel
-.vercel
+# =========================
+# Turbo
+# =========================
 
-# build Outputs
+.turbo/
+
+# =========================
+# Next.js
+# =========================
+
 .next/
 out/
-build
-dist
 
-# debug
+# =========================
+# Build outputs
+# =========================
+
+build/
+dist/
+
+# =========================
+# TypeScript
+# =========================
+
+*.tsbuildinfo
+next-env.d.ts
+
+# =========================
+# Vercel
+# =========================
+
+.vercel/
+
+# =========================
+# Debug logs
+# =========================
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
 
-# misc
+# =========================
+# Misc
+# =========================
+
 .DS_Store
 *.pem
 
-# claude
+# =========================
+# Claude
+# =========================
+
 .claude/
 
-# files
+# =========================
+# Project files
+# =========================
+
 pdfs/
 uploads/

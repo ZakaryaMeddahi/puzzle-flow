@@ -84,6 +84,7 @@ export class WebhooksController {
 
     this.logger.log(`Received LemonSqueezy event: ${event_name}`);
 
+    // TODO: when subscribing I receive three events for some reason (order_created, subscription_created, subscription_payment_success), fix it
     if (event_name === 'order_created') {
       await this.handleOrderCreated(custom_data);
     } else if (event_name === 'subscription_created') {
