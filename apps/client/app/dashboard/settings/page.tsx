@@ -169,7 +169,7 @@ export default function SettingsPage() {
             </span>
           </div>
 
-          {isSubscriber && (
+          {/* {isSubscriber && (
             <div className="space-y-1 text-sm text-zinc-500">
               <div className="flex items-center justify-between">
                 <span>Status</span>
@@ -192,10 +192,10 @@ export default function SettingsPage() {
                 </span>
               </div>
             </div>
-          )}
+          )} */}
 
           {/* Usage meter (Starter only) */}
-          {plan === "starter" && usage && (
+          {/* {plan === "starter" && usage && (
             <div className="mt-4 border-t border-zinc-100 pt-4">
               <div className="mb-1.5 flex items-center justify-between text-xs text-zinc-500">
                 <span>Books used this month</span>
@@ -221,13 +221,13 @@ export default function SettingsPage() {
                 </p>
               )}
             </div>
-          )}
+          )} */}
         </div>
 
         {/* Actions */}
         <div className="space-y-3">
           {/* Pay-per-book: show upgrade options */}
-          {plan === "pay_per_book" && (
+          {/* {plan === "pay_per_book" && (
             <>
               <button
                 type="button"
@@ -266,10 +266,10 @@ export default function SettingsPage() {
                 </span>
               </button>
             </>
-          )}
+          )} */}
 
           {/* Starter active: upgrade to Pro */}
-          {plan === "starter" && !isCanceled && (
+          {/* {plan === "starter" && !isCanceled && (
             <button
               type="button"
               onClick={() => handleUpgrade("pro")}
@@ -288,10 +288,10 @@ export default function SettingsPage() {
                 Upgrade →
               </span>
             </button>
-          )}
+          )} */}
 
           {/* Canceled subscription: reactivate */}
-          {isCanceled && (
+          {/* {isCanceled && (
             <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-3.5">
               <p className="mb-1 text-sm font-semibold text-zinc-900">
                 Subscription canceled
@@ -309,10 +309,10 @@ export default function SettingsPage() {
                 Reactivate {PLAN_LABELS[plan]}
               </button>
             </div>
-          )}
+          )} */}
 
           {/* Active subscriber: manage billing + cancel */}
-          {isSubscriber && !isCanceled && (
+          {/* {isSubscriber && !isCanceled && (
             <div className="rounded-xl border border-zinc-200 bg-white px-5 py-4 shadow-sm">
               <div className="flex items-center justify-between gap-4">
                 <button
@@ -353,7 +353,7 @@ export default function SettingsPage() {
                 )}
               </div>
             </div>
-          )}
+          )} */}
 
           {/* Link to pricing */}
           <p className="pt-1 text-center text-xs text-zinc-400">

@@ -34,12 +34,12 @@ export function NavHeader() {
             >
               Support
             </a>
-            <a
+            {/* <a
               href="/dashboard/settings"
               className="text-sm text-zinc-400 transition-colors hover:text-zinc-700"
             >
               Settings
-            </a>
+            </a> */}
             <span className="text-sm text-zinc-500">{user.email}</span>
             <span
               className={`rounded-full px-2 py-0.5 text-xs font-semibold ${

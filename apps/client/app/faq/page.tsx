@@ -15,7 +15,8 @@ const CATEGORIES = [
       },
       {
         q: "How do I get started?",
-        a: 'Create a free account, click "Create New Book", configure your book settings, and download your PDF. You\'ll be prompted to choose a plan before generation begins.',
+        // a: 'Create a free account, click "Create New Book", configure your book settings, and download your PDF. You\'ll be prompted to choose a plan before generation begins.',
+        a: 'Create a free account, click "Create New Book", configure your book settings, and download your PDF. You\'ll pay per book at generation - no subscription required.',
       },
     ],
   },
@@ -91,11 +92,13 @@ const CATEGORIES = [
     faqs: [
       {
         q: "What's the difference between the plans?",
-        a: "Pay per book ($5.99) is a single purchase with no subscription - ideal for occasional publishers. Starter ($11.99/mo) gives you 10 books per month. Pro ($23.99/mo) gives you unlimited books and catalog-wide uniqueness, meaning no puzzle ever repeats across your entire catalog.",
+        // a: "Pay per book ($5.99) is a single purchase with no subscription - ideal for occasional publishers. Starter ($11.99/mo) gives you 10 books per month. Pro ($23.99/mo) gives you unlimited books and catalog-wide uniqueness, meaning no puzzle ever repeats across your entire catalog.",
+        a: "Right now, Pay per book ($5.99) is the only plan available - a single purchase per book, no subscription needed. Starter and Pro (subscription plans with monthly book allowances and catalog-wide uniqueness) are coming soon.",
       },
       {
         q: "Can I switch plans?",
-        a: "Yes. You can upgrade or downgrade at any time from your account settings. Changes take effect at the start of your next billing cycle.",
+        // a: "Yes. You can upgrade or downgrade at any time from your account settings. Changes take effect at the start of your next billing cycle.",
+        a: "Pay per book is the only plan available today, so there's nothing to switch yet. Once Starter and Pro launch, you'll be able to upgrade or downgrade from your account settings.",
       },
       {
         q: "Do my PDFs expire?",

@@ -59,8 +59,8 @@ const LAYOUTS = [
 
 const UNIQUENESS_LEVELS = [
   { value: "book", label: "Standard", desc: "No duplicates within this book" },
-  { value: "user", label: "Advanced", desc: "No duplicates across your books" },
-  { value: "global", label: "Maximum", desc: "No duplicates across all users" },
+  // { value: "user", label: "Advanced", desc: "No duplicates across your books" },
+  // { value: "global", label: "Maximum", desc: "No duplicates across all users" },
 ];
 
 const FM_TOGGLES: { key: keyof FmEnabled; label: string }[] = [

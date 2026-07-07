@@ -14,6 +14,7 @@ const PLANS = [
       "Perfect for occasional publishers or trying before you subscribe.",
     highlight: false,
     badge: null,
+    comingSoon: false,
     cta: "Buy a book",
     features: [
       { text: "1 book", included: true },
@@ -22,7 +23,7 @@ const PLANS = [
       { text: "Custom front matter", included: true },
       { text: "Book-level uniqueness", included: true },
       { text: "Permanent download", included: true },
-      { text: "Email support", included: false },
+      { text: "Email support", included: true },
     ],
   },
   {
@@ -32,7 +33,8 @@ const PLANS = [
     period: "per month",
     description: "For publishers building a growing catalog of puzzle books.",
     highlight: false,
-    badge: null,
+    badge: "Coming soon",
+    comingSoon: true,
     cta: "Get started",
     features: [
       { text: "10 books per month", included: true },
@@ -52,7 +54,8 @@ const PLANS = [
     description:
       "For serious KDP publishers who need catalog-wide uniqueness and scale.",
     highlight: true,
-    badge: "Best Value",
+    badge: "Coming soon",
+    comingSoon: true,
     cta: "Get started",
     features: [
       { text: "Unlimited books", included: true },
@@ -83,7 +86,7 @@ const COMPARISON_ROWS: { label: string; values: [string, string, string] }[] = [
 const FAQS = [
   {
     q: "Can I switch plans later?",
-    a: "Yes. You can upgrade or downgrade at any time from your account settings. Changes take effect at the start of your next billing cycle.",
+    a: "Right now, Pay per book is available today. Starter and Pro are coming soon - once they launch, you'll be able to upgrade from your account settings.",
   },
   {
     q: "What does uniqueness level mean?",
@@ -287,62 +290,84 @@ export default function PricingPage() {
                     : "border border-zinc-200 shadow-sm"
                 }`}
               >
-                {/* Popular badge */}
+                {/* Popular / coming soon badge */}
                 {plan.badge && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                    <span className="rounded-full bg-indigo-600 px-3.5 py-1 text-xs font-bold text-white shadow-sm">
+                    <span
+                      className={`rounded-full px-3.5 py-1 text-xs font-bold text-white shadow-sm ${
+                        plan.comingSoon ? "bg-zinc-500" : "bg-indigo-600"
+                      }`}
+                    >
                       {plan.badge}
                     </span>
                   </div>
                 )}
 
-                {/* Plan name + description */}
-                <div className="mb-6">
-                  <p className="mb-1 text-base font-bold text-zinc-900">
-                    {plan.name}
-                  </p>
-                  <p className="text-sm leading-relaxed text-zinc-500">
-                    {plan.description}
-                  </p>
+                {/* Coming-soon plans are visually muted and non-interactive */}
+                <div
+                  className={
+                    plan.comingSoon
+                      ? "pointer-events-none opacity-40 blur-[1.5px]"
+                      : ""
+                  }
+                >
+                  {/* Plan name + description */}
+                  <div className="mb-6">
+                    <p className="mb-1 text-base font-bold text-zinc-900">
+                      {plan.name}
+                    </p>
+                    <p className="text-sm leading-relaxed text-zinc-500">
+                      {plan.description}
+                    </p>
+                  </div>
+
+                  {/* Price */}
+                  <div className="mb-8">
+                    <div className="flex items-end gap-1.5">
+                      <span className="text-5xl font-black tracking-tight text-zinc-900">
+                        {plan.price}
+                      </span>
+                      <span className="mb-1.5 text-sm text-zinc-400">
+                        {plan.period}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* CTA */}
+                  <Link
+                    href="/dashboard"
+                    className={`mb-8 block rounded-xl px-5 py-3 text-center text-sm font-semibold transition-colors ${
+                      plan.highlight
+                        ? "bg-indigo-600 text-white shadow-sm hover:bg-indigo-700"
+                        : "border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50"
+                    }`}
+                  >
+                    {plan.cta} →
+                  </Link>
+
+                  {/* Features */}
+                  <ul className="mt-auto space-y-3">
+                    {plan.features.map((f) => (
+                      <li key={f.text} className="flex items-center gap-2.5">
+                        <CheckIcon included={f.included} />
+                        <span
+                          className={`text-sm ${f.included ? "text-zinc-700" : "text-zinc-400"}`}
+                        >
+                          {f.text}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
 
-                {/* Price */}
-                <div className="mb-8">
-                  <div className="flex items-end gap-1.5">
-                    <span className="text-5xl font-black tracking-tight text-zinc-900">
-                      {plan.price}
-                    </span>
-                    <span className="mb-1.5 text-sm text-zinc-400">
-                      {plan.period}
+                {/* Overlay note for coming-soon plans, sits on top of the blurred content above */}
+                {/* {plan.comingSoon && (
+                  <div className="absolute inset-0 flex items-center justify-center rounded-2xl">
+                    <span className="rounded-full border border-zinc-200 bg-white/90 px-4 py-1.5 text-xs font-semibold text-zinc-600 shadow-sm">
+                      Coming soon
                     </span>
                   </div>
-                </div>
-
-                {/* CTA */}
-                <Link
-                  href="/dashboard"
-                  className={`mb-8 block rounded-xl px-5 py-3 text-center text-sm font-semibold transition-colors ${
-                    plan.highlight
-                      ? "bg-indigo-600 text-white shadow-sm hover:bg-indigo-700"
-                      : "border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50"
-                  }`}
-                >
-                  {plan.cta} →
-                </Link>
-
-                {/* Features */}
-                <ul className="mt-auto space-y-3">
-                  {plan.features.map((f) => (
-                    <li key={f.text} className="flex items-center gap-2.5">
-                      <CheckIcon included={f.included} />
-                      <span
-                        className={`text-sm ${f.included ? "text-zinc-700" : "text-zinc-400"}`}
-                      >
-                        {f.text}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                )} */}
               </div>
             ))}
           </div>
@@ -365,9 +390,20 @@ export default function PricingPage() {
                   {PLANS.map((plan) => (
                     <th
                       key={plan.id}
-                      className={`px-6 py-4 text-center font-bold ${plan.highlight ? "text-indigo-600" : "text-zinc-900"}`}
+                      className={`px-6 py-4 text-center font-bold ${
+                        plan.comingSoon
+                          ? "text-zinc-400"
+                          : plan.highlight
+                            ? "text-indigo-600"
+                            : "text-zinc-900"
+                      }`}
                     >
                       {plan.name}
+                      {plan.comingSoon && (
+                        <span className="ml-1.5 rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-semibold text-zinc-500">
+                          Soon
+                        </span>
+                      )}
                     </th>
                   ))}
                 </tr>
@@ -381,7 +417,15 @@ export default function PricingPage() {
                     {row.values.map((val, i) => (
                       <td
                         key={i}
-                        className={`px-6 py-4 text-center ${val === "✓" ? "text-indigo-500 font-bold" : val === "-" ? "text-zinc-300" : "text-zinc-600"}`}
+                        className={`px-6 py-4 text-center ${
+                          PLANS[i].comingSoon
+                            ? "text-zinc-300"
+                            : val === "✓"
+                              ? "text-indigo-500 font-bold"
+                              : val === "-"
+                                ? "text-zinc-300"
+                                : "text-zinc-600"
+                        }`}
                       >
                         {val}
                       </td>
@@ -396,7 +440,13 @@ export default function PricingPage() {
                   {PLANS.map((plan) => (
                     <td
                       key={plan.id}
-                      className={`px-6 py-4 text-center font-bold ${plan.highlight ? "text-indigo-600" : "text-zinc-900"}`}
+                      className={`px-6 py-4 text-center font-bold ${
+                        plan.comingSoon
+                          ? "text-zinc-400"
+                          : plan.highlight
+                            ? "text-indigo-600"
+                            : "text-zinc-900"
+                      }`}
                     >
                       {plan.price}
                       <span className="text-xs font-normal text-zinc-400">

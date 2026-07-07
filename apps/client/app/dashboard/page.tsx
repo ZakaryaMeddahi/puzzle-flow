@@ -180,14 +180,14 @@ export default function DashboardPage() {
                   )}
                 </div>
               </div>
-              {usage.booksThisMonth >= usage.limit && (
+              {/* {usage.booksThisMonth >= usage.limit && (
                 <Link
                   href="/dashboard/settings"
                   className="shrink-0 rounded-lg bg-indigo-600 px-3.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-indigo-700"
                 >
                   Upgrade to Pro →
                 </Link>
-              )}
+              )} */}
             </div>
             {usage.limit !== null && usage.booksThisMonth < usage.limit && (
               <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
