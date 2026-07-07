@@ -27,6 +27,11 @@ interface Props {
     key: K,
     value: BookStyleState[K],
   ) => void;
+  // NOTE: added for free-trial support - true when this book is the user's
+  // free trial book. Puzzle count is fixed at TRIAL_PAGE_COUNT and the
+  // slider is locked. Wire this up from whatever flow/state determines
+  // trial eligibility on the parent page.
+  isTrial?: boolean;
 }
 
 const TRIM_SIZES = [
@@ -83,6 +88,10 @@ const GRID_STYLES: { value: GridStyle; label: string; desc: string }[] = [
   { value: "minimal", label: "Minimal", desc: "Soft grey lines" },
 ];
 
+// Free trial books are fixed at 10 puzzles - keep in sync with whatever
+// the backend enforces for trial generation.
+const TRIAL_PAGE_COUNT = 10;
+
 export function StepBookSetup({
   state,
   onChange,
@@ -90,6 +99,7 @@ export function StepBookSetup({
   onFmEnabledChange,
   bookStyle,
   onBookStyleChange,
+  isTrial = false,
 }: Props) {
   const puzzlePages = Math.ceil(state.pageCount / state.layout);
   const answerPages = fmEnabled.answerPages
@@ -213,7 +223,7 @@ export function StepBookSetup({
                 Number of puzzles
               </label>
               <span className="text-sm font-semibold tabular-nums text-zinc-900">
-                {state.pageCount}
+                {isTrial ? TRIAL_PAGE_COUNT : state.pageCount}
               </span>
             </div>
             <input
@@ -221,13 +231,22 @@ export function StepBookSetup({
               min={10}
               max={300}
               step={5}
-              value={state.pageCount}
+              value={isTrial ? TRIAL_PAGE_COUNT : state.pageCount}
               onChange={(e) => onChange("pageCount", Number(e.target.value))}
-              className="w-full accent-indigo-600"
+              disabled={isTrial}
+              className={`w-full accent-indigo-600 ${
+                isTrial ? "cursor-not-allowed opacity-40" : ""
+              }`}
             />
             <div className="mt-1 flex justify-between text-xs text-zinc-400">
               <span>10</span>
-              <span className="text-zinc-500">Most books: 80–150</span>
+              {isTrial ? (
+                <span className="text-zinc-500">
+                  Free trial books are fixed at 10 puzzles
+                </span>
+              ) : (
+                <span className="text-zinc-500">Most books: 80–150</span>
+              )}
               <span>300</span>
             </div>
           </div>
@@ -525,7 +544,7 @@ export function StepBookSetup({
           <div className="flex justify-between">
             <span>Total puzzles</span>
             <span className="font-semibold tabular-nums">
-              {state.pageCount}
+              {isTrial ? TRIAL_PAGE_COUNT : state.pageCount}
             </span>
           </div>
           <div className="flex justify-between">

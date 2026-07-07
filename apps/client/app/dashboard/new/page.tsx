@@ -399,6 +399,7 @@ export default function NewBookPage() {
               onFmEnabledChange={handleFmEnabledChange}
               bookStyle={bookStyle}
               onBookStyleChange={handleBookStyleChange}
+              isTrial={freeTrial}
             />
           )}
 
