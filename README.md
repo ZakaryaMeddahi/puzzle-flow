@@ -1,25 +1,29 @@
-# KDP Puzzle Platform - Claude Code Reference
-
-> **This README is written for Claude Code.**
-> Read this entire file before touching any code. Do not make assumptions
-> about structure, patterns, or conventions - everything is specified here.
-
----
-
-## What This Project Is
+# KDP Puzzle Platform
 
 A SaaS platform that lets KDP (Kindle Direct Publishing) publishers generate
-unique, print-ready Sudoku puzzle books as PDFs. The core value proposition
-is a **uniqueness engine** that guarantees no two puzzles are the same -
-within a book, across a user's books, or across the entire platform.
+unique, print-ready Sudoku puzzle books as PDFs.
 
-Publishers upload nothing. They configure a book (difficulty, page count,
-trim size), pay, and download a KDP-ready PDF with an answer key.
+The core of the system is a **uniqueness engine** that guarantees no two
+puzzles are repeated: within a book, across all of a user's books, or across
+the entire platform. Publishers configure a book (difficulty, page count, trim
+size), pay, and download a KDP-ready PDF with an answer key.
 
 ---
 
-**Rule:** Never put business logic in `apps/`. Logic lives in `packages/`.
-Apps only wire things together - routes, controllers, UI components.
+## Highlights
+
+- **Monorepo architecture** (Turborepo + pnpm workspaces). Business logic lives in
+  framework-agnostic packages, and the apps only handle wiring (HTTP, queues, UI).
+- **Concurrency-safe puzzle reservation** using PostgreSQL
+  `SELECT ... FOR UPDATE SKIP LOCKED`, so many concurrent book requests can draw
+  from the same pool without collisions or lock contention.
+- **Deterministic generation** from 64-bit seeds that encode difficulty and a
+  per-difficulty sequence, so any puzzle can be reproduced from its seed.
+- **Background processing** with BullMQ: pool pre-generation, PDF rendering, and
+  scheduled cleanup of stale reservations.
+- **Print-ready PDF output** that follows KDP trim size, margin, and gutter
+  requirements, with an answer key at the back of the book.
+- **Payments & subscriptions** through LemonSqueezy webhooks.
 
 ---
 
@@ -27,7 +31,7 @@ Apps only wire things together - routes, controllers, UI components.
 
 | Layer         | Technology                  |
 | ------------- | --------------------------- |
-| Frontend      | Next.js (App Router)        |
+| Frontend      | Next.js (App Router), React |
 | Backend       | NestJS                      |
 | Workers       | BullMQ                      |
 | Database ORM  | Prisma                      |
@@ -36,469 +40,175 @@ Apps only wire things together - routes, controllers, UI components.
 | Monorepo      | Turborepo + pnpm workspaces |
 | Payments      | LemonSqueezy                |
 | PDF           | pdf-lib                     |
-| Language      | TypeScript everywhere       |
+| Language      | TypeScript (strict)         |
 
 ---
 
-## Package Details
+## Repository Layout
 
-### `packages/shared`
-
-**Purpose:** Single source of truth for types, enums, and the Prisma client.
-Both `apps/server` and `apps/workers` import from here.
-
-**Exports:**
-
-- All Prisma models (re-exported from `@prisma/client`)
-- Shared TypeScript types and interfaces
-- Shared enums (Difficulty, PuzzleStatus, BookStatus, UniquenessLevel)
-- Constants (PUZZLE_POOL_TARGET, RESERVATION_TTL_MINUTES, etc.)
-
-**Key rule:** The Prisma schema lives here at `packages/shared/prisma/schema.prisma`.
-Never create a second Prisma schema elsewhere.
-
-```typescript
-// Example import in apps/server or apps/workers:
-import { PrismaClient, Difficulty, PuzzleStatus } from "@kdp/shared";
-import type { CreateBookDto } from "@kdp/shared";
+```text
+apps/
+├── client/          Next.js frontend (landing, pricing, dashboard, book builder)
+├── server/          NestJS REST API (auth, books, puzzles, payments, users)
+└── workers/         BullMQ workers (puzzle generation, PDF generation, cleanup)
+packages/
+├── shared/          Prisma schema + client, shared types, enums, constants
+├── puzzle-core/     Pure Sudoku generation, solving, hashing (no I/O)
+└── pdf-templates/   KDP-compliant PDF layout and rendering
+docs/                Design notes (domain model, database, subscriptions, ...)
 ```
 
-### `packages/puzzle-core`
-
-**Purpose:** All Sudoku puzzle generation logic. No database calls, no HTTP,
-no side effects. Pure functions only.
-
-**Exports:**
-
-- `generatePuzzle(seed: bigint, difficulty: Difficulty): PuzzleResult`
-- `normalizePuzzle(puzzle: string): string` - produces canonical 81-char string
-- `hashPuzzle(normalized: string): string` - SHA-256 hex digest
-- `validatePuzzle(puzzle: string): boolean` - confirms unique solution exists
-- `seedToMetadata(seed: bigint): SeedMetadata` - decodes difficulty + sequence from seed
-
-**Key rule:** This package has zero external dependencies except the Node.js
-built-ins (`crypto` for SHA-256). No Prisma, no Redis, no HTTP clients.
-It must be testable with plain Jest with no mocking.
-
-### `packages/pdf-templates`
-
-**Purpose:** KDP-valid PDF generation. Takes an array of puzzles and book
-metadata and returns a `Uint8Array` PDF buffer.
-
-**Exports:**
-
-- `generateBookPdf(book: BookPdfInput): Promise<Uint8Array>`
-- `generatePreviewPdf(puzzles: PuzzleResult[]): Promise<Uint8Array>` - low-res, watermarked
-
-**KDP requirements this package must enforce:**
-
-- Trim sizes: 6×9, 8×10, 8.5×11 inches
-- Margins: minimum 0.25" all sides, 0.5" gutter on bound edge
-- Resolution: 300 DPI equivalent for print
-- Fonts: embedded, not subset-only
-- Answer key section always at the back of the book
+Packages never depend on apps. `puzzle-core` has no dependencies beyond
+Node's built-in `crypto`, which keeps it fully unit-testable without mocks.
 
 ---
 
-## Database Schema (Prisma)
+## Packages
 
-Located at `packages/shared/prisma/schema.prisma`.
+### `@kdp/shared`
 
-### Key Models
+Single source of truth for the Prisma schema and client, shared types, enums
+(`Difficulty`, `PuzzleStatus`, `BookStatus`, `UniquenessLevel`, `TrimSize`), and
+constants. Used by both the API and the workers.
 
-```prisma
-model SeedCounter {
-  difficulty String @id          // "easy" | "medium" | "hard" | "expert"
-  nextSeed   BigInt @default(1)
-}
+### `@kdp/puzzle-core`
 
-model PuzzleRegistry {
-  id         String    @id @default(uuid())
-  seed       BigInt    @unique
-  hash       String    @unique @db.Char(64)  // SHA-256 of normalized puzzle
-  difficulty String
-  status     String    @default("available") // available | pending | confirmed | expired
-  userId     String?
-  bookId     String?
-  reservedAt DateTime?
-  createdAt  DateTime  @default(now())
-}
+Pure functions for Sudoku generation:
 
-model Book {
-  id         String    @id @default(uuid())
-  userId     String
-  title      String?
-  trimSize   String    // "6x9" | "8x10" | "8.5x11"
-  difficulty String
-  pageCount  Int
-  status     String    @default("draft") // draft | pending | ready | expired
-  pdfPath    String?
-  expiresAt  DateTime?
-  createdAt  DateTime  @default(now())
-}
+- `generatePuzzle(seed, difficulty)`: deterministic puzzle generation from a seed
+- `normalizePuzzle(puzzle)`: canonical 81-character representation
+- `hashPuzzle(normalized)`: SHA-256 digest used for uniqueness checks
+- `validatePuzzle(puzzle)`: confirms the puzzle has exactly one solution
+- `seedToMetadata(seed)`: decodes difficulty and sequence from a seed
 
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-}
-```
+The solver uses bitmask constraints (rows, columns, and boxes as 9-bit
+integers) with a minimum-remaining-values heuristic.
+
+### `@kdp/pdf-templates`
+
+Takes puzzles plus book metadata and returns a PDF buffer. Supports 6×9, 8×10,
+and 8.5×11 inch trim sizes with KDP-compliant margins and gutters, and places
+the answer key at the back of the book.
 
 ---
 
 ## Seed Architecture
 
-Seeds are `BigInt` values with encoded metadata:
+Seeds are 64-bit `BigInt` values with encoded metadata:
 
-```
-Bit layout (64-bit):
-  Bits 63-62 → Difficulty  (00=easy, 01=medium, 10=hard, 11=expert)
-  Bits 61-54 → Shard       (reserved for future sharding, default 0)
-  Bits 53-0  → Sequence    (auto-increment counter per difficulty)
+```text
+Bits 63-62 → Difficulty  (00=easy, 01=medium, 10=hard, 11=expert)
+Bits 61-54 → Shard       (reserved for future sharding, default 0)
+Bits 53-0  → Sequence    (auto-increment counter per difficulty)
 ```
 
-The `SeedCounter` table tracks the next sequence number per difficulty.
-Incrementing the seed counter must be done atomically using a Prisma
-transaction or `UPDATE ... RETURNING`.
+A `SeedCounter` table tracks the next sequence per difficulty and is
+incremented atomically.
 
 ---
 
 ## Uniqueness Engine
 
-This is the most critical system. Read carefully.
+| Level    | Scope                                      |
+| -------- | ------------------------------------------ |
+| `book`   | No duplicates within a single book         |
+| `user`   | No duplicates across all of a user's books |
+| `global` | No duplicates across the entire platform   |
 
-### Three Levels
+### Reservation flow
 
-| Level    | Scope                                 | Implementation              |
-| -------- | ------------------------------------- | --------------------------- |
-| `book`   | No duplicates within one book         | Filter by `bookId` in batch |
-| `user`   | No duplicates across all user's books | Filter by `userId` in query |
-| `global` | No duplicates across entire platform  | `status = 'available'` only |
+1. A request arrives for N puzzles of difficulty D at uniqueness level L for user U.
+2. Rows are selected from `puzzle_registry` with `FOR UPDATE SKIP LOCKED`,
+   filtered by status, difficulty, and (for user-level) the user's history.
+3. The selected rows are marked `pending` with the user and a reservation timestamp.
+4. When the book is confirmed, the puzzles become `confirmed` and linked to the book.
+5. On cancellation or TTL expiry, they go back to `available`.
 
-### Flow for Reserving Puzzles
+### Stale reservation cleanup
 
-```
-1. Receive request: N puzzles, difficulty D, uniqueness level L, userId U
-2. Query puzzle_registry using FOR UPDATE SKIP LOCKED:
-   - WHERE status = 'available'
-   - AND difficulty = D
-   - AND (if user-level) id NOT IN (user's confirmed puzzles)
-   - LIMIT N
-3. UPDATE status = 'pending', reservedAt = NOW(), userId = U
-4. Return reserved puzzle hashes + seeds
-5. On book confirmation → UPDATE status = 'confirmed', bookId = B
-6. On cancellation / TTL expiry → UPDATE status = 'available'
-```
+A repeatable BullMQ job runs every 5 minutes and releases reservations that have
+been pending for more than 30 minutes.
 
-### Stale Reservation Cleanup
+### Pool pre-generation
 
-A BullMQ repeatable job runs every 5 minutes:
-
-```sql
-UPDATE puzzle_registry
-SET status = 'available', userId = NULL, reservedAt = NULL
-WHERE status = 'pending'
-AND reservedAt < NOW() - INTERVAL '30 minutes';
-```
-
-### Pre-Generation
-
-Workers continuously pre-generate puzzles into the pool.
-
-- Target pool per difficulty: 100,000 puzzles
-- Trigger: pool drops below 20,000 for any difficulty
-- Batch size: 5,000 puzzles per job
+Workers keep a pool of pre-generated puzzles per difficulty and refill it in
+batches when it falls below a threshold, so book creation never waits on
+generation.
 
 ---
 
-## API Structure (NestJS - `apps/server`)
+## API Overview
 
-```
-src/
-├── auth/                 → JWT + Google OAuth (Passport.js)
-├── books/                → Book CRUD, generation trigger
-├── puzzles/              → Puzzle reservation, history
-├── payments/             → LemonSqueezy webhooks
-├── users/                → User profile
-└── app.module.ts
-```
-
-### Key Endpoints
-
-```
-POST   /auth/google              → Google OAuth callback
-POST   /auth/refresh             → Refresh JWT
-GET    /books                    → List user's books
-POST   /books                    → Create + reserve puzzles for a book
-GET    /books/:id                → Get book status + download link
-DELETE /books/:id                → Cancel pending book, release puzzles
-POST   /payments/webhook         → LemonSqueezy webhook handler
-GET    /puzzles/history          → User's puzzle history (hashes)
+```text
+GET    /auth/google              Start Google OAuth
+GET    /auth/google/callback     OAuth callback
+POST   /auth/magic-link          Send a passwordless sign-in link
+GET    /auth/magic-link/verify   Verify a magic link
+POST   /auth/refresh             Refresh access token
+GET    /users/me                 Current user profile
+GET    /books                    List the user's books
+POST   /books                    Create a book and reserve its puzzles
+GET    /books/:id                Book status
+POST   /books/:id/checkout       Start checkout for a book
+GET    /books/:id/download       Download the generated PDF
+DELETE /books/:id                Cancel a pending book and release its puzzles
+POST   /preview/page             Render a page preview
+GET    /puzzles/history          The user's puzzle history
+POST   /webhooks/lemonsqueezy    Payment / subscription webhook
+POST   /support                  Submit a support request
 ```
 
-### Auth
-
-- JWT-based, access token 15 minutes, refresh token 7 days
-- Google OAuth via Passport.js
-- All routes except `/auth/*` and `/payments/webhook` require JWT guard
+Authentication supports Google OAuth and magic links, using short-lived JWT
+access tokens with refresh tokens. A global
+guard protects every route except explicitly public ones (auth and webhooks).
 
 ---
 
-## Worker Structure (BullMQ - `apps/workers`)
+## Getting Started
 
-```
-src/
-├── queues/
-│   ├── puzzle-generation.queue.ts   → Pre-generates puzzle pool
-│   ├── pdf-generation.queue.ts      → Renders KDP PDF for a book
-│   └── cleanup.queue.ts             → Releases stale reservations
-└── main.ts
-```
+### Prerequisites
 
-### Queue Names (use these exact strings)
+- Node.js 18+
+- pnpm 9
+- PostgreSQL
+- Redis
 
-```typescript
-export const QUEUES = {
-  PUZZLE_GENERATION: "puzzle-generation",
-  PDF_GENERATION: "pdf-generation",
-  CLEANUP: "cleanup",
-} as const;
-```
+### Environment
 
-### Job Payloads
-
-```typescript
-// puzzle-generation job
-interface PuzzleGenerationJob {
-  difficulty: Difficulty;
-  batchSize: number;
-}
-
-// pdf-generation job
-interface PdfGenerationJob {
-  bookId: string;
-  userId: string;
-}
-
-// cleanup job (no payload, runs on schedule)
-```
-
----
-
-## Frontend Structure (Next.js - `apps/client`)
-
-```
-src/
-├── app/
-│   ├── (marketing)/          → Landing page, pricing, blog
-│   │   ├── page.tsx          → Home / landing page
-│   │   └── blog/
-│   ├── (app)/                → Authenticated app
-│   │   ├── dashboard/        → Book history, downloads
-│   │   ├── generate/         → Book builder (step-by-step)
-│   │   └── preview/[bookId]/ → Low-res preview before purchase
-│   └── api/                  → Next.js API routes (auth callbacks only)
-├── components/
-│   ├── ui/                   → Reusable UI primitives
-│   ├── book-builder/         → Multi-step book creation form
-│   └── sudoku-preview/       → In-browser puzzle preview component
-└── lib/
-    ├── api.ts                → Typed API client (fetches from NestJS)
-    └── auth.ts               → Auth helpers
-```
-
----
-
-## Environment Variables
-
-### `apps/server/.env`
-
-```
-DATABASE_URL=postgresql://postgres:admin@localhost:5432/kdp_platform
-REDIS_URL=redis://localhost:6379
-JWT_SECRET=
-JWT_REFRESH_SECRET=
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-LEMONSQUEEZY_API_KEY=
-LEMONSQUEEZY_WEBHOOK_SECRET=
-LEMONSQUEEZY_STORE_ID=
-PORT=5000
-```
-
-### `apps/client/.env.local`
-
-```
-NEXT_PUBLIC_API_URL=http://localhost:3001
-NEXTAUTH_SECRET=
-NEXTAUTH_URL=http://localhost:3000
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-```
-
-### `apps/workers/.env`
-
-```
-DATABASE_URL=postgresql://postgres:admin@localhost:5432/kdp_platform
-REDIS_URL=redis://localhost:6379
-PDF_STORAGE_PATH=./storage/PDFs
-```
-
----
-
-## Shared Enums and Constants
-
-Define these in `packages/shared/src/enums.ts` and use them everywhere.
-Never use raw strings for these values.
-
-```typescript
-export enum Difficulty {
-  EASY = "easy",
-  MEDIUM = "medium",
-  HARD = "hard",
-  EXPERT = "expert",
-}
-
-export enum PuzzleStatus {
-  AVAILABLE = "available",
-  PENDING = "pending",
-  CONFIRMED = "confirmed",
-  EXPIRED = "expired",
-}
-
-export enum BookStatus {
-  DRAFT = "draft",
-  PENDING = "pending",
-  READY = "ready",
-  EXPIRED = "expired",
-}
-
-export enum UniquenessLevel {
-  BOOK = "book",
-  USER = "user",
-  GLOBAL = "global",
-}
-
-export enum TrimSize {
-  SIX_BY_NINE = "6x9",
-  EIGHT_BY_TEN = "8x10",
-  EIGHT_HALF_BY_ELEVEN = "8.5x11",
-}
-
-export const CONSTANTS = {
-  PUZZLE_POOL_TARGET: 100_000,
-  PUZZLE_POOL_REFILL_THRESHOLD: 20_000,
-  PUZZLE_BATCH_SIZE: 5_000,
-  RESERVATION_TTL_MINUTES: 30,
-  PDF_EXPIRY_DAYS: 7,
-  CLUES_BY_DIFFICULTY: {
-    [Difficulty.EASY]: { min: 36, max: 45 },
-    [Difficulty.MEDIUM]: { min: 27, max: 35 },
-    [Difficulty.HARD]: { min: 22, max: 26 },
-    [Difficulty.EXPERT]: { min: 17, max: 21 },
-  },
-} as const;
-```
-
----
-
-## Coding Conventions
-
-### TypeScript
-
-- Strict mode enabled everywhere (`"strict": true` in all tsconfigs)
-- No `any` types - use `unknown` and narrow properly
-- All async functions return typed Promises
-- DTOs use `class-validator` decorators in NestJS
-- Interfaces for data shapes, types for unions/intersections
-
-### NestJS
-
-- One module per feature (auth, books, puzzles, payments, users)
-- Services contain business logic, controllers only handle HTTP concerns
-- Use `@Injectable()` services, never instantiate classes directly
-- Guards for auth, interceptors for logging, pipes for validation
-- All database calls go through Prisma service, never raw SQL except
-  for the `FOR UPDATE SKIP LOCKED` reservation query
-
-### React / Next.js
-
-- Server Components by default - only use `'use client'` when necessary
-- Fetch data in Server Components, pass to Client Components as props
-- No `useEffect` for data fetching - use Server Components or SWR
-- Tailwind for all styling - no CSS modules, no inline styles
-- Component files named with PascalCase, utility files with camelCase
-
-### Error Handling
-
-- NestJS: use built-in HTTP exceptions (`NotFoundException`, `BadRequestException`, etc.)
-- Workers: failed jobs retry 3 times with exponential backoff, then move to dead letter queue
-- Frontend: error boundaries for async components, toast notifications for user errors
-
-### Testing
-
-- `packages/puzzle-core`: 100% unit test coverage required - it's pure functions
-- `apps/server`: integration tests for all endpoints using `supertest`
-- `apps/workers`: unit tests for job processors using mocked Prisma + Redis
-
----
-
-## What NOT To Do
-
-- **Never** import from `apps/*` into `packages/*` - packages must not depend on apps
-- **Never** call the database directly from `packages/puzzle-core` - pure functions only
-- **Never** hardcode difficulty strings - use the `Difficulty` enum from `@kdp/shared`
-- **Never** generate a puzzle without registering its hash - uniqueness breaks silently
-- **Never** skip the `FOR UPDATE SKIP LOCKED` on reservation queries - race conditions
-- **Never** store the full puzzle solution in the PDF - only in the answer key section
-- **Never** commit `.env` files - they are gitignored
-- **Never** create a second `prisma/schema.prisma` - only one exists in `packages/shared`
-
----
-
-## Running the Project
+Copy the example env files and fill in the values:
 
 ```bash
-# Install all dependencies
-pnpm install
+cp apps/server/.env.example apps/server/.env
+cp apps/workers/.env.example apps/workers/.env
+```
 
-# Generate Prisma client (run after any schema change)
-pnpm db:generate
+The server needs `DATABASE_URL`, `REDIS_URL`, JWT secrets, Google OAuth
+credentials, and LemonSqueezy keys. The client needs `NEXT_PUBLIC_API_URL` in
+`apps/client/.env.local`.
 
-# Run database migrations
-pnpm db:migrate
+### Run
 
-# Start everything in dev mode
-pnpm dev
+```bash
+pnpm install          # install dependencies
+pnpm db:generate      # generate the Prisma client
+pnpm db:migrate       # apply database migrations
+pnpm dev              # start client, API, and workers
 
-# Individual apps
-pnpm --filter @kdp/web dev         # Next.js on :3000
+# Individually
+pnpm --filter client dev           # Next.js on :3000
 pnpm --filter @kdp/api dev         # NestJS on :5000
 pnpm --filter @kdp/workers dev     # BullMQ workers
 
-# Run tests
+# Tests
 pnpm --filter @kdp/puzzle-core test
 
-# Open Prisma Studio
+# Prisma Studio
 pnpm db:studio
+```
 
 ---
 
-## Implementation Order
+## Further Reading
 
-Follow this order strictly. Each step depends on the previous.
-
-1. `packages/shared` - finalize all types, enums, constants, Prisma client export
-2. `packages/puzzle-core` - Sudoku generator, hash normalization, tests
-3. `apps/server` - Auth module (JWT + Google OAuth)
-4. `apps/server` - Puzzle reservation service (with SKIP LOCKED)
-5. `apps/workers` - BullMQ setup + puzzle pre-generation worker
-6. `apps/workers` - Cleanup worker (stale reservations)
-7. `packages/pdf-templates` - KDP PDF layout + answer key
-8. `apps/workers` - PDF generation worker
-9. `apps/server` - Books module + LemonSqueezy payment webhook
-10. `apps/client` - Auth pages (login, Google callback)
-11. `apps/client` - Dashboard (book history, download links)
-12. `apps/client` - Book builder (multi-step form + low-res preview)
-```
+See [`docs/`](docs) for detailed notes on the domain model, database design,
+subscriptions, book generation, and the uniqueness engine.
